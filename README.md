@@ -1,4 +1,4 @@
-# Title
+# Детекция строк в фотографиях страниц рукописных текстов
 
 <!-- Change `kisnikser/m1p-template` to `intsystems/your-repository`-->
 [![License](https://badgen.net/github/license/kisnikser/m1p-template?color=green)](https://github.com/kisnikser/m1p-template/blob/main/LICENSE)
@@ -9,11 +9,11 @@
 <table>
     <tr>
         <td align="left"> <b> Author </b> </td>
-        <td> Name Surname </td>
+        <td> Александр Забарянский </td>
     </tr>
     <tr>
         <td align="left"> <b> Consultant </b> </td>
-        <td> Name Surname, PhD/DSc </td>
+        <td> Ксения Варламова, PhD/DSc </td>
     </tr>
     <tr>
         <td align="left"> <b> Advisor </b> </td>
