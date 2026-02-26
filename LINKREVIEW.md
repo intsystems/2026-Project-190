@@ -19,5 +19,5 @@
 | Palm-Leaf Dataset | A benchmark dataset for text line segmentation in palm leaf documents | 2026 | Remya Sivan, Peeta Basa Pati | [DOI](https://doi.org/10.1038/s41597-026-06718-1) | - | - |
 | InkFM Foundational | InkFM: A Foundational Model for Full-Page Online Handwritten Note Understanding | 2025 | Anastasiia Fadeeva, Vincent Coriou, Diego Antognini, Claudiu Musat, Andrii Maksai | [arXiv](https://arxiv.org/abs/2503.23081) | - | - |
 | PLATTER HTD | PLATTER: A Page-Level Handwritten Text Recognition System for Indic Scripts | 2025 | Badri Vishal Kasuba, Dhruv Kudale, Venkatapathy Subramanian, Parag Chaudhuri, Ganesh Ramakrishnan | [arXiv](https://arxiv.org/abs/2502.06172) | - | - |
-| Curve Transformer | CurT: End-to-End Text Line Detection in Historical Documents with Transformers | 2022 | B. Kiessling | [HAL](https://hal.science/hal-04036249) | - | - |
+| Curve Transformer | CurT: End-to-End Text Line Detection in Historical Documents with Transformers | 2022 |Benjamin Kiessling | [HAL](https://hal.science/hal-04036249) | - | - |
 | Two-Stage DL | A two-stage method for text line detection in historical documents | 2019 | Tobias Grüning, Gundram Leifert, Tobias Strauß, Johannes Michael, Roger Labahn | [arXiv](https://arxiv.org/abs/1802.03345) | [ARU-Net PyTorch](https://github.com/NicSenn/ARU-Net-Pytorch) | - |
