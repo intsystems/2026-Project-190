@@ -12,8 +12,8 @@
 | Learning-Free | Learning-Free Text Line Segmentation for Historical Handwritten Documents | 2020 | B. Kurar Barakat et al. | [MDPI](https://www.mdpi.com/2076-3417/10/22/8276) | -  | - |
 | Unsupervised DL | Unsupervised deep learning for text line segmentation | 2021 | Berat Kurar Barakat, Rafi Cohen, Irina Rabaev, Jihad El-Sana | [arXiv](https://arxiv.org/abs/2003.08632) | - | решение задачи без учителя DL-метод. |
 | FCN Challenging | Text Line Segmentation for Challenging Handwritten Document Images Using Fully Convolutional Network | 2021 | Berat Kurar Barakat, Ahmad Droby, Rym Alasam, Boraq Madi, Irina Rabaev, Raed Shammes, Jihad El-Sana | [arXiv](https://arxiv.org/abs/2101.08299) | - | - |
-| LineCounter | LineCounter: Learning Handwritten Text Line Segmentation by Counting | 2021 | D. Li et al. | [arXiv](https://arxiv.org/abs/2105.11307) | [GitHub](https://github.com/Leedeng/LineCounter) | Сегментация через подсчёт строк. |
-| Mask R-CNN | Text line extraction in historical documents using mask r-cnn | 2022 | A. Droby et al. | [DOI](https://doi.org/10.3390/signals3030032) | - | - |
+| LineCounter | LineCounter: Learning Handwritten Text Line Segmentation by Counting | 2021 | Deng Li, Yue Wu, Yicong Zhou | [arXiv](https://arxiv.org/abs/2105.11307) | [GitHub](https://github.com/Leedeng/LineCounter) | Сегментация через подсчёт строк. |
+| Mask R-CNN | Text line extraction in historical documents using mask r-cnn | 2022 | Ahmad Droby, Berat Kurar Barakat, Reem Alaasam, Boraq Madi, Irina Rabaev, Jihad El-Sana | [DOI](https://doi.org/10.3390/signals3030032) | - | - |
 | Faster R-CNN Indian | Text line segmentation in Indian ancient handwritten documents using faster r-cnn | 2023 | A. Jindal, R. Ghosh | [DOI](https://doi.org/10.1007/s11042-022-13709-y) | - | - |
 | HisDoc R-CNN | HisDoc R-CNN: robust chinese historical document text line detection | 2023 | C. Jian et al. | [DOI](https://doi.org/10.1007/978-3-031-41676-7_25) | - | - |
 | MaskR vs UNet | Historical text line segmentation using deep learning algorithms: Mask-rcnn against u-net networks | 2024 | F.C. Fizaine et al. | [DOI](https://doi.org/10.3390/jimaging10030065) | - | - |
