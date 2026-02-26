@@ -8,11 +8,6 @@
 
 | Topic | Title | Year | Authors | Paper | Code | Summary |
 | :--- | :--- | :---: | :--- | :---: | :---: | :--- |
-| Survey | Text Line Segmentation of Historical Documents: a Survey | 2007 | L. Likforman-Sulem et al. | [DOI](https://doi.org/10.1007/s10032-006-0023-z) | - | Классный обзор всех класичиских методов (projection, Hough, smearing, stochastic). |
-| Hough-based | Text line detection in handwritten documents | 2008 | G. Louloudis et al. | [DOI](https://doi.org/10.1016/j.patcog.2008.05.011) | - | - |
-| Perceptual Grouping | Script-independent text line segmentation in freestyle handwritten documents | 2008 | Y. Li et al. | [DOI](https://doi.org/10.1109/TPAMI.2008.33) | - | Dynamic programming + perceptual grouping для криволинейных строк произвольного стиля. |
-| APAU-Net | APAU-Net: Adaptive Prior-Aware U-Net Text-Line Segmentation for Historical Documents | 2025 | M. et al. | [ResearchSquare → IJDAR 2025](https://www.researchsquare.com/article/rs-8202596/v1) | - | - |
-| ICDAR Contest | ICDAR 2009 Handwriting Segmentation Contest | 2009 | B. Gatos et al. | [DOI](https://doi.org/10.1109/ICDAR.2009.245) | - | - |
 | SegHist | SegHist: A General Segmentation-based Framework for Chinese Historical Document Text Line Detection | 2024 | X. Hu et al. | [arXiv](https://arxiv.org/abs/2406.15485) | - | - |
 | Learning-Free | Learning-Free Text Line Segmentation for Historical Handwritten Documents | 2020 | B. Kurar Barakat et al. | [MDPI](https://www.mdpi.com/2076-3417/10/22/8276) | -  | - |
 | Unsupervised DL | Unsupervised deep learning for text line segmentation | 2021 | B. Kurar Barakat et al. | [arXiv](https://arxiv.org/abs/2003.08632) | - | решение задачи без учителя DL-метод. |
