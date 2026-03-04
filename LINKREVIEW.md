@@ -8,7 +8,7 @@
 
 | Topic | Title | Year | Authors | Paper | Code | Summary |
 | :--- | :--- | :---: | :--- | :---: | :---: | :--- |
-| SegHist | SegHist: A General Segmentation-based Framework for Chinese Historical Document Text Line Detection | 2024 | Xingjian Hu, Baole Wei, Liangcai Gao, Jun Wang | [arXiv](https://arxiv.org/abs/2406.15485) | - | - |
+| SegHist | SegHist: A General Segmentation-based Framework for Chinese Historical Document Text Line Detection | 2024 | Xingjian Hu, Baole Wei, Liangcai Gao, Jun Wang | [arXiv](https://arxiv.org/abs/2406.15485) | [arXiv](https://github.com/LumionHXJ/SegHist) | Фреймворк от китайцев. Демонстрирует высокую устойчивость к повороту. |
 | Learning-Free | Learning-Free Text Line Segmentation for Historical Handwritten Documents | 2020 | B. Kurar Barakat et al. | [MDPI](https://www.mdpi.com/2076-3417/10/22/8276) | -  | - |
 | Unsupervised DL | Unsupervised deep learning for text line segmentation | 2021 | Berat Kurar Barakat, Rafi Cohen, Irina Rabaev, Jihad El-Sana | [arXiv](https://arxiv.org/abs/2003.08632) | - | решение задачи без учителя DL-метод. |
 | FCN Challenging | Text Line Segmentation for Challenging Handwritten Document Images Using Fully Convolutional Network | 2021 | Berat Kurar Barakat, Ahmad Droby, Rym Alasam, Boraq Madi, Irina Rabaev, Raed Shammes, Jihad El-Sana | [arXiv](https://arxiv.org/abs/2101.08299) | - | - |
@@ -22,3 +22,5 @@
 | Curve Transformer | CurT: End-to-End Text Line Detection in Historical Documents with Transformers | 2022 |Benjamin Kiessling | [HAL](https://hal.science/hal-04036249) | - | - |
 | Two-Stage DL | A two-stage method for text line detection in historical documents | 2019 | Tobias Grüning, Gundram Leifert, Tobias Strauß, Johannes Michael, Roger Labahn | [arXiv](https://arxiv.org/abs/1802.03345) | [ARU-Net PyTorch](https://github.com/NicSenn/ARU-Net-Pytorch) | - |
 | - | Text line detection in handwritten documents | 2008 | Louloudis, Gatos, Pratikakis, Halatsis | [DOI](https://sci-hub.ru/meta/10.1016/j.patcog.2008.05.011) | - | Алгоритм состоит из трёх шагов (один из них - преобразование Хафа). Оценка вычисляется на основе перекрытия наборов пикселей, помеченных как строки текста, и эталонных данных (MatchScore). Подход Хафа показывает лучшую производительность, чем два других метода (метод нечеткой длины серий, а также метод профиля проекции), с точки зрения коэффициента обнаружения. |
+| - | A handwriting textline extraction approach based on connected domain | 2010 | Gao Wei, Sun Fuchun, Yin Zhonghang  | [DOI](https://sci-hub.su/10.1109/coginf.2010.5599738) | - | Выделение строк путём анализа пространственной конфигурации связных областей и прямоугольников контуров слов на заданном изображении документа (авторы попиксельно глянули построили прямоугольники чё-то попересикали и что-то вышло). Нету тестов для наклонов. |
+| - | 
