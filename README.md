@@ -13,11 +13,11 @@
     </tr>
     <tr>
         <td align="left"> <b> Consultant </b> </td>
-        <td> Ксения Варламова, PhD/DSc </td>
+        <td> Ксения Варламова </td>
     </tr>
     <tr>
         <td align="left"> <b> Advisor </b> </td>
-        <td> Name Surname, PhD/DSc </td>
+        <td> - </td>
     </tr>
 </table>
 
