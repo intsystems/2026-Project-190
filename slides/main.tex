@@ -6,8 +6,8 @@
 %\setbeamersize{text margin left=0.5em, text margin right=0.5em}
 
 \usepackage[utf8]{inputenc}
-\usepackage[T2A]{fontenc}                     % <--- добавлено
-\usepackage[english, russian]{babel}         % <--- раскомментировано и исправлено
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
 \usepackage{bm}
 \usepackage{multirow}
 \usepackage{ragged2e}
@@ -23,6 +23,11 @@
 \usetikzlibrary{positioning,arrows}
 \tikzstyle{name} = [parameters]
 \definecolor{name}{rgb}{0.5,0.5,0.5}
+
+% ===== Пакет textpos подключён в преамбуле =====
+\usepackage[absolute, overlay]{textpos}
+\setlength{\TPHorizModule}{1mm}
+\setlength{\TPVertModule}{1mm}
 
 %\usepackage{caption}
 %\captionsetup{skip=0pt,belowskip=0pt}
@@ -51,33 +56,61 @@
 \end{frame}
 \setcounter{page}{2}%remove here for the title
 %----------------------------------------------------------------------------------------------------------
-\begin{frame}{Бинаризация изображений}
-Бинаризация изображения - важный этап, предшествующий детекции строк.
+\begin{frame}{Алгоритм детекции строк в фотографиях}
 
 \begin{block}{Проблема}
-Стандартные методы бинаризации (Оцу, глобальный порог) плохо работают при переменном освещении.
+Часто рукописные тексты имеют переменное освещение, наклон строк, пересечения и зачеркивания, что затрудняет стандартные методы детекции строк.
 \end{block}
 
-\begin{block}{Предлагаемый подход: автокодировщик}
-Используем свёрточный автокодировщик для классификации каждого пикселя на два класса: текст/фон.
+\begin{block}{Предлагаемый подход:}
+Используем свёрточный автокодировщик для классификации каждого пикселя на два класса: текст/фон. После с помощью преобразования Хафа выделяются линии строк.
 \end{block}
 
 \begin{block}{Результат}
-\begin{enumerate}[1)]
-    \item построена архитектура U‑Net,
-    \item повышение качества бинаризации на сложных изображениях.
-\end{enumerate}
+Работающий алгоритм, дающий на выходе множество задетектированных строк.
 \end{block}
 \end{frame}
 %----------------------------------------------------------------------------------------------------------
-\begin{frame}{Архитектура U‑Net со skip‑соединениями%
-\footnote{\textit{Florian Côme Fizaine Patrick Bard}  Historical Text Line Segmentation Using Deep Learning Algorithms: Mask-RCNN against U-Net Networks}}
+\begin{frame}{U‑Net + Преобразование Хафа}
 
-\begin{columns}
-\begin{column}{1\textwidth}
-	\includegraphics[width=1\textwidth]{автокодировшик_со_скип_конекшенами.jpg}      
-\end{column}
-\end{columns}
+% Здесь располагается содержимое фрейма, например, картинки
+% Можно использовать textpos для абсолютного позиционирования
+  % Верхний левый угол
+\begin{tikzpicture}[remember picture, overlay]
+    % Верхний ряд: смещаем вниз на 10 мм
+    \node[anchor=north west, inner sep=0pt, yshift=-15mm] at (current page.north west) 
+      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-49.jpg}};
+    \node[anchor=north, inner sep=0pt, yshift=-15mm] at (current page.north) 
+      {\includegraphics[width=40mm]{автокодировшик_со_скип_конекшенами.jpg}};
+    \node[anchor=north east, inner sep=0pt, yshift=-15mm] at (current page.north east) 
+      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-46.jpg}};
 
+    \node[anchor=north, inner sep=0pt, yshift=-38mm] at (current page.north) 
+      {\includegraphics[width=10mm]{чёрная_стрелка.jpg}};
+    
+    % Нижний ряд: смещаем вверх на 10 мм (отрицательный yshift)
+    \node[anchor=south west, inner sep=0pt, yshift=36mm] at (current page.south west) 
+      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-52.jpg}};
+    \node[anchor=south, inner sep=0pt, yshift=36mm] at (current page.south) 
+      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-55.jpg}};
+    \node[anchor=south east, inner sep=0pt, yshift=36mm] at (current page.south east) 
+      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-58.jpg}};
+
+    \node[anchor=south, inner sep=0pt, yshift=24mm] at (current page.south) 
+      {\includegraphics[width=10mm]{чёрная_стрелка.jpg}};
+    
+      \node[anchor=south west, inner sep=0pt, yshift=20mm] at (current page.south west) 
+      {\includegraphics[width=40mm]{line_001.jpg}};
+    \node[anchor=south, inner sep=0pt, yshift=20mm] at (current page.south) 
+      {\includegraphics[width=40mm]{line_000.jpg}};
+    \node[anchor=south east, inner sep=0pt, yshift=20mm] at (current page.south east) 
+      {\includegraphics[width=40mm]{line_002.jpg}};
+\end{tikzpicture}
+
+\let\thefootnote\relax
+\footnotetext{\href{https://sci-hub.ru/meta/10.1016/j.patcog.2008.05.011}{Text line detection in handwritten documents. Hough transform.}}
+\footnotetext{\href{https://www.mdpi.com/2313-433X/10/3/65}{Historical text line segmentation using u-net networks.}}
 \end{frame}
+% Можно добавить поясняющий текст, если нужно
+
 \end{document}
