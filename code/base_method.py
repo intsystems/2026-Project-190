@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 from typing import List, Tuple, Optional
 from datasets import load_dataset
-import cv2
 from school_notebooks_RU import CocoMaskGenerator
 import random
 from typing import List, Tuple, Optional
@@ -12,6 +11,7 @@ import math
 import heapq
 from typing import Tuple, List
 import os
+from post_processing import crop_line_rectangle
 
 class LineSegmentation:
     """
@@ -21,7 +21,7 @@ class LineSegmentation:
     segmentation of language independent handwritten documents" (Das & Panda, 2023).
     """
 
-    def __init__(self, threshold: float = 0.3, gaussian_sigma: float = 1.0):
+    def __init__(self, threshold: float = 0.3, gaussian_sigma: float = 1.0, debug: bool = True):
         """
         Инициализация параметров сегментации.
 
@@ -32,6 +32,7 @@ class LineSegmentation:
         """
         self.threshold = threshold
         self.gaussian_sigma = gaussian_sigma
+        self.debug = debug
 
     def _binarize(self, image: np.ndarray, method: str = 'otsu') -> np.ndarray:
         """
@@ -231,26 +232,6 @@ class LineSegmentation:
         y = start_y
         seam[0] = y
 
-        # Идём справа налево? Нет, идём слева направо, восстанавливая путь.
-        # Для каждого следующего столбца выбираем соседнюю строку с минимальной энергией пути.
-        # Восстанавливаем, зная, что в min_energy_matrix[y, x] хранится энергия пути,
-        # но для восстановления пути нам нужно на каждом шаге выбирать переход с минимальной энергией.
-        # Более надёжно: идём справа налево, выбирая предшественника.
-        # Но проще: идём слева направо, на каждом шаге выбирая кандидата с наименьшим значением min_energy в следующем столбце.
-        # Однако это может дать не совсем тот путь, который был вычислен, но в целом корректно.
-        # Поскольку мы знаем start_y, можем идти слева направо, выбирая минимальный по энергии переход.
-        # Альтернативно: можно восстановить, двигаясь справа налево, выбирая из предыдущего столбца пиксель,
-        # который дал минимум для текущего. Для этого нужно хранить матрицу предков.
-        # Реализуем с сохранением предков для большей точности.
-        # Создадим матрицу предков при вычислении min_energy.
-        # Переделаем compute_horizontal_min_energy_path_matrix, чтобы возвращать и предков.
-        # Для простоты здесь пересоздадим путь, используя жадный выбор слева направо, но с учётом локального минимума.
-        # Это будет приблизительно, но в целом работает.
-        # Более строго: вызовем функцию, которая возвращает предков.
-        # Сделаем отдельный метод, который возвращает матрицу предков.
-        # Пока реализуем простой вариант.
-
-        # Простой жадный путь (может немного отличаться от оптимального)
         y_cur = start_y
         for x in range(1, W):
             # Определяем возможные следующие y
@@ -364,68 +345,100 @@ class LineSegmentation:
         return pixels
 
 
-    def crop_line_rectangle(self, image: np.ndarray, line_pixels: set, padding: int = 20) -> np.ndarray:
+    def robust_min_area_rect(self, points, outlier_ratio=0.01):
         """
-        Строит минимальный повёрнутый прямоугольник ТОЛЬКО по текстовым пикселям строки,
-        поворачивает изображение так, чтобы строка стала горизонтальной,
-        и возвращает чистое выпрямленное изображение строки.
+        Находит повернутый прямоугольник, устойчивый к выбросам, с использованием PCA.
+
+        Аргументы:
+            points: numpy array (N, 2) — координаты точек.
+            outlier_ratio: доля выбросов (0..1). Если >0, крайние outlier_ratio * 100%
+                        точек с каждой стороны отбрасываются по каждой оси проекции.
+
+        Возвращает:
+            rect: кортеж ((center_x, center_y), (width, height), angle)
+                в формате, совместимом с cv2.minAreaRect.
         """
-        if not line_pixels:
-            return np.zeros((1, 1, 3), dtype=np.uint8)
+        points = np.asarray(points, dtype=np.float32)
+        if len(points) < 2:
+            # Недостаточно точек – возвращаем пустой прямоугольник
+            return ((0, 0), (0, 0), 0)
 
-        # Точки только текстовых пикселей
-        points = np.array([[x, y] for x, y in line_pixels], dtype=np.float32)
+        # 1. Центрирование
+        mean = np.mean(points, axis=0)
+        centered = points - mean
 
-        if len(points) < 5:  # слишком мало точек
-            # fallback — обычный bounding box
-            xs, ys = zip(*line_pixels)
-            min_y, max_y = max(0, min(ys) - padding), min(image.shape[0]-1, max(ys) + padding)
-            min_x, max_x = max(0, min(xs) - padding), min(image.shape[1]-1, max(xs) + padding)
-            return image[min_y:max_y+1, min_x:max_x+1].copy()
+        # 2. Ковариационная матрица
+        cov = np.cov(centered, rowvar=False)  # rowvar=False: столбцы – признаки
 
-        # Минимальный повёрнутый прямоугольник по текстовым пикселям
-        rect = cv2.minAreaRect(points)
-        (center_x, center_y), (width, height), angle = rect
+        # 3. Собственные значения и векторы
+        eigenvalues, eigenvectors = np.linalg.eig(cov)
+        # eigenvectors[:, i] – собственный вектор для eigenvalues[i]
 
-        # Ориентируем так, чтобы строка была горизонтальной
+        # 4. Главная компонента (максимальное собственное значение)
+        idx_main = np.argmax(eigenvalues)
+        main_vector = eigenvectors[:, idx_main]  # направление главной оси
+        # Перпендикулярный вектор – второй собственный вектор
+        idx_perp = 0 if idx_main == 1 else 1
+        perp_vector = eigenvectors[:, idx_perp]
+
+        # 5. Проекции точек на главную и перпендикулярную оси
+        proj_main = centered @ main_vector
+        proj_perp = centered @ perp_vector
+
+        # 6. Отсечение выбросов (если outlier_ratio > 0)
+        if outlier_ratio > 0:
+            low_main = np.percentile(proj_main, outlier_ratio * 100)
+            high_main = np.percentile(proj_main, (1 - outlier_ratio) * 100)
+            low_perp = np.percentile(proj_perp, outlier_ratio * 100)
+            high_perp = np.percentile(proj_perp, (1 - outlier_ratio) * 100)
+
+            mask = (proj_main >= low_main) & (proj_main <= high_main) & \
+                (proj_perp >= low_perp) & (proj_perp <= high_perp)
+            filtered = centered[mask]
+            if len(filtered) < 2:
+                # Если после отсечения осталось слишком мало точек – используем все
+                filtered = centered
+        else:
+            filtered = centered
+
+        # 7. Проекции отфильтрованных точек
+        proj_main_f = filtered @ main_vector
+        proj_perp_f = filtered @ perp_vector
+
+        # 8. Границы прямоугольника (min/max)
+        min_main = np.min(proj_main_f)
+        max_main = np.max(proj_main_f)
+        min_perp = np.min(proj_perp_f)
+        max_perp = np.max(proj_perp_f)
+
+        # 9. Центр в локальных координатах (вдоль главной и перпендикулярной осей)
+        center_local = ((min_main + max_main) / 2, (min_perp + max_perp) / 2)
+
+        # 10. Преобразование центра в глобальные координаты
+        center_x = mean[0] + center_local[0] * main_vector[0] + center_local[1] * perp_vector[0]
+        center_y = mean[1] + center_local[0] * main_vector[1] + center_local[1] * perp_vector[1]
+
+        # 11. Размеры прямоугольника
+        width = max_main - min_main
+        height = max_perp - min_perp
+
+        # 12. Угол поворота (главная ось) в градусах
+        angle = np.degrees(np.arctan2(main_vector[1], main_vector[0]))
+
+        # 13. Приведение угла к формату cv2.minAreaRect:
+        #    угол между горизонталью и длинной стороной, диапазон [-90, 0)
         if width < height:
-            angle += 90
             width, height = height, width
+            angle = angle + 90
+        # Нормализация угла в диапазон [-90, 0)
+        if angle >= 0:
+            angle = angle - 90
+        elif angle < -90:
+            angle = angle + 180
 
-        # Матрица поворота
-        rotation_matrix = cv2.getRotationMatrix2D((center_x, center_y), angle, 1.0)
+        return ((center_x, center_y), (width, height), angle)
 
-        # Новые размеры холста
-        cos = np.abs(rotation_matrix[0, 0])
-        sin = np.abs(rotation_matrix[0, 1])
-        new_w = int((image.shape[1] * cos) + (image.shape[0] * sin))
-        new_h = int((image.shape[1] * sin) + (image.shape[0] * cos))
-
-        rotation_matrix[0, 2] += new_w / 2 - center_x
-        rotation_matrix[1, 2] += new_h / 2 - center_y
-
-        # Поворачиваем исходное изображение
-        rotated = cv2.warpAffine(image, rotation_matrix, (new_w, new_h),
-                                flags=cv2.INTER_LINEAR,
-                                borderMode=cv2.BORDER_CONSTANT,
-                                borderValue=(255, 255, 255))  # белый фон
-
-        # Вычисляем координаты вырезания
-        crop_x = int(new_w / 2 - width / 2 - padding)
-        crop_y = int(new_h / 2 - height / 2 - padding)
-        crop_w = int(width + 2 * padding)
-        crop_h = int(height + 2 * padding)
-
-        # Защита границ
-        crop_x = max(0, crop_x)
-        crop_y = max(0, crop_y)
-        crop_w = min(crop_w, new_w - crop_x)
-        crop_h = min(crop_h, new_h - crop_y)
-
-        straightened = rotated[crop_y:crop_y + crop_h, crop_x:crop_x + crop_w]
-
-        return straightened
-    def segment_lines(self, image: np.ndarray, binarization_method: str = 'otsu', debug: bool = True) -> List[set]:
+    def segment_lines(self, image: np.ndarray, binarization_method: str = 'otsu') -> List[set]:
         """
         Сегментация строк в рукописном документе. Возвращает список множеств координат пикселей,
         принадлежащих каждой строке.
@@ -441,7 +454,7 @@ class LineSegmentation:
         # Шаг 1: Бинаризация
         binary = self._binarize(image, method=binarization_method)
 
-        if debug:
+        if self.debug:
             cv2.namedWindow('Window', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Window', 800, 600)
             cv2.imshow('Window', binary)
@@ -455,7 +468,7 @@ class LineSegmentation:
         import matplotlib.pyplot as plt
 
 
-        if debug:
+        if self.debug:
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
 
             # График исходного HPP
@@ -481,7 +494,7 @@ class LineSegmentation:
         if len(line_regions) == 0:
             return []  # Нет строк
         
-        if debug:
+        if self.debug:
             mask = np.zeros(image.shape[:2], dtype=np.uint8)
             for start, end in line_regions:
                 mask[start:end+1, :] = 255
@@ -493,7 +506,7 @@ class LineSegmentation:
         # Шаг 4: Энергетическая матрица с усилением энергии в текстовых областях
         energy = self._compute_energy_matrix(binary, line_regions)
 
-        if debug:
+        if self.debug:
             cv2.namedWindow('energy matrix', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('energy matrix', 800, 600)
             cv2.imshow('energy matrix', energy)
@@ -513,7 +526,7 @@ class LineSegmentation:
             mid = (end_prev + start_next) // 2
             start_points.append(mid)
 
-        if debug:
+        if self.debug:
             print('start_points', len(start_points))
 
        # Шаг 7: Извлечение всех швов с помощью A*
@@ -524,7 +537,7 @@ class LineSegmentation:
                 if seam:
                     seams.append(seam)
 
-        if debug:
+        if self.debug:
             vis_seams = image.copy()
             for seam in seams:
                 for x in range(1, len(seam)):
@@ -572,7 +585,7 @@ class LineSegmentation:
                 white_image[y, x] = (0, 0, 0)        # чёрный текст
 
             # Вырезаем и выпрямляем
-            crop = self.crop_line_rectangle(white_image, pixels, padding=25)
+            crop = crop_line_rectangle(white_image, pixels, debug=False, padding=0)
             line_crops.append(crop)
 
         save_dir = "input/lines"
@@ -581,7 +594,7 @@ class LineSegmentation:
             filename = os.path.join(save_dir, f"line_{idx:03d}.jpg")
             cv2.imwrite(filename, crop)
 
-        if debug:
+        if self.debug:
             print('Количество задетекшеных строк', len(line_pixels))
 
         return line_pixels   # если хочешь — можешь возвращать (line_pixels, line_crops)
