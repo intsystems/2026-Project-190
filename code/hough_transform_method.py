@@ -9,6 +9,7 @@ import os
 from u_net_binarization import binarize_image
 import matplotlib.pyplot as plt
 from post_processing import crop_line_rectangle
+from processing import extract_pages_with_yolo
 
 
 class TextLineDetector:
@@ -97,7 +98,7 @@ class TextLineDetector:
             skeleton_junction_neighborhood: размер окрестности для удаления узлов
         """
         defaults = {
-            'binarization_method': 'otsu',
+            'binarization_method': 'u_net',
             'hough_theta_range': (85, 95),
             'hough_rho_step_factor': 0.15,
             'hough_max_votes_threshold': 5,
@@ -706,7 +707,7 @@ class TextLineDetector:
             overlay[y:y+h, x:x+w][part2_mask] = (0, 255, 0)   # зелёный для part2 (чтобы лучше видеть)
             # Смешиваем с исходным
             debug_img = cv2.addWeighted(debug_img, 0.6, overlay, 0.4, 0)
-            self._save_debug_image(debug_img, "split_component")
+            #self._save_debug_image(debug_img, "split_component")
 
         return part1, part2
 
@@ -815,7 +816,7 @@ class TextLineDetector:
                 if best_line2 is not None and best_line2 != best_line1:
                     self._draw_line(debug_img, best_line2, (0, 255, 255), thickness=2)    # жёлтая – вторая
 
-                self._save_debug_image(debug_img, f"split_comp_{idx}")
+                #self._save_debug_image(debug_img, f"split_comp_{idx}")
 
     def _assign_all_components_to_lines(self):
         """
@@ -937,6 +938,152 @@ class TextLineDetector:
         result[mask_color] = output[mask_color]
         return result, line_masks
 
+    def postprocess_create_new_lines(self):
+        """
+        Создаёт новые строки из оставшихся компонент Subset1, которые не были
+        обнаружены на этапе Hough. Реализует этап "Creation of New Text Lines"
+        из статьи Louloudis et al.
+        """
+        if not self.lines:
+            return
+
+        h, w = self.binary.shape
+        mid_x = w / 2.0
+
+        # 1. Вычисляем y_mid для существующих линий, если ещё не вычислены
+        for line in self.lines:
+            if 'y_mid' not in line:
+                theta_rad = np.deg2rad(line['theta'])
+                sin_theta = np.sin(theta_rad)
+                cos_theta = np.cos(theta_rad)
+                if abs(sin_theta) < 1e-6:
+                    line['y_mid'] = 0
+                else:
+                    line['y_mid'] = (line['rho'] - mid_x * cos_theta) / sin_theta
+
+        # 2. Сортируем линии по y_mid и вычисляем среднее расстояние между строками Ad
+        self.lines.sort(key=lambda l: l['y_mid'])
+        distances = []
+        for i in range(len(self.lines)-1):
+            d = abs(self.lines[i+1]['y_mid'] - self.lines[i]['y_mid'])
+            distances.append(d)
+        if not distances:
+            return
+        Ad = np.mean(distances)
+
+        # 3. Определяем множество индексов компонент Subset1, уже присвоенных линиям
+        assigned_indices = set()
+        for line in self.lines:
+            if 'components' in line:
+                assigned_indices.update(line['components'])
+
+        # 4. Собираем оставшиеся компоненты Subset1
+        remaining = [(idx, comp) for idx, comp in enumerate(self.subset1) if idx not in assigned_indices]
+        if not remaining:
+            return
+
+        # 5. Для каждой оставшейся компоненты проверяем, образует ли она новую строку
+        candidates_for_new_lines = []  # список (idx, comp, list_of_candidate_centers)
+        for idx, comp in remaining:
+            centers = self._compute_gravity_centers(comp, self.AW)  # список (cx, cy)
+            if not centers:
+                continue
+            # Для каждого центра определяем, является ли он кандидатом
+            candidate_centers = []
+            for cx, cy in centers:
+                # Находим ближайшую существующую линию
+                min_dist = float('inf')
+                for line in self.lines:
+                    theta_rad = np.deg2rad(line['theta'])
+                    sin_theta = np.sin(theta_rad)
+                    cos_theta = np.cos(theta_rad)
+                    if abs(sin_theta) < 1e-6:
+                        continue
+                    y_line = (line['rho'] - cx * cos_theta) / sin_theta
+                    dist = abs(cy - y_line)
+                    if dist < min_dist:
+                        min_dist = dist
+                # Условие кандидата: расстояние до ближайшей линии близко к среднему Ad
+                # Используем диапазон 0.7*Ad ... 1.1*Ad
+                if 0.7 * Ad <= min_dist <= 1.1 * Ad:
+                    candidate_centers.append((cx, cy))
+            # Компонента образует новую строку, если более половины её блоков — кандидаты
+            if len(candidate_centers) >= len(centers) / 2:
+                candidates_for_new_lines.append((idx, comp, candidate_centers))
+
+        if not candidates_for_new_lines:
+            return
+
+        # 6. Группируем компоненты в новые строки по вертикальной близости
+        # Сортируем по среднему y кандидатов (или по центроиду компоненты)
+        comp_data = []
+        for idx, comp, centers in candidates_for_new_lines:
+            avg_y = np.mean([cy for (_, cy) in centers])
+            comp_data.append((idx, comp, centers, avg_y))
+        comp_data.sort(key=lambda x: x[3])  # сортировка по avg_y
+
+        new_lines_groups = []
+        current_group = []
+        for item in comp_data:
+            if not current_group:
+                current_group.append(item)
+            else:
+                last_avg_y = current_group[-1][3]
+                if abs(item[3] - last_avg_y) < 0.8 * self.AH:
+                    current_group.append(item)
+                else:
+                    new_lines_groups.append(current_group)
+                    current_group = [item]
+        if current_group:
+            new_lines_groups.append(current_group)
+
+        # 7. Для каждой группы создаём новую линию
+        # Получаем медианный угол существующих линий (для параллельности)
+        existing_angles = [line['theta'] for line in self.lines]
+        median_theta = np.median(existing_angles) if existing_angles else 90.0
+
+        for group in new_lines_groups:
+            # Собираем все центры-кандидаты из всех компонент группы
+            all_points = []
+            for _, _, centers in group:
+                all_points.extend(centers)
+            if len(all_points) < 2:
+                # Если точек мало, создаём линию с медианным углом и rho через среднюю точку
+                avg_x = np.mean([p[0] for p in all_points])
+                avg_y = np.mean([p[1] for p in all_points])
+                theta_rad = np.deg2rad(median_theta)
+                rho = avg_x * np.cos(theta_rad) + avg_y * np.sin(theta_rad)
+            else:
+                # Вычисляем угол через PCA (главная компонента) по точкам
+                pts = np.array(all_points)
+                mean = np.mean(pts, axis=0)
+                centered = pts - mean
+                cov = np.cov(centered.T)
+                eigvals, eigvecs = np.linalg.eig(cov)
+                main_dir = eigvecs[:, np.argmax(eigvals)]  # главное направление
+                theta_rad = np.arctan2(main_dir[1], main_dir[0])
+                theta_deg = np.rad2deg(theta_rad)
+                # Приводим угол к диапазону 0-180
+                if theta_deg < 0:
+                    theta_deg += 180
+                # Ограничиваем допустимыми значениями (обычно около 90°)
+                if abs(theta_deg - 90) > 30:
+                    theta_deg = median_theta
+                # Вычисляем rho как среднее проекций всех точек
+                rho = np.mean([x * np.cos(np.deg2rad(theta_deg)) + y * np.sin(np.deg2rad(theta_deg))
+                            for x, y in all_points])
+            # Создаём новую линию
+            new_line = {
+                'rho': rho,
+                'theta': theta_deg,
+                'components': [idx for idx, _, _ in group],  # индексы компонент
+                'y_mid': None   # будет вычислен позже
+            }
+            self.lines.append(new_line)
+
+        if self.debug:
+            print(f"[DEBUG] postprocess_create_new_lines: added {len(new_lines_groups)} new lines")
+
     def detect_text_lines(self) -> List[Dict]:
         """
         Основной метод детекции строк текста.
@@ -959,7 +1106,7 @@ class TextLineDetector:
         self.partition_components()
         self.block_based_hough()
         self.postprocess_merge_lines()
-        #self.postprocess_create_new_lines()  # отключено
+        #self.postprocess_create_new_lines()
         self.postprocess_assign_subset3()
         self.postprocess_split_subset2()
         self._assign_all_components_to_lines()
@@ -995,7 +1142,7 @@ class TextLineDetector:
             crop = crop_line_rectangle(white_image, line_masks[i], debug=False, padding=0)
             line_crops.append(crop)
 
-        save_dir = "input/lines"
+        save_dir = "output/lines"
         os.makedirs(save_dir, exist_ok=True)
         for idx, crop in enumerate(line_crops):
             filename = os.path.join(save_dir, f"line_{idx:03d}.jpg")
@@ -1005,11 +1152,21 @@ class TextLineDetector:
 
 
 if __name__ == "__main__":
-    img_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/library/datasets/school_notebooks_RU/images_base/2013.jpg'
+    img_path = 'datasets/school_notebooks_RU/images_base/1_10.JPG'
     img = cv2.imread(img_path)
+
+    pages = extract_pages_with_yolo(
+        image_path=img_path,
+        model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+        output_dir='debug_images',
+        conf_threshold=0.7
+    )
+
     if img is None:
         print("Не удалось загрузить изображение")
         exit()
-    detector = TextLineDetector(img, params={'binarization_method': 'u_net'}, debug=True)
-    lines = detector.detect_text_lines()
-    print(f"Обнаружено строк: {len(lines)}")
+
+    for page in pages:
+        detector = TextLineDetector(page, params={'binarization_method': 'u_net'}, debug=False)
+        lines = detector.detect_text_lines()
+        print(f"Обнаружено строк: {len(lines)}")
