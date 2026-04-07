@@ -3,6 +3,8 @@ from typing import List, Tuple, Optional
 import cv2
 import numpy as np
 import random
+from processing import normalize_illumination
+import os
 
 
 class CocoMaskGenerator:
@@ -137,6 +139,25 @@ class CocoMaskGenerator:
         result = cv2.addWeighted(image, 1 - alpha, overlay, alpha, 0)
         return result
 
+    def get_all_polygons(self, image_id: int, category_id: int = 0) -> list:
+        """
+
+        """
+        annotations = self.get_annotations(image_id, category_id)
+
+
+        polygons = []
+        for ann in annotations:
+            seg = ann.get('segmentation')
+            if not seg:
+                continue
+            # В формате COCO segmentation — список полигонов. Берём первый.
+            for polygon in seg:
+                polygons.append(polygon)
+
+        return polygons
+
+
     def visualize(self, image_path: str, image_id: int, category_id: int = 0,
                   show_bbox: bool = False, window_name: str = 'Visualization'):
         """
@@ -184,7 +205,7 @@ class CocoMaskGenerator:
         cv2.destroyAllWindows()
 
     def create_binary_mask(self, image_path: str, image_id: int,
-                height: Optional[int] = None, width: Optional[int] = None) -> np.ndarray:
+                height: Optional[int] = None, width: Optional[int] = None, debug : bool = False) -> np.ndarray:
         """
         Создаёт бинарную маску для указанного изображения и категории объектов.
         Внутри полигонов применяется метод Оцу для получения бинарного текста.
@@ -207,10 +228,13 @@ class CocoMaskGenerator:
 
         # Загружаем исходное изображение и переводим в градации серого
         img = cv2.imread(image_path)  # предположим, есть такой метод
+        #img = normalize_illumination(img, clip_limit=4, gamma=0.2)
         if img is None:
             raise ValueError(f"Изображение с id {image_id} не найдено")
         if len(img.shape) == 3:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            if debug:
+                cv2.imwrite('debug_images/gray.jpg', gray)
         else:
             gray = img
 
@@ -245,6 +269,7 @@ class CocoMaskGenerator:
 
             # Применяем метод Оцу ко всей области roi
             _, binary_roi = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            #_, binary_roi = cv2.threshold(roi, 120, 255, cv2.THRESH_BINARY)
 
             # Создаём маску полигона в локальных координатах roi
             poly_mask = np.zeros((y2-y1, x2-x1), dtype=np.uint8)
@@ -254,6 +279,8 @@ class CocoMaskGenerator:
             # Вставляем бинаризованные пиксели только внутрь полигона
             roi_mask[poly_mask == 255] = binary_roi[poly_mask == 255]
 
+            if debug:
+                cv2.imwrite('debug_images/binary_result.jpg', mask)
         return mask
 
     @staticmethod
@@ -306,3 +333,146 @@ class CocoMaskGenerator:
             return 0.0
         f = (1 + beta**2) * (precision * recall) / (beta**2 * precision + recall)
         return float(f)
+    
+    
+    
+    
+    
+
+    def get_polygons_by_category(self, image_id: int, category_id: int) -> List[np.ndarray]:
+        """Возвращает все полигоны указанной категории для изображения."""
+        anns = self.get_annotations(image_id, category_id)
+        polygons = []
+        for ann in anns:
+            seg = ann.get('segmentation')
+            if seg and seg[0]:
+                pts = np.array(seg[0], dtype=np.int32).reshape(-1, 2)
+                polygons.append(pts)
+        return polygons
+
+    def get_polygons_by_category(self, image_id: int, category_id: int) -> List[np.ndarray]:
+        """Возвращает все полигоны указанной категории для изображения."""
+        anns = self.get_annotations(image_id, category_id)
+        polygons = []
+        for ann in anns:
+            seg = ann.get('segmentation')
+            if seg and seg[0]:
+                pts = np.array(seg[0], dtype=np.int32).reshape(-1, 2)
+                polygons.append(pts)
+        return polygons
+
+    def polygon_intersection_area(self, poly1: np.ndarray, poly2: np.ndarray) -> float:
+        """Вычисляет площадь пересечения двух полигонов (в пикселях)."""
+        all_pts = np.vstack([poly1, poly2])
+        x, y, w, h = cv2.boundingRect(all_pts)
+        mask1 = np.zeros((h, w), dtype=np.uint8)
+        mask2 = np.zeros((h, w), dtype=np.uint8)
+        poly1_loc = poly1 - [x, y]
+        poly2_loc = poly2 - [x, y]
+        cv2.fillPoly(mask1, [poly1_loc], 1)
+        cv2.fillPoly(mask2, [poly2_loc], 1)
+        intersection = cv2.bitwise_and(mask1, mask2)
+        return float(np.sum(intersection))
+
+    def assign_polygons_to_lines(self, image_id: int, line_category: int = 4,
+                                 source_categories: List[int] = None) -> dict:
+        """
+        Для каждой строки возвращает список полигонов из source_categories,
+        которые присвоены этой строке (по максимальной площади пересечения).
+        Возвращает {line_index: list_of_polygons}
+        """
+        if source_categories is None:
+            source_categories = [0, 1, 2]
+
+        line_polygons = self.get_polygons_by_category(image_id, line_category)
+        if not line_polygons:
+            return {}
+
+        # Собираем все source-полигоны
+        source_polygons = []
+        for cat in source_categories:
+            source_polygons.extend(self.get_polygons_by_category(image_id, cat))
+
+        # Для каждого source-полигона определяем лучшую строку
+        best_line_for_source = {}
+        for s_idx, s_poly in enumerate(source_polygons):
+            best_line = -1
+            best_area = 0
+            for l_idx, l_poly in enumerate(line_polygons):
+                area = self.polygon_intersection_area(s_poly, l_poly)
+                if area > best_area:
+                    best_area = area
+                    best_line = l_idx
+            if best_line != -1 and best_area > 0:
+                best_line_for_source[s_idx] = best_line
+
+        # Формируем словарь для строк
+        lines_polygons = {i: [] for i in range(len(line_polygons))}
+        for s_idx, l_idx in best_line_for_source.items():
+            lines_polygons[l_idx].append(source_polygons[s_idx])
+
+        return lines_polygons
+
+    def create_line_masks_from_global_binarization(self, image_path: str, image_id: int,
+                                               line_category: int = 4,
+                                               source_categories: List[int] = None,
+                                               debug: bool = False) -> List[np.ndarray]:
+        if source_categories is None:
+            source_categories = [0, 1, 2]
+
+        img = cv2.imread(image_path)
+        if img is None:
+            raise ValueError(f"Не удалось загрузить {image_path}")
+
+        from u_net_binarization import binarize_image
+        global_binary = binarize_image(img)
+
+        if debug:
+            debug_dir = "debug_images"
+            os.makedirs(debug_dir, exist_ok=True)
+            cv2.imwrite(os.path.join(debug_dir, f"debug_{image_id}_global_binary.jpg"), global_binary)
+
+        line_polygons = self.get_polygons_by_category(image_id, line_category)
+        if not line_polygons:
+            return []
+
+        assigned = self.assign_polygons_to_lines(image_id, line_category, source_categories)
+        masks = []
+
+        for idx, line_poly in enumerate(line_polygons):
+            all_polys = [line_poly] + assigned.get(idx, [])
+            if not all_polys:
+                continue
+
+            all_pts = np.vstack(all_polys)
+            x, y, w, h = cv2.boundingRect(all_pts)
+
+            h_img, w_img = global_binary.shape
+            x1 = max(0, x)
+            y1 = max(0, y)
+            x2 = min(w_img, x + w)
+            y2 = min(h_img, y + h)
+            roi_w = x2 - x1
+            roi_h = y2 - y1
+
+            poly_mask = np.zeros((roi_h, roi_w), dtype=np.uint8)
+            for poly in all_polys:
+                local_poly = poly - np.array([x1, y1])
+                cv2.fillPoly(poly_mask, [local_poly], 255)
+
+            global_roi = global_binary[y1:y2, x1:x2]
+            roi = np.where(poly_mask == 255, global_roi, 255)
+
+            if debug:
+                debug_img = img.copy()
+                for poly in all_polys:
+                    color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+                    cv2.polylines(debug_img, [poly], True, color, 2)
+                cv2.rectangle(debug_img, (x1, y1), (x2, y2), (0,0,255), 3)
+                cv2.imwrite(os.path.join(debug_dir, f"debug_{image_id}_line_{idx}_polys.jpg"), debug_img)
+                cv2.imwrite(os.path.join(debug_dir, f"debug_{image_id}_line_{idx}_mask.jpg"), roi)
+                cv2.imwrite(os.path.join(debug_dir, f"debug_{image_id}_line_{idx}_poly_mask.jpg"), poly_mask)
+
+            masks.append(roi)
+
+        return masks

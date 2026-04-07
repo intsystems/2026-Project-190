@@ -10,7 +10,8 @@ from u_net_binarization import binarize_image
 import matplotlib.pyplot as plt
 from post_processing import crop_line_rectangle
 from processing import extract_pages_with_yolo
-
+import joblib
+import colorsys
 
 class TextLineDetector:
     """
@@ -82,13 +83,12 @@ class TextLineDetector:
         Параметры:
             binarization_method: метод бинаризации ('otsu', 'adaptive', 'u_net')
             hough_theta_range: диапазон углов для преобразования Хафа (в градусах)
-            hough_rho_step_factor: шаг по ρ (в долях от AH)
+            hough_rho_step_factor: шаг по ро (в долях от AH)
             hough_max_votes_threshold: порог голосов для основной линии
             hough_secondary_threshold: порог для дополнительных линий
             hough_angle_tolerance: допуск по углу для вторичных линий
             hough_neighborhood_radius: радиус окрестности для объединения голосов
             merge_distance_factor: коэффициент для слияния линий (по расстоянию)
-            new_line_distance_factor: коэффициент для создания новых линий
             subset1_height_bounds: границы высоты для subset1 (доли от AH)
             subset1_width_factor: минимальная ширина для subset1 (доли от AW)
             subset2_height_factor: минимальная высота для subset2 (доли от AH)
@@ -96,6 +96,18 @@ class TextLineDetector:
             subset3_width_factor: максимальная ширина для subset3 (доли от AW)
             skeleton_junction_removal_zone: зона удаления узлов скелета (доли от высоты)
             skeleton_junction_neighborhood: размер окрестности для удаления узлов
+            hough_small_dataset_threshold: порог для адаптации порогов при малом количестве компонент
+            hough_large_dataset_threshold: порог для адаптации порогов при большом количестве компонент
+            hough_min_max_votes: минимальное значение для hough_max_votes_threshold после адаптации
+            hough_min_secondary_votes: минимальное значение для hough_secondary_threshold после адаптации
+            hough_max_max_votes: максимальное значение для hough_max_votes_threshold после адаптации
+            hough_max_secondary_votes: максимальное значение для hough_secondary_threshold после адаптации
+            skew_expansion_threshold: порог наклона для расширения диапазона углов Хафа
+            new_line_lower_factor: нижний множитель среднего расстояния для определения кандидата в новую строку
+            new_line_upper_factor: верхний множитель среднего расстояния для определения кандидата
+            new_line_vertical_grouping_factor: множитель AH для группировки компонент по вертикали
+            angle_filter_threshold: порог отклонения угла для отбрасывания строк (в градусах)
+            min_components_for_skew: минимальное количество компонент для оценки наклона
         """
         defaults = {
             'binarization_method': 'u_net',
@@ -106,7 +118,6 @@ class TextLineDetector:
             'hough_angle_tolerance': 2,
             'hough_neighborhood_radius': 5,
             'merge_distance_factor': 1.0,
-            'new_line_distance_factor': 0.9,
             'subset1_height_bounds': (0.5, 3.0),
             'subset1_width_factor': 0.5,
             'subset2_height_factor': 3.0,
@@ -114,6 +125,18 @@ class TextLineDetector:
             'subset3_width_factor': 0.5,
             'skeleton_junction_removal_zone': (0.5, 1.5),
             'skeleton_junction_neighborhood': 3,
+            'hough_small_dataset_threshold': 50,
+            'hough_large_dataset_threshold': 200,
+            'hough_min_max_votes': 3,
+            'hough_min_secondary_votes': 5,
+            'hough_max_max_votes': 10,
+            'hough_max_secondary_votes': 15,
+            'skew_expansion_threshold': 3,
+            'new_line_lower_factor': 0.7,
+            'new_line_upper_factor': 1.1,
+            'new_line_vertical_grouping_factor': 0.8,
+            'angle_filter_threshold': 10,
+            'min_components_for_skew': 5,
         }
         for key, default in defaults.items():
             if key not in self.params:
@@ -201,10 +224,19 @@ class TextLineDetector:
         """
         if not self.components:
             raise ValueError("Нет связных компонент для оценки высоты.")
-        heights = [comp['bbox'][3] for comp in self.components if comp['bbox'][3] > 4]
+        heights = [comp['bbox'][3] for comp in self.components if comp['bbox'][3] > 4] # надо что-то решать с выбросами!!!!! Как-то понимать когда их стоит убирать, а когда нет
         hist, bin_edges = np.histogram(heights, bins=len(heights)//10)
         hist, bin_edges = hist[1:], bin_edges[1:]
-        peak_idx = np.argmax(hist)
+
+        peak_idx = None
+        if len(hist) != 0:
+            peak_idx = np.argmax(hist)
+        else:
+            heights = [comp['bbox'][3] for comp in self.components]
+            hist, bin_edges = np.histogram(heights, bins=len(heights)//10)
+            hist, bin_edges = hist[1:], bin_edges[1:]
+            peak_idx = np.argmax(hist)
+
         AH = (bin_edges[peak_idx] + bin_edges[peak_idx+1]) / 2.0
         AW = AH
         self.AH = AH
@@ -238,16 +270,25 @@ class TextLineDetector:
         """
         AH, AW = self.AH, self.AW
         subset1, subset2, subset3 = [], [], []
+
+
+        h_min = self.params['subset1_height_bounds'][0] * AH
+        h_max = self.params['subset1_height_bounds'][1] * AH
+        w_min = self.params['subset1_width_factor'] * AW
+
         for comp in self.components:
             x, y, w, h = comp['bbox']
-            if (0.5 * AH <= h < 3 * AH) and (w >= 0.5 * AW):
+            if (h_min <= h < h_max) and (w >= w_min):
                 subset1.append(comp)
-            elif h >= 3 * AH:
+            elif h >= self.params['subset2_height_factor'] * AH:
                 subset2.append(comp)
-            elif (h < 3 * AH and w < 0.5 * AW) or (h < 0.5 * AH and w > 0.5 * AW):
+            elif (h < self.params['subset2_height_factor'] * AH and w < self.params['subset3_width_factor'] * AW) or \
+                (h < self.params['subset3_height_factor'] * AH and w > self.params['subset3_width_factor'] * AW):
                 subset3.append(comp)
             else:
                 subset1.append(comp)
+
+
         self.subset1 = subset1
         self.subset2 = subset2
         self.subset3 = subset3
@@ -340,12 +381,19 @@ class TextLineDetector:
         Вход:
             num_components (int): количество компонент в subset1.
         """
-        if num_components < 50:
-            self.params['hough_max_votes_threshold'] = max(3, self.params['hough_max_votes_threshold'] // 2)
-            self.params['hough_secondary_threshold'] = max(5, self.params['hough_secondary_threshold'] // 2)
-        elif num_components > 200:
-            self.params['hough_max_votes_threshold'] = min(10, self.params['hough_max_votes_threshold'] + 2)
-            self.params['hough_secondary_threshold'] = min(15, self.params['hough_secondary_threshold'] + 2)
+        small_thresh = self.params['hough_small_dataset_threshold']
+        large_thresh = self.params['hough_large_dataset_threshold']
+        min_max_votes = self.params['hough_min_max_votes']
+        min_sec_votes = self.params['hough_min_secondary_votes']
+        max_max_votes = self.params['hough_max_max_votes']
+        max_sec_votes = self.params['hough_max_secondary_votes']
+
+        if num_components < small_thresh:
+            self.params['hough_max_votes_threshold'] = max(min_max_votes, self.params['hough_max_votes_threshold'] // 2)
+            self.params['hough_secondary_threshold'] = max(min_sec_votes, self.params['hough_secondary_threshold'] // 2)
+        elif num_components > large_thresh:
+            self.params['hough_max_votes_threshold'] = min(max_max_votes, self.params['hough_max_votes_threshold'] + 2)
+            self.params['hough_secondary_threshold'] = min(max_sec_votes, self.params['hough_secondary_threshold'] + 2)
 
     def _estimate_skew(self):
         """
@@ -354,7 +402,7 @@ class TextLineDetector:
         Выход:
             angle_deg (float): угол наклона в градусах.
         """
-        if len(self.subset1) < 5:
+        if len(self.subset1) < self.params['min_components_for_skew']:
             return 0
         pts = [comp['centroid'] for comp in self.subset1]
         pts = np.array(pts)
@@ -382,7 +430,7 @@ class TextLineDetector:
             return []
         self._adjust_hough_thresholds(len(self.subset1))
         skew_est = self._estimate_skew()
-        if abs(skew_est) > 3:
+        if abs(skew_est) > self.params['skew_expansion_threshold']:
             new_range = (85 - abs(skew_est), 95 + abs(skew_est))
             new_range = (max(70, new_range[0]), min(110, new_range[1]))
             self.params['hough_theta_range'] = new_range
@@ -544,7 +592,7 @@ class TextLineDetector:
             curr_line = self.lines[i]
             comps = curr_line['components'][:]
             j = i + 1
-            while j < len(self.lines) and abs(self.lines[j]['y_mid'] - curr_line['y_mid']) < avg_dist:
+            while j < len(self.lines) and abs(self.lines[j]['y_mid'] - curr_line['y_mid']) < avg_dist * self.params['merge_distance_factor']:
                 comps.extend(self.lines[j]['components'])
                 j += 1
             merged_line = {
@@ -665,8 +713,9 @@ class TextLineDetector:
         skeleton = self._skeletonize(mask)
         junctions = self._find_junctions(skeleton)
 
-        zone_y_min = int(h / 2)
-        zone_y_max = int(3 * h / 2)
+        zone_ymin_factor, zone_ymax_factor = self.params['skeleton_junction_removal_zone']
+        zone_y_min = int(h * zone_ymin_factor)
+        zone_y_max = int(h * zone_ymax_factor)
         neigh_size = self.params['skeleton_junction_neighborhood']
         skeleton_mod = self._remove_junctions_in_zone(skeleton, junctions,
                                                       (zone_y_min, zone_y_max),
@@ -783,20 +832,6 @@ class TextLineDetector:
                 if best_line2 is not None:
                     best_line2['all_components'].append(('split_parts', x_comp, y_comp, part2))
 
-
-            # вариант с вычислением ближайщей линии через гланую большую компоненту
-            # best_line, next_line = self._closest_lines_to_the_mask(x_comp, y_comp, w_comp, h_comp)
-            # # part1 самая близкая линия
-            # if best_line is not None:
-            #     best_line['all_components'].append(('split_parts', x_comp, y_comp, part2))
-
-            # # part2 вторая по близости линия, если она существует и отлична от best_line
-            # if next_line is not None and next_line != best_line:
-            #     next_line['all_components'].append(('split_parts', x_comp, y_comp, part1))
-            # elif best_line is not None:
-            #     # Если второй линии нет, кладём part2 в ту же строку
-            #     best_line['all_components'].append(('split_parts', x_comp, y_comp, part1))
-
             if self.debug:
                 debug_img = self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
                 # Рамка компоненты
@@ -863,7 +898,8 @@ class TextLineDetector:
             line_masks (list): список масок для каждой линии (каждая маска – список координат (y,x))
         """
         if not self.lines:
-            return self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
+            return self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR), []
+
 
         h, w = self.binary.shape
         output = np.zeros((h, w, 3), dtype=np.uint8)
@@ -908,26 +944,26 @@ class TextLineDetector:
             if i < 30:
                 colors.append(base_colors[i])
             else:
-                # Для большего количества строк циклически повторяем цвета,
-                # но сдвигаем оттенок на 12 градусов (модуль 180), чтобы добавить разнообразия.
-                # Используем HSV-сдвиг для сохранения яркости.
                 base = base_colors[i % 30]
-                # Преобразуем в HSV, добавим сдвиг оттенка, затем обратно в RGB
-                bgr = np.uint8([[base[2], base[1], base[0]]])  # BGR порядок для OpenCV
-                hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+                # Преобразуем RGB -> HSV через colorsys (нормализованные 0..1)
+                r, g, b = base[0]/255.0, base[1]/255.0, base[2]/255.0
+                p, s, v = colorsys.rgb_to_hsv(r, g, b)   # h в диапазоне 0..1
+                # OpenCV Hue = h * 180 (так как OpenCV хранит 0..180)
+                h_opencv = p * 180
                 shift = (i // 30) * 12 % 180
-                hsv[0, 0, 0] = (hsv[0, 0, 0] + shift) % 180
-                new_bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)[0][0]
-                colors.append((new_bgr[2], new_bgr[1], new_bgr[0]))  # обратно в RGB
+                new_h_opencv = (h_opencv + shift) % 180
+                new_h = new_h_opencv / 180.0
+                # Обратно в RGB
+                new_r, new_g, new_b = colorsys.hsv_to_rgb(new_h, s, v)
+                colors.append((int(new_r*255), int(new_g*255), int(new_b*255)))
 
         line_masks = []  # формируем маски для каждой линии
         for idx, line in enumerate(self.lines):
             color = colors[idx]
             line_masks.append([])
-            for typ, x, y, mask in line.get('all_components', []):
+            for _, x, y, mask in line.get('all_components', []):
                 rows, cols = np.where(mask)
                 output[y + rows, x + cols] = color
-                # print('gfd', (y + rows, x + cols))
                 for yy, xx in zip(y + rows, x + cols):
                     line_masks[idx].append((xx, yy))
 
@@ -1004,8 +1040,9 @@ class TextLineDetector:
                     if dist < min_dist:
                         min_dist = dist
                 # Условие кандидата: расстояние до ближайшей линии близко к среднему Ad
-                # Используем диапазон 0.7*Ad ... 1.1*Ad
-                if 0.7 * Ad <= min_dist <= 1.1 * Ad:
+                lower_factor = self.params['new_line_lower_factor']
+                upper_factor = self.params['new_line_upper_factor']
+                if lower_factor * Ad <= min_dist <= upper_factor * Ad:
                     candidate_centers.append((cx, cy))
             # Компонента образует новую строку, если более половины её блоков — кандидаты
             if len(candidate_centers) >= len(centers) / 2:
@@ -1029,7 +1066,7 @@ class TextLineDetector:
                 current_group.append(item)
             else:
                 last_avg_y = current_group[-1][3]
-                if abs(item[3] - last_avg_y) < 0.8 * self.AH:
+                if abs(item[3] - last_avg_y) < self.params['new_line_vertical_grouping_factor'] * self.AH:
                     current_group.append(item)
                 else:
                     new_lines_groups.append(current_group)
@@ -1043,43 +1080,45 @@ class TextLineDetector:
         median_theta = np.median(existing_angles) if existing_angles else 90.0
 
         for group in new_lines_groups:
-            # Собираем все центры-кандидаты из всех компонент группы
             all_points = []
-            for _, _, centers in group:
+            for item in group:
+                centers = item[2]
                 all_points.extend(centers)
             if len(all_points) < 2:
-                # Если точек мало, создаём линию с медианным углом и rho через среднюю точку
                 avg_x = np.mean([p[0] for p in all_points])
                 avg_y = np.mean([p[1] for p in all_points])
                 theta_rad = np.deg2rad(median_theta)
                 rho = avg_x * np.cos(theta_rad) + avg_y * np.sin(theta_rad)
+                theta_deg = median_theta   # <-- добавлено
             else:
-                # Вычисляем угол через PCA (главная компонента) по точкам
                 pts = np.array(all_points)
                 mean = np.mean(pts, axis=0)
                 centered = pts - mean
                 cov = np.cov(centered.T)
                 eigvals, eigvecs = np.linalg.eig(cov)
-                main_dir = eigvecs[:, np.argmax(eigvals)]  # главное направление
+                main_dir = eigvecs[:, np.argmax(eigvals)]
                 theta_rad = np.arctan2(main_dir[1], main_dir[0])
                 theta_deg = np.rad2deg(theta_rad)
-                # Приводим угол к диапазону 0-180
                 if theta_deg < 0:
                     theta_deg += 180
-                # Ограничиваем допустимыми значениями (обычно около 90°)
                 if abs(theta_deg - 90) > 30:
                     theta_deg = median_theta
-                # Вычисляем rho как среднее проекций всех точек
                 rho = np.mean([x * np.cos(np.deg2rad(theta_deg)) + y * np.sin(np.deg2rad(theta_deg))
                             for x, y in all_points])
-            # Создаём новую линию
             new_line = {
                 'rho': rho,
                 'theta': theta_deg,
-                'components': [idx for idx, _, _ in group],  # индексы компонент
-                'y_mid': None   # будет вычислен позже
+                'components': [item[0] for item in group],
+                'y_mid': None
             }
             self.lines.append(new_line)
+
+        if self.debug:
+            debug_img = self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
+            for line in self.lines:
+                self._draw_line(debug_img, line, (0, 0, 255), thickness=3)
+            self._save_debug_image(debug_img, "new_lines")
+            print(f"[DEBUG] After after new lines: {len(self.lines)} lines")
 
         if self.debug:
             print(f"[DEBUG] postprocess_create_new_lines: added {len(new_lines_groups)} new lines")
@@ -1106,7 +1145,7 @@ class TextLineDetector:
         self.partition_components()
         self.block_based_hough()
         self.postprocess_merge_lines()
-        #self.postprocess_create_new_lines()
+        self.postprocess_create_new_lines()
         self.postprocess_assign_subset3()
         self.postprocess_split_subset2()
         self._assign_all_components_to_lines()
@@ -1116,7 +1155,7 @@ class TextLineDetector:
             median_theta = np.median([line['theta'] for line in self.lines])
             filtered = []
             for line in self.lines:
-                if abs(line['theta'] - median_theta) <= 10:
+                if abs(line['theta'] - median_theta) <= self.params['angle_filter_threshold']:
                     filtered.append(line)
                 else:
                     if self.debug:
@@ -1133,27 +1172,31 @@ class TextLineDetector:
         for i in range(len(line_masks)):
             H, W = self.image.shape[:2]
             white_image = np.ones((H, W, 3), dtype=np.uint8) * 255
-            #print('Высота', H, 'Ширена', W)
             for x, y in line_masks[i]:
-                #print('Пиксель y', y, 'Пиксель x', x)
-                white_image[y, x] = (0, 0, 0)        # чёрный текст
+                white_image[y, x] = (0, 0, 0)
 
             # Вырезаем и выпрямляем
             crop = crop_line_rectangle(white_image, line_masks[i], debug=False, padding=0)
             line_crops.append(crop)
 
-        save_dir = "output/lines"
-        os.makedirs(save_dir, exist_ok=True)
-        for idx, crop in enumerate(line_crops):
-            filename = os.path.join(save_dir, f"line_{idx:03d}.jpg")
-            cv2.imwrite(filename, crop)
+        if self.debug:
+            save_dir = "output/lines"
+            os.makedirs(save_dir, exist_ok=True)
+            for idx, crop in enumerate(line_crops):
+                filename = os.path.join(save_dir, f"line_{idx:03d}.jpg")
+                cv2.imwrite(filename, crop)
 
-        return self.lines
+        return self.lines, line_crops, line_masks
 
 
 if __name__ == "__main__":
-    img_path = 'datasets/school_notebooks_RU/images_base/1_10.JPG'
+    img_path = 'datasets/school_notebooks_RU/images_base/1_11.JPG'
     img = cv2.imread(img_path)
+
+    # загружаем параметры
+    study = joblib.load("models/optuna/optuna_hough_transform.pkl")
+    best_params = study.best_params
+    all_params = {'binarization_method': 'u_net', **best_params}
 
     pages = extract_pages_with_yolo(
         image_path=img_path,
@@ -1167,6 +1210,6 @@ if __name__ == "__main__":
         exit()
 
     for page in pages:
-        detector = TextLineDetector(page, params={'binarization_method': 'u_net'}, debug=False)
-        lines = detector.detect_text_lines()
+        detector = TextLineDetector(page, params=best_params, debug=True)
+        lines, _, _ = detector.detect_text_lines()
         print(f"Обнаружено строк: {len(lines)}")
