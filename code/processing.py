@@ -7,6 +7,9 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import os
+import sys
+import time
+from contextlib import contextmanager
 
 # Используя yolo модель выделяем маску стрниц, бинаризуем изображени поворачивам соотвествующие станницы  разрезам
 
@@ -21,14 +24,14 @@ def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", c
     else:
         img = image_path.copy()
 
-    # Бинаризация (только для поиска масок, не для вывода)
+    # Бинаризация
     binary = binarize_image(img)
     if debug:
         cv2.imwrite(os.path.join(output_dir, "01_binary.jpg"), binary)
 
     # YOLO
     model = YOLO(model_path)
-    results = model(img, conf=conf_threshold)
+    results = model(img, conf=conf_threshold, verbose=False)
     if not (results and len(results) > 0 and results[0].masks is not None):
         print("Маски не найдены")
         return []
@@ -54,8 +57,8 @@ def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", c
         x, y, w, h = cv2.boundingRect(contour)
 
         # Вырезаем из *цветного* изображения
-        page_roi = img[y:y+h, x:x+w]          # цветная область
-        mask_roi = mask_big[y:y+h, x:x+w]     # бинарная маска
+        page_roi = img[y:y+h, x:x+w]
+        mask_roi = mask_big[y:y+h, x:x+w] 
 
         # Создаём белый фон размером с вырезанную область
         white_bg = np.full_like(page_roi, 255)   # (h, w, 3) все пиксели = 255
@@ -184,7 +187,7 @@ def correct_perspective(image, binary=None, debug=False, correct_global_angle=Fa
         else:
             gray = image.copy()
         binary = binarize_image(gray)
-    median = cv2.medianBlur(binary, 27)
+    median = cv2.medianBlur(binary, 17)
 
     if debug:
         cv2.imwrite('debug_images/binary.jpg', binary)
@@ -192,7 +195,10 @@ def correct_perspective(image, binary=None, debug=False, correct_global_angle=Fa
 
 
     black_coords = set((y, x) for x, y in np.argwhere(median == 0))
+    start_time = time.time()
     straightened = crop_line_rectangle(image, black_coords, debug=debug, robust=False, correct_global_angle=correct_global_angle)
+    end_time = time.time()
+    print(end_time - start_time)
     return straightened
 
 # Значит это кореция шума - бесполезная вешь u-net как и otse работает ещё более фиговие (размывается разница между
@@ -234,24 +240,27 @@ def _apply_clahe_and_gamma(channel, clip_limit, tile_grid_size, gamma):
     return corrected
 
 if __name__ == "__main__":
-    img_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/library/datasets/school_notebooks_RU/images_base/0_3.jpg'
+    img_path = 'datasets/school_notebooks_RU/images_base/2_28.JPG'
     img = cv2.imread(img_path)
 
-    # Нормализация освещения
-    # img_corrected = normalize_illumination(img, clip_limit=4, gamma=0.2)
+    #Нормализация освещения
+    img_corrected = normalize_illumination(img, clip_limit=4, gamma=0.2)
 
-    # Исправление наклона
-    # img_final = correct_perspective(img)
-    # cv2.imwrite('debug_images/img_final.jpg', img_final)
-    # cv2.imwrite('debug_images/img_corrected.jpg', img_corrected)
+    #Исправление наклона
+    start_time = time.time()
+    img_final = correct_perspective(img)
+    end_time = time.time()
+    print(end_time - start_time)
+    cv2.imwrite('debug_images/img_final.jpg', img_final)
+    cv2.imwrite('debug_images/img_corrected.jpg', img_corrected)
 
-    pages = extract_pages_with_yolo(
-        image_path='datasets/school_notebooks_RU/images_base/3_46.JPG',
-        model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
-        output_dir='debug_images',
-        conf_threshold=0.7
-    )
-    for idx, page in enumerate(pages):
-        img_final = correct_perspective(page, debug=True, correct_global_angle=True)
-        cv2.imwrite(f'debug_images/img_final{idx}.jpg', img_final)
-        print(f"Страница {idx+1}: размер {page.shape}")
+    # pages = extract_pages_with_yolo(
+    #     image_path='datasets/school_notebooks_RU/images_base/2_31.JPG',
+    #     model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+    #     output_dir='debug_images',
+    #     conf_threshold=0.7
+    # )
+    # for idx, page in enumerate(pages):
+    #     img_final = correct_perspective(page, debug=True, correct_global_angle=True)
+    #     cv2.imwrite(f'debug_images/img_final{idx}.jpg', img_final)
+    #     print(f"Страница {idx+1}: размер {page.shape}")

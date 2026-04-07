@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import cv2
 from typing import Union, Tuple
+
 class DoubleConv(nn.Module):
     def __init__(self, in_ch, out_ch):
         super().__init__()
@@ -69,7 +70,7 @@ class UNetTiny(nn.Module):
 
 def binarize_image(
     image: Union[str, np.ndarray],
-    model_path: str = "models/unet_binarization(6).pth",
+    model_path: str = "models/u_net/unet_binarization_2_(6-architecture).pth",
     target_size: Tuple[int, int] = (3000, 3000),
     device: str = None,
     threshold: float = 0.5,
@@ -161,13 +162,17 @@ def binarize_image(
         cv2.imwrite("padded_image.png", padded_image)
 
     # 5. Преобразуем в тензор (B=1, C=1, H, W)
-    input_tensor = (
-        torch.from_numpy(padded_image)
-        .float()
-        .unsqueeze(0)          # (1, H, W)  ← канал
-        .unsqueeze(0)          # (1, 1, H, W) ← batch
-        / 255.0
-    ).to(device)
+    # input_tensor = ( # Для шестой модели
+    #     torch.from_numpy(padded_image)
+    #     .float()
+    #     .unsqueeze(0)          # (1, H, W)  ← канал
+    #     .unsqueeze(0)          # (1, 1, H, W) ← batch
+    #     / 255.0
+    # ).to(device)
+
+    img_norm = padded_image.astype(np.float32) / 255.0
+    img_norm = (img_norm - 0.5) / 0.5
+    input_tensor = torch.from_numpy(img_norm).unsqueeze(0).unsqueeze(0).to(device)
 
     # 6. Инференс (с AMP если CUDA)
     with torch.no_grad():
@@ -195,6 +200,7 @@ def binarize_image(
     )
     return final_mask
 
-# Пример 1: из файла
-binary_mask = binarize_image("datasets/school_notebooks_RU/images_base/1_11.JPG", target_size = (3000, 3000))
-cv2.imwrite("result_binary.png", binary_mask)
+if __name__ == "__main__":
+    # Пример 1: из файла
+    binary_mask = binarize_image("datasets/school_notebooks_RU/images_base/1_11.JPG", target_size = (3000, 3000))
+    cv2.imwrite("result_binary.png", binary_mask)
