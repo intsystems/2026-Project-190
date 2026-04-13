@@ -70,7 +70,7 @@ class UNetTiny(nn.Module):
 
 def binarize_image(
     image: Union[str, np.ndarray],
-    model_path: str = "models/u_net/unet_binarization_2_(6-architecture).pth",
+    model_path: str = "models/u_net/unet_binarization_3_(6-architecture).pth",
     target_size: Tuple[int, int] = (3000, 3000),
     device: str = None,
     threshold: float = 0.5,

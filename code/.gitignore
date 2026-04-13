@@ -4,3 +4,5 @@ debug_images/
 lines/
 result_binary.png
 test.py
+tmp_files/
+boost_hough/

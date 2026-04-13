@@ -13,7 +13,14 @@ from contextlib import contextmanager
 
 # Используя yolo модель выделяем маску стрниц, бинаризуем изображени поворачивам соотвествующие станницы  разрезам
 
-def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", conf_threshold=0.7, debug=False):
+def extract_pages_with_yolo(
+    image_path,
+    model_path,
+    output_dir="debug_images",
+    conf_threshold=0.7,
+    debug=False,
+    return_binary=False,
+):
     os.makedirs(output_dir, exist_ok=True)
 
     # Загрузка изображения
@@ -34,6 +41,8 @@ def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", c
     results = model(img, conf=conf_threshold, verbose=False)
     if not (results and len(results) > 0 and results[0].masks is not None):
         print("Маски не найдены")
+        if return_binary:
+            return [], []
         return []
 
     annotated = results[0].plot()
@@ -43,6 +52,7 @@ def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", c
     masks = results[0].masks.data.cpu().numpy()
     orig_h, orig_w = binary.shape
     pages = []
+    binary_pages = []
 
     for i, mask in enumerate(masks):
         mask_bin = (mask > 0.5).astype(np.uint8) * 255
@@ -56,21 +66,28 @@ def extract_pages_with_yolo(image_path, model_path, output_dir="debug_images", c
         contour = max(contours, key=cv2.contourArea)
         x, y, w, h = cv2.boundingRect(contour)
 
-        # Вырезаем из *цветного* изображения
+        # Вырезаем из цветного и бинарного изображения по одной и той же маске
         page_roi = img[y:y+h, x:x+w]
+        binary_roi = binary[y:y+h, x:x+w]
         mask_roi = mask_big[y:y+h, x:x+w] 
 
         # Создаём белый фон размером с вырезанную область
         white_bg = np.full_like(page_roi, 255)   # (h, w, 3) все пиксели = 255
+        white_bg_binary = np.full_like(binary_roi, 255)
 
         # Накладываем цветные пиксели только там, где маска == 255
         mask_3ch = np.stack([mask_roi] * 3, axis=-1)  # (h, w, 3) для поэлементного выбора
         result_page = np.where(mask_3ch == 255, page_roi, white_bg)
+        result_binary_page = np.where(mask_roi == 255, binary_roi, white_bg_binary)
 
         if debug:
             cv2.imwrite(os.path.join(output_dir, f"07_page_{i}.jpg"), result_page)
+            cv2.imwrite(os.path.join(output_dir, f"08_binary_page_{i}.jpg"), result_binary_page)
         pages.append(result_page)
+        binary_pages.append(result_binary_page)
 
+    if return_binary:
+        return pages, binary_pages
     return pages
 
 
@@ -243,24 +260,27 @@ if __name__ == "__main__":
     img_path = 'datasets/school_notebooks_RU/images_base/2_28.JPG'
     img = cv2.imread(img_path)
 
-    #Нормализация освещения
-    img_corrected = normalize_illumination(img, clip_limit=4, gamma=0.2)
+    # #Нормализация освещения
+    # img_corrected = normalize_illumination(img, clip_limit=4, gamma=0.2)
 
-    #Исправление наклона
-    start_time = time.time()
-    img_final = correct_perspective(img)
-    end_time = time.time()
-    print(end_time - start_time)
-    cv2.imwrite('debug_images/img_final.jpg', img_final)
-    cv2.imwrite('debug_images/img_corrected.jpg', img_corrected)
+    # #Исправление наклона
+    # start_time = time.time()
+    # img_final = correct_perspective(img)
+    # end_time = time.time()
+    # print(end_time - start_time)
+    # cv2.imwrite('debug_images/img_final.jpg', img_final)
+    # cv2.imwrite('debug_images/img_corrected.jpg', img_corrected)
 
-    # pages = extract_pages_with_yolo(
-    #     image_path='datasets/school_notebooks_RU/images_base/2_31.JPG',
-    #     model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
-    #     output_dir='debug_images',
-    #     conf_threshold=0.7
-    # )
-    # for idx, page in enumerate(pages):
-    #     img_final = correct_perspective(page, debug=True, correct_global_angle=True)
-    #     cv2.imwrite(f'debug_images/img_final{idx}.jpg', img_final)
-    #     print(f"Страница {idx+1}: размер {page.shape}")
+    pages, binary_pages = extract_pages_with_yolo(
+        image_path='datasets/school_notebooks_RU/images_base/1_11.JPG',
+        model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+        output_dir='debug_images',
+        conf_threshold=0.7,
+        return_binary = True
+    )
+    for idx, page in enumerate(pages):
+        img_final = correct_perspective(page, debug=True, correct_global_angle=True)
+        cv2.imwrite(f'debug_images/img_color_final{idx}.jpg', img_final)
+
+    for idx, page in enumerate(binary_pages):
+        cv2.imwrite(f'debug_images/img_binary_final{idx}.jpg', page)
