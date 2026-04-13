@@ -12,6 +12,41 @@ from post_processing import crop_line_rectangle
 from processing import extract_pages_with_yolo
 import joblib
 import colorsys
+import scipy.signal
+
+# Палитра из 30 хорошо различимых цветов (RGB)
+BASE_COLORS = [
+    (255, 0, 0),    # красный
+    (0, 255, 0),    # зелёный
+    (0, 0, 255),    # синий
+    (255, 255, 0),  # жёлтый
+    (255, 0, 255),  # пурпурный
+    (0, 255, 255),  # циан
+    (128, 0, 0),    # тёмно-красный
+    (0, 128, 0),    # тёмно-зелёный
+    (0, 0, 128),    # тёмно-синий
+    (128, 128, 0),  # оливковый
+    (128, 0, 128),  # фиолетовый
+    (0, 128, 128),  # бирюзовый
+    (255, 128, 0),  # оранжевый
+    (255, 0, 128),  # розовый
+    (128, 255, 0),  # салатовый
+    (0, 255, 128),  # мятный
+    (128, 0, 255),  # лавандовый
+    (0, 128, 255),  # голубой
+    (255, 128, 128),# светло-красный
+    (128, 255, 128),# светло-зелёный
+    (128, 128, 255),# светло-синий
+    (255, 255, 128),# светло-жёлтый
+    (255, 128, 255),# светло-пурпурный
+    (128, 255, 255),# светло-циан
+    (192, 0, 0),    # тёмно-красный
+    (0, 192, 0),    # тёмно-зелёный
+    (0, 0, 192),    # тёмно-синий
+    (192, 192, 0),  # тёмно-оливковый
+    (192, 0, 192),  # тёмно-фиолетовый
+    (0, 192, 192),  # тёмно-бирюзовый
+]
 
 class TextLineDetector:
     """
@@ -173,6 +208,8 @@ class TextLineDetector:
                                            cv2.THRESH_BINARY_INV, 11, 2)
         elif self.params['binarization_method'] == 'u_net':
             binary = 255 - binarize_image(self.image)
+        elif self.params['binarization_method'] == 'is_binary': # уже бинарное изображение
+            binary = 255 - self.image
         else:
             raise ValueError(f"Неподдерживаемый метод бинаризации: {self.params['binarization_method']}")
         self.binary = binary
@@ -699,66 +736,219 @@ class TextLineDetector:
 
     def _split_vertically_connected(self, comp):
         """
-        Разделяет вертикально связанную компоненту (обычно из subset2) на две части.
-
-        Вход:
-            comp (dict): компонента с маской 'mask'
-
-        Выход:
-            (part1, part2) (np.ndarray, np.ndarray): две маски-части.
+        Делит компоненту (subset2), слепленную по вертикали,
+        на части с помощью горизонтального профиля (axis=1).
         """
-        mask = comp['mask']
+        mask = (comp['mask'] > 0).astype(np.uint8)
+        x0, y0, _, _ = comp['bbox']
         h, w = mask.shape
 
-        skeleton = self._skeletonize(mask)
-        junctions = self._find_junctions(skeleton)
+        if h < 8 or w < 3 or np.sum(mask) == 0:
+            return [comp]
 
-        zone_ymin_factor, zone_ymax_factor = self.params['skeleton_junction_removal_zone']
-        zone_y_min = int(h * zone_ymin_factor)
-        zone_y_max = int(h * zone_ymax_factor)
-        neigh_size = self.params['skeleton_junction_neighborhood']
-        skeleton_mod = self._remove_junctions_in_zone(skeleton, junctions,
-                                                      (zone_y_min, zone_y_max),
-                                                      neigh_size)
-        labeled_skeleton = measure.label(skeleton_mod, connectivity=2)
-        upmost_label = None
-        min_y = h
-        for label in range(1, labeled_skeleton.max()+1):
-            rows, _ = np.where(labeled_skeleton == label)
-            if len(rows) > 0:
-                y_min = np.min(rows)
-                if y_min < min_y:
-                    min_y = y_min
-                    upmost_label = label
-        if upmost_label is None:
-            split_y = h // 2
-            return mask[:split_y, :], mask[split_y:, :]
-        upmost_mask = (labeled_skeleton == upmost_label)
-        rest_mask = (labeled_skeleton != 0) & (labeled_skeleton != upmost_label)
-        dist_up = ndimage.distance_transform_edt(~upmost_mask)
-        dist_rest = ndimage.distance_transform_edt(~rest_mask)
-        part1 = mask & (dist_up < dist_rest)
-        part2 = mask & (dist_up >= dist_rest)
+        ah = self.AH if self.AH is not None else max(8.0, h / 3.0)
+        min_line_height = max(3, int(round(0.35 * ah)))
+        min_gap = max(2, int(round(0.18 * ah)))
+        min_region_height = max(3, int(round(0.30 * ah)))
+
+        profile = np.sum(mask, axis=1).astype(np.float32)
+        if len(profile) >= 7:
+            win = max(7, int(round(0.45 * ah)))
+            if win % 2 == 0:
+                win += 1
+            win = min(win, len(profile) if len(profile) % 2 == 1 else len(profile) - 1)
+            profile_smooth = scipy.signal.savgol_filter(profile, win, 2) if win >= 5 else profile.copy()
+        else:
+            profile_smooth = profile.copy()
+
+        p_min = float(np.min(profile_smooth))
+        p_max = float(np.max(profile_smooth))
+        if p_max - p_min < 1e-6:
+            return [comp]
+
+        norm_hpp = (profile_smooth - p_min) / (p_max - p_min)
+
+        text_rows = norm_hpp > 0.22
+        if not np.any(text_rows):
+            return [comp]
+
+        regions = []
+        in_region = False
+        start = 0
+        for i, is_text in enumerate(text_rows):
+            if is_text and not in_region:
+                start = i
+                in_region = True
+            elif not is_text and in_region:
+                regions.append((start, i - 1))
+                in_region = False
+        if in_region:
+            regions.append((start, len(text_rows) - 1))
+
+        merged_regions = []
+        merge_gap = max(2, int(round(0.15 * ah)))
+        for reg in regions:
+            if not merged_regions:
+                merged_regions.append(reg)
+                continue
+            prev_start, prev_end = merged_regions[-1]
+            cur_start, cur_end = reg
+            if cur_start - prev_end <= merge_gap:
+                merged_regions[-1] = (prev_start, cur_end)
+            else:
+                merged_regions.append(reg)
+        regions = [(s, e) for s, e in merged_regions if e - s + 1 >= min_region_height]
+
+        if len(regions) <= 1:
+            return [comp]
+
+        start_points = []
+        for i in range(len(regions) - 1):
+            _, end_prev = regions[i]
+            start_next, _ = regions[i + 1]
+            if start_next - end_prev - 1 < min_gap:
+                continue
+            start_points.append((end_prev + start_next) // 2)
+
+        if not start_points:
+            return [comp]
+
+        distance_to_text = cv2.distanceTransform((1 - mask).astype(np.uint8), cv2.DIST_L2, 3)
+        distance_to_text = distance_to_text / (np.max(distance_to_text) + 1e-6)
+
+        energy = mask.astype(np.float32) * 1000.0
+        energy += (1.0 - distance_to_text) * 25.0
+
+        row_penalty = np.abs(np.arange(h, dtype=np.float32)[:, None] - np.array(start_points, dtype=np.float32)[None, :])
+
+        def _extract_seam(energy_map, start_y):
+            cost = np.full((h, w), np.inf, dtype=np.float32)
+            parent = np.full((h, w), -1, dtype=np.int32)
+            cost[:, 0] = energy_map[:, 0] + np.abs(np.arange(h, dtype=np.float32) - start_y) * 3.0
+
+            for x in range(1, w):
+                prev = cost[:, x - 1]
+                for y in range(h):
+                    y0 = max(0, y - 1)
+                    y1 = min(h, y + 2)
+                    local_prev = prev[y0:y1]
+                    best_off = int(np.argmin(local_prev))
+                    best_y = y0 + best_off
+                    smooth_penalty = abs(y - best_y) * 2.0
+                    cost[y, x] = energy_map[y, x] + local_prev[best_off] + smooth_penalty
+                    parent[y, x] = best_y
+
+            end_y = int(np.argmin(cost[:, -1]))
+            seam = np.zeros(w, dtype=np.int32)
+            seam[-1] = end_y
+            for x in range(w - 1, 0, -1):
+                seam[x - 1] = parent[seam[x], x]
+            return seam
+
+        seams = []
+        for seam_idx, start_y in enumerate(start_points):
+            seam_energy = energy + row_penalty[:, [seam_idx]] * 1.5
+            seam = _extract_seam(seam_energy, start_y)
+            if np.mean(mask[seam, np.arange(w)]) > 0.35:
+                continue
+            seams.append(seam)
+
+        if not seams:
+            return [comp]
+
+        seams = sorted(seams, key=lambda s: float(np.mean(s)))
+        filtered_seams = []
+        for seam in seams:
+            if not filtered_seams:
+                filtered_seams.append(seam)
+                continue
+            if np.mean(np.abs(seam - filtered_seams[-1])) >= min_line_height:
+                filtered_seams.append(seam)
+        seams = filtered_seams
+
+        if not seams:
+            return [comp]
+
+        seams_full = [np.zeros(w, dtype=np.int32)] + seams + [np.full(w, h - 1, dtype=np.int32)]
+        parts = []
+        total_area = max(1, int(np.sum(mask)))
+
+        for i in range(len(seams_full) - 1):
+            upper = seams_full[i]
+            lower = seams_full[i + 1]
+            part_mask = np.zeros_like(mask, dtype=np.uint8)
+
+            for x in range(w):
+                y_top = int(min(upper[x], lower[x]))
+                y_bottom = int(max(upper[x], lower[x]))
+                if y_bottom - y_top <= 1:
+                    continue
+                col = mask[y_top + 1:y_bottom, x]
+                if col.size:
+                    part_mask[y_top + 1:y_bottom, x] = col
+
+            if np.sum(part_mask) == 0:
+                continue
+
+            rows, cols = np.where(part_mask > 0)
+            if len(rows) == 0:
+                continue
+
+            part_h = int(np.max(rows) - np.min(rows) + 1)
+            if part_h < min_line_height and np.sum(part_mask) < 0.1 * total_area:
+                continue
+
+            r0, r1 = int(np.min(rows)), int(np.max(rows))
+            c0, c1 = int(np.min(cols)), int(np.max(cols))
+            cropped = part_mask[r0:r1 + 1, c0:c1 + 1]
+
+            x = x0 + c0
+            y = y0 + r0
+            w_part = c1 - c0 + 1
+            h_part = r1 - r0 + 1
+
+            parts.append({
+                'bbox': (x, y, w_part, h_part),
+                'mask': cropped,
+                'centroid': (x + w_part / 2, y + h_part / 2),
+                'label': None
+            })
 
         if self.debug:
-            # Создаём цветное изображение для отладки
-            debug_img = self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
-            x, y, _, _ = comp['bbox']
-            # Рисуем bounding box всей компоненты
-            cv2.rectangle(debug_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            
-            # Накладываем part1 (красный) и part2 (синий) с прозрачностью
-            overlay = debug_img.copy()
-            # part1 и part2 — это маски (2D-массивы bool или uint8 с 0/1)
-            part1_mask = (part1 > 0)
-            part2_mask = (part2 > 0)
-            overlay[y:y+h, x:x+w][part1_mask] = (0, 0, 255)   # красный для part1
-            overlay[y:y+h, x:x+w][part2_mask] = (0, 255, 0)   # зелёный для part2 (чтобы лучше видеть)
-            # Смешиваем с исходным
-            debug_img = cv2.addWeighted(debug_img, 0.6, overlay, 0.4, 0)
-            #self._save_debug_image(debug_img, "split_component")
+            debug_img = np.full((h, w, 3), 255, dtype=np.uint8)
+            debug_img[mask > 0] = (50, 50, 50)
 
-        return part1, part2
+            overlay = debug_img.copy()
+            for idx, part in enumerate(parts):
+                px, py, pw, ph = part['bbox']
+                local_x = px - x0
+                local_y = py - y0
+                color = BASE_COLORS[idx % len(BASE_COLORS)]
+                overlay[local_y:local_y + ph, local_x:local_x + pw][part['mask'] > 0] = color
+            debug_img = cv2.addWeighted(debug_img, 0.45, overlay, 0.55, 0)
+
+            for seam in seams:
+                debug_img[seam, np.arange(w)] = (0, 0, 255)
+            self._save_debug_image(debug_img, "split_vertically_connected")
+
+            plt.figure(figsize=(7, 4))
+            plt.plot(profile, label='hpp', alpha=0.4)
+            plt.plot(profile_smooth, label='hpp_smooth', linewidth=2)
+            for start_row, end_row in regions:
+                plt.axvspan(start_row, end_row, color='green', alpha=0.15)
+            for start_y in start_points:
+                plt.axvline(start_y, color='red', linestyle='--', alpha=0.7)
+            plt.title('split_vertically_connected hpp')
+            plt.xlabel('row')
+            plt.ylabel('ink pixels')
+            plt.legend()
+            plt.grid(True, alpha=0.2)
+            hist_path = os.path.join(self.debug_output_dir, f"{self.debug_counter:03d}_split_vertically_connected_profile.png")
+            plt.savefig(hist_path)
+            plt.close()
+            self.debug_counter += 1
+
+        return parts if len(parts) >= 2 else [comp]
 
     def _closest_lines_to_the_mask(self, x, y, w, h):
         """Выбираем ближайщею к маске линию и вторую ближайщею"""
@@ -783,6 +973,56 @@ class TextLineDetector:
                 best_line = line
 
         return best_line, next_line
+
+    def postprocess_split_subset2_add_to_subset1(self):
+        """
+        Делит компоненты subset2 (вертикально слепленные строки)
+        и добавляет валидные части в subset1 для Hough.
+        """
+
+        new_parts = []
+
+        for idx, comp in enumerate(self.subset2):
+            parts = self._split_vertically_connected(comp)
+
+            valid_parts = []
+
+            for part in parts:
+                _, _, w, h = part['bbox']
+
+                # фильтрация мусора
+                # if h < 0.3 * self.AH:
+                #     continue
+                # if w < 0.2 * self.AW:
+                #     continue
+
+                valid_parts.append(part)
+                new_parts.append(part)
+
+            # Debug визуализация
+            # if self.debug:
+            #     debug_img = self.image.copy() if len(self.image.shape) == 3 else cv2.cvtColor(self.image, cv2.COLOR_GRAY2BGR)
+
+            #     x, y, w, h = comp['bbox']
+            #     cv2.rectangle(debug_img, (x, y), (x + w, y + h), (255, 255, 0), 2)
+
+            #     overlay = debug_img.copy()
+
+            #     for i, part in enumerate(parts):
+            #         px, py, pw, ph = part['bbox']
+            #         mask = part['mask']
+
+            #         color = BASE_COLORS[i % len(BASE_COLORS)]
+
+            #         region = overlay[py:py+ph, px:px+pw]
+            #         region[mask > 0] = color
+
+            #     debug_img = cv2.addWeighted(debug_img, 0.6, overlay, 0.4, 0)
+            #     self._save_debug_image(debug_img, f"split_subset2_{idx}")
+
+        # добавляем в subset1
+        self.subset1.extend(new_parts)
+
 
     def postprocess_split_subset2(self):
         """
@@ -855,7 +1095,7 @@ class TextLineDetector:
 
     def _assign_all_components_to_lines(self):
         """
-        Собирает все компоненты (subset1, subset2, subset3, split_parts) и присваивает их
+        Собирает все компоненты (subset1, subset3) и присваивает их
         ближайшим строкам по вертикальному расстоянию. Результат сохраняется в поле
         'all_components' каждой линии.
         """
@@ -872,6 +1112,9 @@ class TextLineDetector:
                     line['y_mid'] = 0
                 else:
                     line['y_mid'] = (line['rho'] - mid_x * cos_theta) / sin_theta
+
+        for line in self.lines:
+            line['all_components'] = []
 
         # Subset1
         for comp in self.subset1:
@@ -904,47 +1147,13 @@ class TextLineDetector:
         h, w = self.binary.shape
         output = np.zeros((h, w, 3), dtype=np.uint8)
 
-        # Палитра из 30 хорошо различимых цветов (RGB)
-        base_colors = [
-            (255, 0, 0),    # красный
-            (0, 255, 0),    # зелёный
-            (0, 0, 255),    # синий
-            (255, 255, 0),  # жёлтый
-            (255, 0, 255),  # пурпурный
-            (0, 255, 255),  # циан
-            (128, 0, 0),    # тёмно-красный
-            (0, 128, 0),    # тёмно-зелёный
-            (0, 0, 128),    # тёмно-синий
-            (128, 128, 0),  # оливковый
-            (128, 0, 128),  # фиолетовый
-            (0, 128, 128),  # бирюзовый
-            (255, 128, 0),  # оранжевый
-            (255, 0, 128),  # розовый
-            (128, 255, 0),  # салатовый
-            (0, 255, 128),  # мятный
-            (128, 0, 255),  # лавандовый
-            (0, 128, 255),  # голубой
-            (255, 128, 128),# светло-красный
-            (128, 255, 128),# светло-зелёный
-            (128, 128, 255),# светло-синий
-            (255, 255, 128),# светло-жёлтый
-            (255, 128, 255),# светло-пурпурный
-            (128, 255, 255),# светло-циан
-            (192, 0, 0),    # тёмно-красный
-            (0, 192, 0),    # тёмно-зелёный
-            (0, 0, 192),    # тёмно-синий
-            (192, 192, 0),  # тёмно-оливковый
-            (192, 0, 192),  # тёмно-фиолетовый
-            (0, 192, 192),  # тёмно-бирюзовый
-        ]
-
         n = len(self.lines)
         colors = []
         for i in range(n):
             if i < 30:
-                colors.append(base_colors[i])
+                colors.append(BASE_COLORS[i])
             else:
-                base = base_colors[i % 30]
+                base = BASE_COLORS[i % 30]
                 # Преобразуем RGB -> HSV через colorsys (нормализованные 0..1)
                 r, g, b = base[0]/255.0, base[1]/255.0, base[2]/255.0
                 p, s, v = colorsys.rgb_to_hsv(r, g, b)   # h в диапазоне 0..1
@@ -1142,12 +1351,13 @@ class TextLineDetector:
         self.binarize()
         self.extract_connected_components()
         self.estimate_average_character_height()
-        self.partition_components()
+        self.partition_components() #
+        self.postprocess_split_subset2_add_to_subset1()
         self.block_based_hough()
         self.postprocess_merge_lines()
         self.postprocess_create_new_lines()
         self.postprocess_assign_subset3()
-        self.postprocess_split_subset2()
+        #self.postprocess_split_subset2() #
         self._assign_all_components_to_lines()
 
         # Дополнительная фильтрация строк с большим наклоном после слияния
@@ -1193,23 +1403,48 @@ if __name__ == "__main__":
     img_path = 'datasets/school_notebooks_RU/images_base/1_11.JPG'
     img = cv2.imread(img_path)
 
-    # загружаем параметры
-    study = joblib.load("models/optuna/optuna_hough_transform.pkl")
-    best_params = study.best_params
-    all_params = {'binarization_method': 'u_net', **best_params}
+    # загружаем параметры (простая optuna)
+    # study = joblib.load("models/optuna/optuna_hough_transform.pkl")
+    # best_params = study.best_params
+    # all_params = {'binarization_method': 'u_net', **best_params}
 
-    pages = extract_pages_with_yolo(
+    from param_optimization_hough_transform_method_boost import (
+        load_boost_bundle,
+        load_unet_model,
+        extract_unet_avg_feature,
+        predict_params_from_feature,
+    )
+
+    bundle = load_boost_bundle("models/boost_hough/boost_models.joblib")
+
+    models = bundle["models"]
+    fixed_params = bundle["fixed_params"]
+
+    unet_model, unet_device = load_unet_model()
+
+    image_path = "datasets/school_notebooks_RU/images_base/1_11.JPG"
+    feature_vector = extract_unet_avg_feature(image_path, unet_model, unet_device)
+
+    params = predict_params_from_feature(feature_vector, models, fixed_params)
+    params['binarization_method'] = 'is_binary'
+
+    del unet_model
+    print(params)
+
+
+    pages, binary_pages = extract_pages_with_yolo(
         image_path=img_path,
         model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
         output_dir='debug_images',
-        conf_threshold=0.7
+        conf_threshold=0.7,
+        return_binary = True
     )
 
     if img is None:
         print("Не удалось загрузить изображение")
         exit()
 
-    for page in pages:
-        detector = TextLineDetector(page, params=best_params, debug=True)
+    for page in binary_pages:
+        detector = TextLineDetector(page, params=params, debug=True)
         lines, _, _ = detector.detect_text_lines()
         print(f"Обнаружено строк: {len(lines)}")
