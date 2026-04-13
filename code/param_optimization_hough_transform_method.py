@@ -56,7 +56,7 @@ def iou_binary_images(img1: np.ndarray, img2: np.ndarray, target_size: Tuple[int
 # Максимальный IoU с поворотом
 def best_iou_with_rotations(img1: np.ndarray, img2: np.ndarray,
                             target_size: Tuple[int, int] = (32, 256),
-                            step: int = 5) -> float:
+                            step: int = 6) -> float:
     best = 0.0
     for angle in range(0, 180, step):
         rotated = rotate_binary_image(img1, angle)
@@ -78,18 +78,19 @@ def evaluate_image(img_path: str, gt_masks: List[np.ndarray],
         base_name = os.path.splitext(os.path.basename(img_path))[0]
 
     # Получаем страницы
-    pages = extract_pages_with_yolo(
+    _, binary_pages = extract_pages_with_yolo(
         image_path=img,
         model_path=model_path,
         output_dir=debug_dir if debug else '/tmp',
-        conf_threshold=0.7
+        conf_threshold=0.7,
+        return_binary = True
     )
-    if not pages:
+    if not binary_pages:
         return 0.0
 
     all_pred_images = [] # сюда собираем вырезанные строки
     all_pred_points = [] # для отладки (точки)
-    for page_idx, page in enumerate(pages):
+    for page_idx, page in enumerate(binary_pages):
         detector = TextLineDetector(page, params=params, debug=False)
 
         _, crops, masks = detector.detect_text_lines()
@@ -121,7 +122,7 @@ def evaluate_image(img_path: str, gt_masks: List[np.ndarray],
     # Генерируем все пары индексов
     pairs = [(i, j) for i in range(n_pred) for j in range(n_gt)]
     
-    results = Parallel(n_jobs=15)(
+    results = Parallel(n_jobs=8)(
         delayed(compute_pair)(i, j) for (i, j) in pairs
     )
 
@@ -147,7 +148,7 @@ def evaluate_image(img_path: str, gt_masks: List[np.ndarray],
                 collage[:h2, w1+10:w1+10+w2] = gt_masks[matched_gt_idx]
                 cv2.imwrite(os.path.join(debug_dir, f"{base_name}_pred{i}_gt{matched_gt_idx}_iou{best_iou:.3f}.jpg"), collage)
 
-    del img, pages
+    del img, binary_pages
     gc.collect()
     return score
 
@@ -236,7 +237,7 @@ def main():
     
     image_files = image_files[:10]
 
-    fixed_params = {'binarization_method': 'u_net'}
+    fixed_params = {'binarization_method': 'is_binary'}
     study = optuna.create_study(direction='minimize', sampler=optuna.samplers.TPESampler(seed=42))
     study.optimize(
         lambda trial: objective(trial, image_files, model_path, fixed_params),
