@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from post_processing import crop_line_rectangle
-from processing import extract_pages_with_yolo, correct_perspective
+from processing import extract_pages_with_yolo, correct_perspective, warp_binary_by_local_angles
 from scipy.signal import find_peaks, peak_widths
 
 
@@ -404,11 +404,13 @@ class LineSegmentation:
         lines_crops = []
         for idx, page in enumerate(binary_pages):
             # Шаг 2: исправляем перспективу текущей страницы.
-            corrected_page, binary, _ = correct_perspective(
-                page,
-                debug=self.debug,
-                debug_output_dir=os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_perspective'),
-            )
+            # corrected_page, binary, _ = correct_perspective(
+            #     page,
+            #     debug=self.debug,
+            #     debug_output_dir=os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_perspective'),
+            # )
+
+            binary = warp_binary_by_local_angles(page)
 
             if self.debug:
                 os.makedirs(DEBUG_IMAGES_DIR, exist_ok=True)
@@ -562,12 +564,17 @@ class LineSegmentation:
                     white_image[y, x] = (0, 0, 0)
 
                 crop = crop_line_rectangle(white_image, pixels, debug=False, padding=0)
+                if crop is None or crop.size == 0:
+                    line_pixels.pop()
+                    continue
                 line_crops.append(crop)
 
             # Шаг 11: сохраняем прямоугольные изображения строк.
             save_dir = "output/lines"
             os.makedirs(save_dir, exist_ok=True)
             for line_idx, crop in enumerate(line_crops):
+                if crop is None or crop.size == 0:
+                    continue
                 filename = os.path.join(save_dir, f"line_{line_idx:03d}.jpg")
                 cv2.imwrite(filename, crop)
             lines_pixels.extend(line_pixels)
@@ -578,10 +585,10 @@ class LineSegmentation:
             #         file.write(f'Количество задетекшеных строк в странице {idx} {len(line_pixels)}\n')
 
             if self.debug:
-                if len(corrected_page.shape) == 2:
-                    vis_image = cv2.cvtColor(corrected_page, cv2.COLOR_GRAY2BGR)
+                if len(binary.shape) == 2:
+                    vis_image = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
                 else:
-                    vis_image = corrected_page.copy()
+                    vis_image = binary.copy()
 
                 random.seed(42)
                 colors = []
@@ -602,7 +609,7 @@ class LineSegmentation:
 
 
 if __name__ == "__main__":
-    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/34/reuse12/ФотоТемное/3.JPG'
+    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/50_504.JPG'
     lineSegmentation = LineSegmentation()
 
     _, _ = lineSegmentation.segment_lines(image_path=image_path)
