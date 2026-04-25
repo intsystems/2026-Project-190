@@ -1,7 +1,7 @@
 import heapq
 import os
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import cv2
 import matplotlib.pyplot as plt
@@ -14,68 +14,25 @@ from processing import (
     warp_binary_by_local_angles,
     warp_binary_by_local_angles_bijection,
 )
-from scipy.interpolate import UnivariateSpline
-from scipy.ndimage import gaussian_filter1d, median_filter
-from scipy.signal import find_peaks, peak_widths, savgol_filter
-
 
 # Общая папка для всех отладочных изображений метода.
 DEBUG_IMAGES_DIR = "debug_images"
 
-# Подпапка только для debug-графиков HPP-профиля и разных вариантов его сглаживания.
-HPP_DEBUG_DIR = os.path.join(DEBUG_IMAGES_DIR, "hpp")
-
-# Размер окна скользящего среднего в debug-сравнении сглаживаний HPP.
-# Чем больше окно, тем сильнее сглаживаются шумные пики, но тем сильнее размываются границы строк.
-HPP_MOVING_AVERAGE_WINDOW = 21
-
-# Sigma гауссова фильтра в debug-сравнении сглаживаний HPP.
-# Большая sigma делает профиль плавнее и устойчивее к шуму, но может склеивать близкие строки.
-HPP_GAUSSIAN_SIGMA_DEBUG = 3.0
-
-# Размер окна медианного фильтра в debug-сравнении сглаживаний HPP.
-# Медиана хорошо убирает одиночные выбросы, но при слишком большом окне съедает тонкие строки.
-HPP_MEDIAN_FILTER_SIZE = 21
-
-# Размер окна Savitzky-Golay фильтра в debug-сравнении сглаживаний HPP.
-# Фильтр сглаживает профиль, стараясь сохранить форму пиков лучше, чем простое среднее.
-HPP_SAVGOL_WINDOW = 31
-
-# Степень полинома Savitzky-Golay фильтра.
-# Чем выше степень, тем гибче аппроксимация, но тем выше риск подстроиться под шум.
-HPP_SAVGOL_POLYORDER = 3
-
-# Коэффициент гладкости сплайна в debug-сравнении HPP.
-# Больше значение -- более гладкая кривая; меньше -- сплайн ближе повторяет исходный шумный профиль.
-HPP_SPLINE_SMOOTH_FACTOR = 0.03
-
-# Размер морфологического ядра для debug-сглаживания HPP-профиля.
+# Размер морфологического ядра для сглаживания HPP-профиля.
 # Используется как 1D open/close по профилю: помогает закрывать мелкие провалы и убирать мелкие пики.
 HPP_MORPH_KERNEL_SIZE = 21
 
-# Sigma гауссова сглаживания перед основным Otsu-порогом в _find_line_regions.
-# Это уже рабочий гиперпараметр сегментации: больше sigma дает стабильнее порог, но может склеить строки.
-HPP_OTSU_SMOOTH_SIGMA = 1.5
+# Цена черного пикселя для A*: текст дорогой, но проходимый, если другого пути нет.
+HPP_TEXT_PIXEL_COST = 10.0
 
-# Минимальная высота найденного TEXT-региона в пикселях.
-# Все сегменты ниже этого размера считаются шумом/ложными строками и удаляются.
-HPP_MIN_TEXT_REGION_HEIGHT = 4
+# Цена границы текста для A*: помогает шву обходить контуры букв, а не резать их по краю.
+HPP_GRADIENT_COST = 0.5
 
-# Максимальный вертикальный gap между соседними TEXT-регионами, при котором их склеиваем.
-# Нужен, чтобы маленькая дырка внутри одной строки не разбивала ее на две разные строки.
-HPP_MAX_GAP_TO_MERGE = 3
+# Расширение HPP-региона строки вверх для жесткого запрета A*.
+HPP_BLOCK_REGION_TOP_PADDING = 2
 
-# Размер 1D-морфологического closing по TEXT/GAP маске после Otsu.
-# Закрывает маленькие дырки внутри строк; слишком большое значение может склеивать соседние строки.
-HPP_CLOSING_STRUCTURE_SIZE = 5
-
-# Padding вокруг найденных HPP-регионов при повторном поиске строк.
-# Нужен, чтобы первый проход удалил не только центр строки, но и близкие пиксели букв/шум вокруг нее.
-HPP_SECOND_PASS_REGION_PADDING = 15
-
-# Порог непроходимой энергии для A*.
-# Черный текст дает около 2550, HPP-регионы строк получают еще +5000, поэтому такие клетки считаем стеной.
-HPP_A_STAR_BLOCKED_ENERGY = 2000.0
+# Расширение HPP-региона строки вниз для жесткого запрета A*.
+HPP_BLOCK_REGION_BOTTOM_PADDING = 5
 
 
 class LineSegmentation:
@@ -84,8 +41,6 @@ class LineSegmentation:
     """
 
     def __init__(self,
-                 threshold: float = 0.4,
-                 gaussian_sigma: float = 1.0,
                  debug: bool = True,
                  page_yolo_model: Any = None,
                  use_warp_binary_by_local_angles: bool = True,
@@ -94,8 +49,6 @@ class LineSegmentation:
         Короткое описание:
             задает параметры сегментации строк и режим сохранения отладки.
         Вход:
-            threshold: float -- порог строки по нормализованному HPP.
-            gaussian_sigma: float -- сигма гауссова сглаживания HPP.
             debug: bool -- сохранять отладочные файлы в debug_images.
             page_yolo_model: Any -- заранее загруженная YOLO-модель поиска страниц.
             use_warp_binary_by_local_angles: bool -- True: local warp, False: global correct_perspective.
@@ -103,8 +56,6 @@ class LineSegmentation:
         Выход:
             None
         """
-        self.threshold = threshold
-        self.gaussian_sigma = gaussian_sigma
         self.debug = debug
         self.page_yolo_model = page_yolo_model
         self.use_warp_binary_by_local_angles = use_warp_binary_by_local_angles
@@ -124,29 +75,20 @@ class LineSegmentation:
     def _normalize_hpp(self, hpp: np.ndarray, method: str = 'minmax') -> np.ndarray:
         """
         Короткое описание:
-            нормализует HPP minmax методом или после гауссова сглаживания.
+            нормализует HPP minmax методом.
         Вход:
             hpp: np.ndarray -- исходный горизонтальный проекционный профиль.
-            method: str -- метод нормализации: minmax или gaussian.
+            method: str -- метод нормализации, сейчас поддерживается только minmax.
         Выход:
             np.ndarray -- нормализованный профиль со значениями от 0 до 1.
         """
-        if method == 'minmax':
-            min_val = np.min(hpp)
-            max_val = np.max(hpp)
-            if max_val - min_val == 0:
-                return np.zeros_like(hpp)
-            return (hpp - min_val) / (max_val - min_val)
-        elif method == 'gaussian':
-            from scipy.ndimage import gaussian_filter1d
-            smoothed = gaussian_filter1d(hpp, sigma=self.gaussian_sigma)
-            min_val = np.min(smoothed)
-            max_val = np.max(smoothed)
-            if max_val - min_val == 0:
-                return np.zeros_like(smoothed)
-            return (smoothed - min_val) / (max_val - min_val)
-        else:
+        if method != 'minmax':
             raise ValueError(f"Неизвестный метод нормализации: {method}")
+        min_val = np.min(hpp)
+        max_val = np.max(hpp)
+        if max_val - min_val == 0:
+            return np.zeros_like(hpp)
+        return (hpp - min_val) / (max_val - min_val)
 
     def _normalize_profile_for_debug(self, profile: np.ndarray) -> np.ndarray:
         """
@@ -179,22 +121,6 @@ class LineSegmentation:
             window -= 1
         return max(3, window)
 
-    def _moving_average_profile(self, profile: np.ndarray, window_size: int) -> np.ndarray:
-        """
-        Короткое описание:
-            сглаживает HPP скользящим средним.
-        Вход:
-            profile: np.ndarray -- исходный HPP.
-            window_size: int -- размер окна.
-        Выход:
-            np.ndarray -- сглаженный профиль.
-        """
-        window_size = self._make_odd_window(window_size, len(profile))
-        pad = window_size // 2
-        padded = np.pad(profile.astype(np.float32), pad_width=pad, mode='edge')
-        kernel = np.ones(window_size, dtype=np.float32) / float(window_size)
-        return np.convolve(padded, kernel, mode='valid').astype(np.float32)
-
     def _morphological_smooth_profile(self, profile: np.ndarray, kernel_size: int) -> np.ndarray:
         """
         Короткое описание:
@@ -218,133 +144,12 @@ class LineSegmentation:
         smoothed = opened.reshape(-1).astype(np.float32) / 255.0
         return smoothed * (profile_max - profile_min) + profile_min
 
-    def _compute_hpp_smoothing_debug_profiles(self, hpp: np.ndarray) -> Dict[str, np.ndarray]:
-        """
-        Короткое описание:
-            считает несколько вариантов сглаживания HPP только для отладки.
-        Вход:
-            hpp: np.ndarray -- исходный горизонтальный проекционный профиль.
-        Выход:
-            Dict[str, np.ndarray] -- имя метода и сглаженный профиль.
-        """
-        hpp = hpp.astype(np.float32)
-        profile_length = len(hpp)
-        savgol_window = self._make_odd_window(HPP_SAVGOL_WINDOW, profile_length)
-        median_size = self._make_odd_window(HPP_MEDIAN_FILTER_SIZE, profile_length)
-
-        profiles = {
-            "original": hpp,
-            "moving_average": self._moving_average_profile(hpp, HPP_MOVING_AVERAGE_WINDOW),
-            "gaussian": gaussian_filter1d(hpp, sigma=HPP_GAUSSIAN_SIGMA_DEBUG).astype(np.float32),
-            "median": median_filter(hpp, size=median_size, mode='nearest').astype(np.float32),
-            "morphological": self._morphological_smooth_profile(hpp, HPP_MORPH_KERNEL_SIZE),
-        }
-
-        if savgol_window > HPP_SAVGOL_POLYORDER:
-            profiles["savitzky_golay"] = savgol_filter(
-                hpp,
-                window_length=savgol_window,
-                polyorder=HPP_SAVGOL_POLYORDER,
-                mode='nearest',
-            ).astype(np.float32)
-
-        if profile_length >= 4 and float(np.var(hpp)) > 1e-9:
-            x = np.arange(profile_length, dtype=np.float32)
-            smoothing_factor = float(profile_length) * float(np.var(hpp)) * HPP_SPLINE_SMOOTH_FACTOR
-            spline = UnivariateSpline(x, hpp, s=smoothing_factor)
-            profiles["spline"] = spline(x).astype(np.float32)
-
-        return profiles
-
-    def _save_hpp_smoothing_debug(self, hpp: np.ndarray, page_idx: int) -> None:
-        """
-        Короткое описание:
-            сохраняет debug сравнение методов сглаживания HPP.
-        Вход:
-            hpp: np.ndarray -- исходный горизонтальный проекционный профиль.
-            page_idx: int -- номер страницы.
-        Выход:
-            None
-        """
-        os.makedirs(HPP_DEBUG_DIR, exist_ok=True)
-        profiles = self._compute_hpp_smoothing_debug_profiles(hpp)
-
-        fig, ax = plt.subplots(1, 1, figsize=(14, 7))
-        colors = {
-            "original": "black",
-            "moving_average": "tab:blue",
-            "gaussian": "tab:orange",
-            "median": "tab:green",
-            "savitzky_golay": "tab:red",
-            "spline": "tab:purple",
-            "morphological": "tab:brown",
-        }
-        for name, profile in profiles.items():
-            normalized = self._normalize_profile_for_debug(profile)
-            linewidth = 2.2 if name != "original" else 1.0
-            alpha = 0.9 if name != "original" else 0.45
-            ax.plot(
-                normalized,
-                label=name,
-                color=colors.get(name),
-                linewidth=linewidth,
-                alpha=alpha,
-            )
-            single_fig, single_ax = plt.subplots(1, 1, figsize=(14, 5))
-            single_ax.plot(normalized, color=colors.get(name), linewidth=2.2)
-            single_ax.axhline(
-                self.threshold,
-                color='gray',
-                linestyle='--',
-                linewidth=1.5,
-                label=f'threshold={self.threshold:.2f}',
-            )
-            single_ax.set_title(f'HPP smoothing debug: {name}')
-            single_ax.set_xlabel('Номер строки y')
-            single_ax.set_ylabel('Нормализованное значение профиля')
-            single_ax.grid(True, linestyle='--', alpha=0.5)
-            single_ax.legend(loc='upper right')
-            single_fig.tight_layout()
-            single_fig.savefig(os.path.join(HPP_DEBUG_DIR, f'page_{page_idx:03d}_hpp_smoothing_{name}.jpg'))
-            plt.close(single_fig)
-
-        ax.axhline(self.threshold, color='gray', linestyle='--', linewidth=1.5, label=f'threshold={self.threshold:.2f}')
-        ax.set_title('HPP smoothing debug: сравнение методов сглаживания')
-        ax.set_xlabel('Номер строки y')
-        ax.set_ylabel('Нормализованное значение профиля')
-        ax.grid(True, linestyle='--', alpha=0.5)
-        ax.legend(loc='upper right')
-        fig.tight_layout()
-        fig.savefig(os.path.join(HPP_DEBUG_DIR, f'page_{page_idx:03d}_hpp_smoothing_comparison.jpg'))
-        plt.close(fig)
-
-        csv_path = os.path.join(HPP_DEBUG_DIR, f'page_{page_idx:03d}_hpp_smoothing_profiles.csv')
-        with open(csv_path, 'w', encoding='utf-8') as file:
-            names = list(profiles.keys())
-            file.write('y,' + ','.join(names) + '\n')
-            for y_idx in range(len(hpp)):
-                values = [self._normalize_profile_for_debug(profiles[name])[y_idx] for name in names]
-                file.write(str(y_idx) + ',' + ','.join(f'{float(value):.6f}' for value in values) + '\n')
-
-        summary_path = os.path.join(HPP_DEBUG_DIR, f'page_{page_idx:03d}_hpp_smoothing_summary.txt')
-        with open(summary_path, 'w', encoding='utf-8') as file:
-            file.write('Debug сглаживания горизонтального проекционного профиля HPP\n')
-            file.write(f'profile_length={len(hpp)}\n')
-            file.write(f'threshold={self.threshold}\n')
-            file.write(f'moving_average_window={HPP_MOVING_AVERAGE_WINDOW}\n')
-            file.write(f'gaussian_sigma={HPP_GAUSSIAN_SIGMA_DEBUG}\n')
-            file.write(f'median_filter_size={HPP_MEDIAN_FILTER_SIZE}\n')
-            file.write(f'savitzky_golay_window={HPP_SAVGOL_WINDOW}\n')
-            file.write(f'savitzky_golay_polyorder={HPP_SAVGOL_POLYORDER}\n')
-            file.write(f'spline_smooth_factor={HPP_SPLINE_SMOOTH_FACTOR}\n')
-            file.write(f'morph_kernel_size={HPP_MORPH_KERNEL_SIZE}\n')
-
     def _find_line_regions(self,
                            normalized_hpp: np.ndarray,
                            debug_filename: Optional[str] = None) -> List[Tuple[int, int]]:
         """
         Короткое описание:
-            находит области строк по нормализованному HPP.
+            находит области строк как плато локальных максимумов после морфологического сглаживания HPP.
         Вход:
             normalized_hpp: np.ndarray -- нормализованный профиль со значениями от 0 до 1.
             debug_filename: Optional[str] -- имя файла для debug-графика HPP.
@@ -356,89 +161,60 @@ class LineSegmentation:
         if float(np.max(normalized_hpp)) <= 1e-9:
             return []
 
-        # Otsu-модель: считаем, что HPP состоит из смеси двух классов TEXT/GAP.
-        smoothed_hpp = gaussian_filter1d(
+        # Шаг 1: сглаживаем HPP только морфологией, без Otsu и ручных порогов.
+        smoothed_hpp = self._morphological_smooth_profile(
             normalized_hpp.astype(np.float32),
-            sigma=HPP_OTSU_SMOOTH_SIGMA,
+            HPP_MORPH_KERNEL_SIZE,
         )
-        profile_u8 = np.clip(smoothed_hpp * 255.0, 0, 255).astype(np.uint8)
-        otsu_threshold, _ = cv2.threshold(
-            profile_u8,
+        smoothed_u8 = np.clip(
+            self._normalize_profile_for_debug(smoothed_hpp) * 255.0,
             0,
             255,
-            cv2.THRESH_BINARY + cv2.THRESH_OTSU,
-        )
-        text_rows = profile_u8 > otsu_threshold
+        ).astype(np.uint8)
 
-        # Закрываем мелкие дырки внутри строки в 1D-маске.
-        kernel_size = max(1, int(HPP_CLOSING_STRUCTURE_SIZE))
-        if kernel_size > 1:
-            mask_u8 = text_rows.astype(np.uint8).reshape(1, -1) * 255
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, 1))
-            mask_u8 = cv2.morphologyEx(mask_u8, cv2.MORPH_CLOSE, kernel)
-            text_rows = mask_u8.reshape(-1) > 0
-
-        if not np.any(text_rows):
-            return []
-
+        # Шаг 2: идем по сглаженному профилю и ищем форму "подъем -> плато максимума -> спад".
         regions = []
-        in_region = False
-        start = 0
-        for i, is_text in enumerate(text_rows):
-            if is_text and not in_region:
-                start = i
-                in_region = True
-            elif not is_text and in_region:
-                regions.append((start, i - 1))
-                in_region = False
-        if in_region:
-            regions.append((start, len(text_rows) - 1))
+        plateau_rows = np.zeros_like(smoothed_u8, dtype=bool)
+        row_idx = 0
+        while row_idx < len(smoothed_u8):
+            plateau_start = row_idx
+            plateau_value = int(smoothed_u8[row_idx])
+            while row_idx + 1 < len(smoothed_u8) and int(smoothed_u8[row_idx + 1]) == plateau_value:
+                row_idx += 1
+            plateau_end = row_idx
 
-        # Удаляем короткие ложные сегменты.
-        regions = [
-            (start, end)
-            for start, end in regions
-            if end - start + 1 >= HPP_MIN_TEXT_REGION_HEIGHT
-        ]
+            has_left_rise = plateau_start > 0 and int(smoothed_u8[plateau_start - 1]) < plateau_value
+            has_right_fall = plateau_end + 1 < len(smoothed_u8) and int(smoothed_u8[plateau_end + 1]) < plateau_value
+            if plateau_value > 0 and has_left_rise and has_right_fall:
+                regions.append((plateau_start, plateau_end))
+                plateau_rows[plateau_start:plateau_end + 1] = True
 
-        merged = []
-        for reg in regions:
-            if not merged:
-                merged.append(reg)
-            else:
-                prev_start, prev_end = merged[-1]
-                curr_start, curr_end = reg
-                if curr_start - prev_end <= HPP_MAX_GAP_TO_MERGE:
-                    merged[-1] = (prev_start, curr_end)
-                else:
-                    merged.append(reg)
+            row_idx += 1
+
         if self.debug and debug_filename is not None:
             self._save_hpp_regions_debug(
                 normalized_hpp,
                 smoothed_hpp,
-                text_rows,
-                merged,
-                otsu_threshold,
+                plateau_rows,
+                regions,
                 debug_filename,
             )
-        return merged
+        return regions
 
     def _save_hpp_regions_debug(self,
                                 normalized_hpp: np.ndarray,
                                 smoothed_hpp: np.ndarray,
-                                text_rows: np.ndarray,
+                                plateau_rows: np.ndarray,
                                 regions: List[Tuple[int, int]],
-                                otsu_threshold: float,
                                 debug_filename: str) -> None:
         """
         Короткое описание:
-            сохраняет debug-график HPP-регионов для первого или повторного прохода.
+            сохраняет debug-график HPP-регионов, найденных как плато локальных максимумов.
         Вход:
             normalized_hpp: np.ndarray -- исходный нормализованный HPP.
-            smoothed_hpp: np.ndarray -- сглаженный HPP перед Otsu.
-            text_rows: np.ndarray -- бинарная TEXT/GAP маска.
+            smoothed_hpp: np.ndarray -- HPP после морфологического сглаживания.
+            plateau_rows: np.ndarray -- маска строк, попавших в плато локальных максимумов.
             regions: List[Tuple[int, int]] -- найденные регионы.
-            otsu_threshold: float -- Otsu-порог в шкале 0..255.
             debug_filename: str -- имя debug-файла.
         Выход:
             None
@@ -447,123 +223,70 @@ class LineSegmentation:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
         x = np.arange(len(normalized_hpp))
         ax1.plot(x, normalized_hpp, color='tab:blue', linewidth=1.0, label='normalized_hpp')
-        ax1.plot(x, smoothed_hpp, color='tab:orange', linewidth=2.0, label='gaussian_smoothed_hpp')
-        ax1.axhline(float(otsu_threshold) / 255.0, color='tab:red', linestyle='--', label='otsu_threshold')
+        ax1.plot(x, smoothed_hpp, color='tab:orange', linewidth=2.0, label='morphological_smoothed_hpp')
         for start, end in regions:
             ax1.axvspan(start, end, color='tab:green', alpha=0.18)
-        ax1.set_title('HPP regions debug')
+        ax1.set_title('HPP plateau regions debug')
         ax1.set_ylabel('profile value')
         ax1.grid(True, linestyle='--', alpha=0.5)
         ax1.legend(loc='upper right')
 
-        ax2.plot(x, text_rows.astype(np.float32), color='tab:green', linewidth=2.0)
+        ax2.plot(x, plateau_rows.astype(np.float32), color='tab:green', linewidth=2.0)
         for start, end in regions:
             ax2.axvspan(start, end, color='tab:green', alpha=0.18)
         ax2.set_xlabel('Номер строки y')
-        ax2.set_ylabel('TEXT mask')
+        ax2.set_ylabel('plateau mask')
         ax2.grid(True, linestyle='--', alpha=0.5)
 
         fig.tight_layout()
         fig.savefig(os.path.join(DEBUG_IMAGES_DIR, debug_filename))
         plt.close(fig)
 
-    def _find_line_regions_second_pass(self,
-                                       binary: np.ndarray,
-                                       line_regions: List[Tuple[int, int]],
-                                       page_idx: int) -> List[Tuple[int, int]]:
-        """
-        Короткое описание:
-            повторно ищет HPP-регионы после удаления уже найденных строк с padding.
-        Вход:
-            binary: np.ndarray -- бинарное изображение страницы.
-            line_regions: List[Tuple[int, int]] -- регионы первого HPP-прохода.
-            page_idx: int -- индекс страницы для debug-файлов.
-        Выход:
-            List[Tuple[int, int]] -- объединенный список регионов первого и второго прохода.
-        """
-        # Шаг 1: удаляем уже найденные строки, расширяя область на padding.
-        remaining_binary = binary.copy()
-        height = remaining_binary.shape[0]
-        padding = max(0, int(HPP_SECOND_PASS_REGION_PADDING))
-        removed_regions_with_padding = []
-        for start, end in line_regions:
-            y0 = max(0, int(start) - padding)
-            y1 = min(height - 1, int(end) + padding)
-            removed_regions_with_padding.append((y0, y1))
-            remaining_binary[y0:y1 + 1, :] = 255
-        cv2.imwrite(os.path.join(DEBUG_IMAGES_DIR, f'remaining_binary_{page_idx}.jpg'), remaining_binary)
-        # Шаг 2: строим повторный HPP по оставшемуся тексту.
-        second_hpp = self._horizontal_projection_profile(remaining_binary)
-        second_norm_hpp = self._normalize_hpp(second_hpp, method='minmax')
-        second_regions = self._find_line_regions(
-            second_norm_hpp,
-            debug_filename=f'page_{page_idx:03d}_hpp_second_pass_bases.jpg',
-        )
-
-        # Шаг 3: объединяем регионы и сортируем сверху вниз.
-        merged_regions = sorted(
-            line_regions + second_regions,
-            key=lambda region: region[0],
-        )
-
-        if self.debug:
-            second_mask = np.zeros(binary.shape[:2], dtype=np.uint8)
-            for start, end in second_regions:
-                second_mask[start:end + 1, :] = 255
-            cv2.imwrite(
-                os.path.join(DEBUG_IMAGES_DIR, f'page_{page_idx:03d}_hpp_second_pass_remaining.jpg'),
-                remaining_binary,
-            )
-            cv2.imwrite(
-                os.path.join(DEBUG_IMAGES_DIR, f'page_{page_idx:03d}_hpp_second_pass_new_regions_mask.jpg'),
-                second_mask,
-            )
-            with open(
-                os.path.join(DEBUG_IMAGES_DIR, f'page_{page_idx:03d}_hpp_second_pass_debug.txt'),
-                'w',
-                encoding='utf-8',
-            ) as file:
-                file.write(f'padding_only_for_second_vote={padding}\n')
-                file.write(f'first_pass_regions_without_padding={line_regions}\n')
-                file.write(f'removed_regions_with_padding={removed_regions_with_padding}\n')
-                file.write(f'second_pass_regions_without_padding={second_regions}\n')
-                file.write(f'final_line_regions_without_padding={merged_regions}\n')
-                file.write('debug_images:\n')
-                file.write(f'- page_{page_idx:03d}_hpp_second_pass_remaining.jpg: binary after removing first-pass regions with padding\n')
-                file.write(f'- page_{page_idx:03d}_hpp_second_pass_new_regions_mask.jpg: only regions found on second pass\n')
-                file.write(f'- page_{page_idx:03d}_hpp_second_pass_bases.jpg: second-pass HPP profile and TEXT mask\n')
-
-        return merged_regions
-
     def _compute_energy_matrix(self,
                                binary: np.ndarray,
                                line_regions: List[Tuple[int, int]]) -> np.ndarray:
         """
         Короткое описание:
-            строит энергетическую матрицу для поиска швов между строками.
+            строит мягкую энергетическую матрицу для поиска швов между строками.
         Вход:
             binary: np.ndarray -- бинарное изображение, где текст равен 0, фон равен 255.
             line_regions: List[Tuple[int, int]] -- области строк по HPP.
         Выход:
-            np.ndarray -- энергетическая матрица размера H x W.
+            np.ndarray -- мягкая энергетическая матрица размера H x W.
         """
-        H, W = binary.shape
-        energy = (255 - binary).astype(np.float32) * 10.0
+        energy = (255 - binary).astype(np.float32) * HPP_TEXT_PIXEL_COST
 
         gray = binary if binary.dtype == np.uint8 else binary.astype(np.uint8)
         grad_x = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)
         grad_y = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)
         gradient = np.sqrt(grad_x**2 + grad_y**2)
-        energy += 0.5 * gradient
-
-        for start, end in line_regions:
-            start = max(0, start - 2)
-            end = min(H - 1, end + 5)
-            energy[start:end+1, :] += 5000.0
+        energy += HPP_GRADIENT_COST * gradient
 
         energy = np.nan_to_num(energy, nan=0.0, posinf=1e9, neginf=0.0)
 
         return energy
+
+    def _build_hpp_blocked_mask(self,
+                                shape: Tuple[int, int],
+                                line_regions: List[Tuple[int, int]]) -> np.ndarray:
+        """
+        Короткое описание:
+            строит жесткую маску запрещенных зон A* по HPP-регионам строк.
+        Вход:
+            shape: Tuple[int, int] -- размер изображения H x W.
+            line_regions: List[Tuple[int, int]] -- области строк по HPP.
+        Выход:
+            np.ndarray -- bool-маска, где True означает запрет для A*.
+        """
+        # Шаг 1: создаем пустую маску и отмечаем сами HPP-регионы с небольшим padding.
+        height, width = shape
+        blocked_mask = np.zeros((height, width), dtype=bool)
+        for start, end in line_regions:
+            y0 = max(0, int(start) - HPP_BLOCK_REGION_TOP_PADDING)
+            y1 = min(height - 1, int(end) + HPP_BLOCK_REGION_BOTTOM_PADDING)
+            blocked_mask[y0:y1 + 1, :] = True
+
+        return blocked_mask
 
     def _compute_horizontal_min_energy_path_matrix(self, energy: np.ndarray) -> np.ndarray:
         """
@@ -633,21 +356,26 @@ class LineSegmentation:
 
         return min_energy, parent
 
-    def _find_seam_a_star(self, energy: np.ndarray, start_y: int) -> List[int]:
+    def _find_seam_a_star(self,
+                          energy: np.ndarray,
+                          blocked_mask: np.ndarray,
+                          start_y: int) -> List[int]:
         """
         Короткое описание:
-            находит горизонтальный шов алгоритмом A* от левого до правого края, обходя запрещенные клетки.
+            находит горизонтальный шов A* между строками: HPP-регионы запрещены, текст только дорогой.
         Вход:
             energy: np.ndarray -- энергетическая матрица размера H x W.
-            start_y: int -- строка старта шва на левом крае изображения.
+            blocked_mask: np.ndarray -- True там, где A* не имеет права проходить.
+            start_y: int -- строка старта шва между двумя HPP-регионами.
         Выход:
             List[int] -- координаты y шва для каждого столбца x.
         """
         H, W = energy.shape
+        if blocked_mask.shape != energy.shape:
+            return []
         if not (0 <= start_y < H):
             return []
 
-        blocked = energy >= HPP_A_STAR_BLOCKED_ENERGY
         directions = [-1, 0, 1]
 
         came_from = {}
@@ -657,19 +385,19 @@ class LineSegmentation:
         start = (start_y, 0)
         goal_x = W - 1
 
-        # Шаг 1: если старт попал в запрещенную клетку, ищем ближайшую разрешенную строку в первом столбце.
-        if blocked[start_y, 0]:
-            free_ys = np.where(~blocked[:, 0])[0]
+        # Шаг 1: если старт попал в HPP-регион, сдвигаем его к ближайшей разрешенной строке.
+        if blocked_mask[start_y, 0]:
+            free_ys = np.where(~blocked_mask[:, 0])[0]
             if len(free_ys) == 0:
                 return []
             start_y = int(free_ys[np.argmin(np.abs(free_ys - start_y))])
             start = (start_y, 0)
 
-        g_score[start] = 0
-        f_score[start] = 0
+        g_score[start] = float(energy[start_y, 0])
+        f_score[start] = float(energy[start_y, 0])
 
         open_set = []
-        heapq.heappush(open_set, (0, start_y, 0))
+        heapq.heappush(open_set, (float(energy[start_y, 0]), start_y, 0))
 
         visited = set()
 
@@ -693,8 +421,8 @@ class LineSegmentation:
                 ny = y + dy
                 nx = x + 1
                 if 0 <= ny < H and nx < W:
-                    # Шаг 2: запрещаем A* проходить через текст и HPP-регионы с высокой энергией.
-                    if blocked[ny, nx]:
+                    # Шаг 2: HPP-регионы строк являются стеной, но черные пиксели текста только повышают цену.
+                    if blocked_mask[ny, nx]:
                         continue
                     neighbor = (ny, nx)
                     tentative_g = g_score.get(current, np.inf) + energy[ny, nx]
@@ -714,7 +442,7 @@ class LineSegmentation:
         with open(warning_path, 'a', encoding='utf-8') as file:
             file.write(
                 f"Warning: A* не нашел путь для start_y={start_y}, "
-                f"blocked_energy={HPP_A_STAR_BLOCKED_ENERGY}\n"
+                "HPP blocked mask закрыла проход между строками\n"
             )
         return []
 
@@ -1013,8 +741,6 @@ class LineSegmentation:
             norm_hpp = self._normalize_hpp(hpp, method='minmax')
 
             if self.debug:
-                self._save_hpp_smoothing_debug(hpp, idx)
-
                 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
 
                 ax1.plot(hpp, color='blue')
@@ -1044,21 +770,22 @@ class LineSegmentation:
                     return lines_pixels, lines_crops, full_class_matrix
                 return []
 
-            # Шаг 4.5: повторный HPP по остаточному изображению после вырезания найденных регионов.
-            # line_regions = self._find_line_regions_second_pass(binary, line_regions, idx)
-
             # Шаг 5: строим энергетическую матрицу для поиска швов.
             energy = self._compute_energy_matrix(binary, line_regions)
+            blocked_mask = self._build_hpp_blocked_mask(binary.shape, line_regions)
 
             if self.debug:
                 energy_debug = cv2.normalize(
                     energy, None, 0, 255, cv2.NORM_MINMAX
                 ).astype(np.uint8)
                 energy_path = os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_energy_matrix.jpg')
+                blocked_path = os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_hpp_blocked_mask.jpg')
                 debug_text_path = os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_debug.txt')
                 cv2.imwrite(energy_path, energy_debug)
+                cv2.imwrite(blocked_path, blocked_mask.astype(np.uint8) * 255)
                 with open(debug_text_path, 'w', encoding='utf-8') as file:
                     file.write(f'Максаимальная энергия {np.max(energy)}\n')
+                    file.write(f'HPP blocked pixels {int(np.sum(blocked_mask))}\n')
 
             _, parent = self._compute_min_energy_path_with_parents(energy)
             parent = parent.astype(np.int32)
@@ -1079,7 +806,7 @@ class LineSegmentation:
             seams = []
             for start_y in start_points:
                 if 0 <= start_y < binary.shape[0]:
-                    seam = self._find_seam_a_star(energy, start_y)
+                    seam = self._find_seam_a_star(energy, blocked_mask, start_y)
                     if seam:
                         seams.append(seam)
 
@@ -1106,9 +833,9 @@ class LineSegmentation:
                                 thickness=2,
                             )
 
-                energy_vis = np.zeros((energy.shape[0], energy.shape[1], 3), dtype=np.uint8)
-                energy_vis[energy > 4000] = [255, 0, 0]
-                vis_seams = cv2.addWeighted(vis_seams, 0.7, energy_vis, 0.3, 0)
+                blocked_vis = np.zeros((blocked_mask.shape[0], blocked_mask.shape[1], 3), dtype=np.uint8)
+                blocked_vis[blocked_mask] = [255, 0, 0]
+                vis_seams = cv2.addWeighted(vis_seams, 0.7, blocked_vis, 0.3, 0)
 
                 seams_path = os.path.join(DEBUG_IMAGES_DIR, f'page_{idx:03d}_seams_a_star.jpg')
                 cv2.imwrite(seams_path, vis_seams)
@@ -1227,7 +954,7 @@ class LineSegmentation:
 
 
 if __name__ == "__main__":
-    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_15.JPG'
+    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2555.jpg'
     lineSegmentation = LineSegmentation(use_warp_binary_by_local_angles = True, use_bijection_warp=False)
 
     _, _ = lineSegmentation.segment_lines(image_path=image_path, return_class_matrix=True)
