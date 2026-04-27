@@ -1,0 +1,5652 @@
+{
+  "label_names": [
+    "1_11.txt",
+    "1_19.txt",
+    "8_109.txt",
+    "2786.txt",
+    "2796.txt"
+  ],
+  "methods": [
+    "hysteresis_two_thresholds",
+    "dp_switch_penalty",
+    "otsu_mixture_threshold"
+  ],
+  "parameters": {
+    "smooth_sigma": 2.0,
+    "min_text_region_height": 4,
+    "max_gap_to_merge": 3,
+    "closing_structure_size": 5,
+    "hysteresis_low_threshold": 0.18,
+    "hysteresis_high_threshold": 0.4,
+    "dp_switch_penalty": 0.18,
+    "otsu_smooth_sigma": 1.5,
+    "max_mask_alignment_shift": 200
+  },
+  "results": {
+    "hysteresis_two_thresholds": {
+      "method_name": "hysteresis_two_thresholds",
+      "average_metrics": {
+        "cross_entropy": 0.6972422412119373,
+        "cross_entropy_text_only": 10.432132852041837,
+        "pixel_accuracy": 0.9340123810237675,
+        "text_pixel_accuracy": 0.0008875770180369602,
+        "alignment_dx": 0.0,
+        "alignment_dy": 0.0,
+        "alignment_intersection": 680303.4,
+        "alignment_intersection_before": 680303.4,
+        "alignment_intersection_gain": 0.0,
+        "alignment_max_shift": 200.0,
+        "alignment_pred_text_pixels": 735543.6,
+        "alignment_target_text_pixels": 744906.0,
+        "target_lines": 36.2,
+        "predicted_lines": 29.0,
+        "correctly_detected_lines": 28.0,
+        "line_precision": 0.9680701754385964,
+        "line_recall": 0.767193675889328,
+        "line_f1": 0.851453634085213,
+        "line_iou_threshold": 0.3
+      },
+      "results": {
+        "1_11": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_11.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_11.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 1.106315663781108,
+            "cross_entropy_text_only": 10.736396675471253,
+            "pixel_accuracy": 0.897040114271017,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 1083989.0,
+            "alignment_intersection_before": 1083989.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 1163683.0,
+            "alignment_target_text_pixels": 1175672.0,
+            "target_lines": 46.0,
+            "predicted_lines": 30.0,
+            "correctly_detected_lines": 26.0,
+            "line_precision": 0.8666666666666667,
+            "line_recall": 0.5652173913043478,
+            "line_f1": 0.6842105263157895,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9916871617183112,
+              "recall": 0.9927663333422891,
+              "f1": 0.9922264540965168,
+              "iou": 0.9845728319917068,
+              "tp": 10937402.0,
+              "fp": 91683.0,
+              "fn": 79694.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 127439.0,
+              "fn": 43029.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 64619.0,
+              "fn": 43372.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25724.0,
+              "fn": 39122.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26540.0,
+              "fn": 37812.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28040.0,
+              "fn": 39095.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24007.0,
+              "fn": 33843.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 30039.0,
+              "fn": 39006.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32289.0,
+              "fn": 33444.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33259.0,
+              "fn": 26849.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22802.0,
+              "fn": 35780.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 31478.0,
+              "fn": 22160.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33399.0,
+              "fn": 32067.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 38216.0,
+              "fn": 34211.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39843.0,
+              "fn": 36312.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 47360.0,
+              "fn": 31808.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 53799.0,
+              "fn": 27903.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18193.0,
+              "fn": 30464.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36592.0,
+              "fn": 29723.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 94264.0,
+              "fn": 22111.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26119.0,
+              "fn": 24964.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25102.0,
+              "fn": 29215.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28976.0,
+              "fn": 26621.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29040.0,
+              "fn": 26464.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33699.0,
+              "fn": 22648.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33189.0,
+              "fn": 28491.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36511.0,
+              "fn": 9640.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 27063.0,
+              "fn": 21032.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 35998.0,
+              "fn": 19781.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39647.0,
+              "fn": 21681.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40437.0,
+              "fn": 18325.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20724.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 18168.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17117.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21236.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20430.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20094.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 18691.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 19393.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17801.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14701.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 15070.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 10849.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17079.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 11825.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21778.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 23743.0
+            }
+          }
+        },
+        "1_19": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_19.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_19.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.7813359280840979,
+            "cross_entropy_text_only": 10.712314786266749,
+            "pixel_accuracy": 0.9273119114543966,
+            "text_pixel_accuracy": 0.002243223148137593,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 671961.0,
+            "alignment_intersection_before": 671961.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 770512.0,
+            "alignment_target_text_pixels": 789489.0,
+            "target_lines": 46.0,
+            "predicted_lines": 38.0,
+            "correctly_detected_lines": 37.0,
+            "line_precision": 0.9736842105263158,
+            "line_recall": 0.8043478260869565,
+            "line_f1": 0.8809523809523809,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9897106140853436,
+              "recall": 0.9913576612481375,
+              "f1": 0.9905334529946396,
+              "iou": 0.9812444562260265,
+              "tp": 11304728.0,
+              "fp": 117528.0,
+              "fn": 98551.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 7910.0,
+              "fn": 26701.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 9904.0,
+              "fn": 25087.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15445.0,
+              "fn": 25691.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20470.0,
+              "fn": 24886.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18323.0,
+              "fn": 24034.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 51857.0,
+              "fn": 21376.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13638.0,
+              "fn": 22965.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17009.0,
+              "fn": 19138.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16021.0,
+              "fn": 22491.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17911.0,
+              "fn": 23769.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20958.0,
+              "fn": 24597.0
+            },
+            "12": {
+              "precision": 0.06446896185032566,
+              "recall": 0.06905552918841955,
+              "f1": 0.06668347120694791,
+              "iou": 0.034491750426702064,
+              "tp": 1455.0,
+              "fp": 21114.0,
+              "fn": 19615.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18109.0,
+              "fn": 17988.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20541.0,
+              "fn": 19531.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24527.0,
+              "fn": 23500.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26605.0,
+              "fn": 15605.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20693.0,
+              "fn": 18285.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16878.0,
+              "fn": 17912.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16240.0,
+              "fn": 21413.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16899.0,
+              "fn": 13758.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20038.0,
+              "fn": 17093.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18712.0,
+              "fn": 21304.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15586.0,
+              "fn": 14876.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20532.0,
+              "fn": 19837.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20042.0,
+              "fn": 8888.0
+            },
+            "26": {
+              "precision": 0.01627020904129338,
+              "recall": 0.01661583762751078,
+              "f1": 0.01644120707596254,
+              "iou": 0.00828874199979016,
+              "tp": 316.0,
+              "fp": 19106.0,
+              "fn": 18702.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20335.0,
+              "fn": 8044.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18502.0,
+              "fn": 20655.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19883.0,
+              "fn": 12573.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18714.0,
+              "fn": 16878.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21464.0,
+              "fn": 17137.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18866.0,
+              "fn": 18374.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21655.0,
+              "fn": 9191.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23757.0,
+              "fn": 20310.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23721.0,
+              "fn": 8916.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25485.0,
+              "fn": 19492.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25137.0,
+              "fn": 2275.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26154.0,
+              "fn": 3829.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14836.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17863.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12956.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14741.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 11593.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 7487.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 9495.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12031.0
+            }
+          }
+        },
+        "8_109": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/8_109.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/8_109.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.22440915048102436,
+            "cross_entropy_text_only": 9.998797732340451,
+            "pixel_accuracy": 0.9776542127267573,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 222793.0,
+            "alignment_intersection_before": 222793.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 246071.0,
+            "alignment_target_text_pixels": 249179.0,
+            "target_lines": 22.0,
+            "predicted_lines": 16.0,
+            "correctly_detected_lines": 16.0,
+            "line_precision": 1.0,
+            "line_recall": 0.7272727272727273,
+            "line_f1": 0.8421052631578948,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9977913560543136,
+              "recall": 0.9980510046017156,
+              "f1": 0.9979211634385624,
+              "iou": 0.9958509520696576,
+              "tp": 11920311.0,
+              "fp": 26386.0,
+              "fn": 23278.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17012.0,
+              "fn": 8776.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14048.0,
+              "fn": 584.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12448.0,
+              "fn": 4035.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14316.0,
+              "fn": 13092.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13664.0,
+              "fn": 11502.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13405.0,
+              "fn": 1779.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14091.0,
+              "fn": 11424.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13757.0,
+              "fn": 17117.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15410.0,
+              "fn": 17464.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17395.0,
+              "fn": 17002.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16929.0,
+              "fn": 17392.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17231.0,
+              "fn": 15382.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18959.0,
+              "fn": 13658.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 9022.0,
+              "fn": 14124.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12835.0,
+              "fn": 13403.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25549.0,
+              "fn": 13817.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14617.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12666.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14003.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12198.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 964.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 4180.0
+            }
+          }
+        },
+        "2786": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2786.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2786.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.7777617575730253,
+            "cross_entropy_text_only": 10.691944912900425,
+            "pixel_accuracy": 0.927344,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 742313.0,
+            "alignment_intersection_before": 742313.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 803875.0,
+            "alignment_target_text_pixels": 810310.0,
+            "target_lines": 44.0,
+            "predicted_lines": 44.0,
+            "correctly_detected_lines": 44.0,
+            "line_precision": 1.0,
+            "line_recall": 1.0,
+            "line_f1": 1.0,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9939267380455291,
+              "recall": 0.994498328371921,
+              "f1": 0.9942124510543842,
+              "iou": 0.9884915080691087,
+              "tp": 11128128.0,
+              "fp": 67997.0,
+              "fn": 61562.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18779.0,
+              "fn": 19900.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19650.0,
+              "fn": 18176.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13125.0,
+              "fn": 19854.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15742.0,
+              "fn": 20979.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16436.0,
+              "fn": 21394.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16049.0,
+              "fn": 15139.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19020.0,
+              "fn": 19141.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17251.0,
+              "fn": 18850.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17243.0,
+              "fn": 22254.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18487.0,
+              "fn": 18849.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17543.0,
+              "fn": 19680.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21061.0,
+              "fn": 19383.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20325.0,
+              "fn": 20046.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14257.0,
+              "fn": 15212.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18773.0,
+              "fn": 21183.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15459.0,
+              "fn": 18973.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18894.0,
+              "fn": 20213.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18830.0,
+              "fn": 14570.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18803.0,
+              "fn": 21823.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15329.0,
+              "fn": 20814.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20723.0,
+              "fn": 17433.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17734.0,
+              "fn": 20893.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19833.0,
+              "fn": 13885.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18222.0,
+              "fn": 17754.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15221.0,
+              "fn": 18013.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17474.0,
+              "fn": 18750.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15673.0,
+              "fn": 22586.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18785.0,
+              "fn": 17502.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13660.0,
+              "fn": 18903.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19115.0,
+              "fn": 17523.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22364.0,
+              "fn": 14708.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17872.0,
+              "fn": 18878.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14033.0,
+              "fn": 18641.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17715.0,
+              "fn": 16803.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21255.0,
+              "fn": 15884.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20629.0,
+              "fn": 16837.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21248.0,
+              "fn": 17629.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19863.0,
+              "fn": 16200.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19082.0,
+              "fn": 15316.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22953.0,
+              "fn": 13660.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19057.0,
+              "fn": 18191.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21192.0,
+              "fn": 19294.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19808.0,
+              "fn": 19843.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19308.0,
+              "fn": 18751.0
+            }
+          }
+        },
+        "2796": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2796.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2796.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.5963887061404309,
+            "cross_entropy_text_only": 10.021210153230312,
+            "pixel_accuracy": 0.9407116666666666,
+            "text_pixel_accuracy": 0.002194661942047208,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 680461.0,
+            "alignment_intersection_before": 680461.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 693577.0,
+            "alignment_target_text_pixels": 699880.0,
+            "target_lines": 23.0,
+            "predicted_lines": 17.0,
+            "correctly_detected_lines": 17.0,
+            "line_precision": 1.0,
+            "line_recall": 0.7391304347826086,
+            "line_f1": 0.85,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9982824806749225,
+              "recall": 0.9988393043613696,
+              "f1": 0.9985608148932811,
+              "iou": 0.9971257663408377,
+              "tp": 11287004.0,
+              "fp": 19419.0,
+              "fn": 13116.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 59461.0,
+              "fn": 50672.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 43337.0,
+              "fn": 37351.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29552.0,
+              "fn": 27306.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29648.0,
+              "fn": 17323.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34141.0,
+              "fn": 34142.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36722.0,
+              "fn": 30349.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36279.0,
+              "fn": 24649.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32773.0,
+              "fn": 39259.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36356.0,
+              "fn": 33526.0
+            },
+            "10": {
+              "precision": 0.04384562685544645,
+              "recall": 0.043063810698665474,
+              "f1": 0.04345120226308345,
+              "iou": 0.022208085130993004,
+              "tp": 1536.0,
+              "fp": 33496.0,
+              "fn": 34132.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 50203.0,
+              "fn": 31078.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 42734.0,
+              "fn": 28170.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 35167.0,
+              "fn": 30245.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40888.0,
+              "fn": 27218.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33482.0,
+              "fn": 20481.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 77835.0,
+              "fn": 29401.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39967.0,
+              "fn": 6949.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 22854.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 35884.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 32036.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 34010.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 33307.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 38002.0
+            }
+          }
+        }
+      }
+    },
+    "dp_switch_penalty": {
+      "method_name": "dp_switch_penalty",
+      "average_metrics": {
+        "cross_entropy": 0.6900558250842914,
+        "cross_entropy_text_only": 10.346617573944537,
+        "pixel_accuracy": 0.9346921991391618,
+        "text_pixel_accuracy": 0.009032021888008189,
+        "alignment_dx": 0.0,
+        "alignment_dy": 0.0,
+        "alignment_intersection": 680397.8,
+        "alignment_intersection_before": 680397.8,
+        "alignment_intersection_gain": 0.0,
+        "alignment_max_shift": 200.0,
+        "alignment_pred_text_pixels": 735645.2,
+        "alignment_target_text_pixels": 744906.0,
+        "target_lines": 36.2,
+        "predicted_lines": 23.2,
+        "correctly_detected_lines": 21.8,
+        "line_precision": 0.9009920634920634,
+        "line_recall": 0.5703557312252964,
+        "line_f1": 0.675709953129308,
+        "line_iou_threshold": 0.3
+      },
+      "results": {
+        "1_11": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_11.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_11.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 1.0784011655854109,
+            "cross_entropy_text_only": 10.44686188862486,
+            "pixel_accuracy": 0.8996403441777946,
+            "text_pixel_accuracy": 0.02697010730884124,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 1084123.0,
+            "alignment_intersection_before": 1084123.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 1163821.0,
+            "alignment_target_text_pixels": 1175672.0,
+            "target_lines": 46.0,
+            "predicted_lines": 18.0,
+            "correctly_detected_lines": 16.0,
+            "line_precision": 0.8888888888888888,
+            "line_recall": 0.34782608695652173,
+            "line_f1": 0.5,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9916992075490072,
+              "recall": 0.9927659702702055,
+              "f1": 0.9922323021868369,
+              "iou": 0.9845843484961487,
+              "tp": 10937398.0,
+              "fp": 91549.0,
+              "fn": 79698.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 280934.0,
+              "fn": 43029.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 45466.0,
+              "fn": 43372.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32330.0,
+              "fn": 39122.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 48331.0,
+              "fn": 37812.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39409.0,
+              "fn": 39095.0
+            },
+            "6": {
+              "precision": 0.9104768083036003,
+              "recall": 0.9123600153650681,
+              "f1": 0.9114174390459885,
+              "iou": 0.8372515523739797,
+              "tp": 30877.0,
+              "fp": 3036.0,
+              "fn": 2966.0
+            },
+            "7": {
+              "precision": 0.011352484018991539,
+              "recall": 0.010972670871148029,
+              "f1": 0.011159346604612359,
+              "iou": 0.005610980741750678,
+              "tp": 428.0,
+              "fp": 37273.0,
+              "fn": 38578.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 41684.0,
+              "fn": 33444.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 45356.0,
+              "fn": 26849.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 283458.0,
+              "fn": 35780.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28662.0,
+              "fn": 22160.0
+            },
+            "12": {
+              "precision": 0.011492613928021445,
+              "recall": 0.012567436928930052,
+              "f1": 0.01200601790475623,
+              "iou": 0.006039262700434587,
+              "tp": 403.0,
+              "fp": 34663.0,
+              "fn": 31664.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 31824.0,
+              "fn": 34211.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36511.0,
+              "fn": 36312.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 27063.0,
+              "fn": 31808.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 37354.0,
+              "fn": 27903.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39641.0,
+              "fn": 30464.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39118.0,
+              "fn": 29723.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 22111.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 24964.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 29215.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 26621.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 26464.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 22648.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 28491.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 9640.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21032.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 19781.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21681.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 18325.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20724.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 18168.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17117.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21236.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20430.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20094.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 18691.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 19393.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17801.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14701.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 15070.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 10849.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17079.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 11825.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21778.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 23743.0
+            }
+          }
+        },
+        "1_19": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_19.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_19.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.7814098877689469,
+            "cross_entropy_text_only": 10.713253041690301,
+            "pixel_accuracy": 0.9273050221245905,
+            "text_pixel_accuracy": 0.0021558248436646995,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 672040.0,
+            "alignment_intersection_before": 672040.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 770606.0,
+            "alignment_target_text_pixels": 789489.0,
+            "target_lines": 46.0,
+            "predicted_lines": 32.0,
+            "correctly_detected_lines": 30.0,
+            "line_precision": 0.9375,
+            "line_recall": 0.6521739130434783,
+            "line_f1": 0.7692307692307693,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9897174457865332,
+              "recall": 0.9913563458370176,
+              "f1": 0.9905362178982653,
+              "iou": 0.9812498828199051,
+              "tp": 11304713.0,
+              "fp": 117449.0,
+              "fn": 98566.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 72060.0,
+              "fn": 26701.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 82120.0,
+              "fn": 25087.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16852.0,
+              "fn": 25691.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18352.0,
+              "fn": 24886.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20381.0,
+              "fn": 24034.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22391.0,
+              "fn": 21376.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18469.0,
+              "fn": 22965.0
+            },
+            "8": {
+              "precision": 0.034227613630643784,
+              "recall": 0.035531403490437874,
+              "f1": 0.03486732470196129,
+              "iou": 0.017742987606001303,
+              "tp": 680.0,
+              "fp": 19187.0,
+              "fn": 18458.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24716.0,
+              "fn": 22491.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26623.0,
+              "fn": 23769.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20277.0,
+              "fn": 24597.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18069.0,
+              "fn": 21070.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15472.0,
+              "fn": 17988.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17102.0,
+              "fn": 19531.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19921.0,
+              "fn": 23500.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18542.0,
+              "fn": 15605.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15719.0,
+              "fn": 18285.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21101.0,
+              "fn": 17912.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19494.0,
+              "fn": 21413.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19190.0,
+              "fn": 13758.0
+            },
+            "21": {
+              "precision": 0.00018929534806682127,
+              "recall": 0.00023401392382846778,
+              "f1": 0.00020929259104227713,
+              "iou": 0.00010465724751439037,
+              "tp": 4.0,
+              "fp": 21127.0,
+              "fn": 17089.0
+            },
+            "22": {
+              "precision": 0.056119073869900775,
+              "recall": 0.04778445362373263,
+              "f1": 0.051617483013893115,
+              "iou": 0.026492479050642795,
+              "tp": 1018.0,
+              "fp": 17122.0,
+              "fn": 20286.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19530.0,
+              "fn": 14876.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18811.0,
+              "fn": 19837.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21529.0,
+              "fn": 8888.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18813.0,
+              "fn": 19018.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21909.0,
+              "fn": 8044.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24444.0,
+              "fn": 20655.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22726.0,
+              "fn": 12573.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25667.0,
+              "fn": 16878.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25189.0,
+              "fn": 17137.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25999.0,
+              "fn": 18374.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 9191.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20310.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 8916.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 19492.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 2275.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 3829.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14836.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 17863.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12956.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14741.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 11593.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 7487.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 9495.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12031.0
+            }
+          }
+        },
+        "8_109": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/8_109.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/8_109.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.22440915048102436,
+            "cross_entropy_text_only": 9.998797732340451,
+            "pixel_accuracy": 0.9776542127267573,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 222794.0,
+            "alignment_intersection_before": 222794.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 246072.0,
+            "alignment_target_text_pixels": 249179.0,
+            "target_lines": 22.0,
+            "predicted_lines": 14.0,
+            "correctly_detected_lines": 13.0,
+            "line_precision": 0.9285714285714286,
+            "line_recall": 0.5909090909090909,
+            "line_f1": 0.7222222222222223,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9977914395745904,
+              "recall": 0.9980510046017156,
+              "f1": 0.9979212052095653,
+              "iou": 0.9958510352654066,
+              "tp": 11920311.0,
+              "fp": 26385.0,
+              "fn": 23278.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17012.0,
+              "fn": 8776.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14048.0,
+              "fn": 584.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12448.0,
+              "fn": 4035.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14316.0,
+              "fn": 13092.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13664.0,
+              "fn": 11502.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13405.0,
+              "fn": 1779.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14091.0,
+              "fn": 11424.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13757.0,
+              "fn": 17117.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15410.0,
+              "fn": 17464.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17395.0,
+              "fn": 17002.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16929.0,
+              "fn": 17392.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17231.0,
+              "fn": 15382.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22876.0,
+              "fn": 13658.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 43490.0,
+              "fn": 14124.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 13403.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 13817.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14617.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12666.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14003.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12198.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 964.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 4180.0
+            }
+          }
+        },
+        "2786": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2786.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2786.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.7777617575730253,
+            "cross_entropy_text_only": 10.691944912900425,
+            "pixel_accuracy": 0.927344,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 742317.0,
+            "alignment_intersection_before": 742317.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 803879.0,
+            "alignment_target_text_pixels": 810310.0,
+            "target_lines": 44.0,
+            "predicted_lines": 44.0,
+            "correctly_detected_lines": 44.0,
+            "line_precision": 1.0,
+            "line_recall": 1.0,
+            "line_f1": 1.0,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9939270931423482,
+              "recall": 0.994498328371921,
+              "f1": 0.9942126287048524,
+              "iou": 0.9884918592928936,
+              "tp": 11128128.0,
+              "fp": 67993.0,
+              "fn": 61562.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18779.0,
+              "fn": 19900.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19527.0,
+              "fn": 18176.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13248.0,
+              "fn": 19854.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15742.0,
+              "fn": 20979.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16434.0,
+              "fn": 21394.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16304.0,
+              "fn": 15139.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18761.0,
+              "fn": 19141.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17261.0,
+              "fn": 18850.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17080.0,
+              "fn": 22254.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18504.0,
+              "fn": 18849.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17673.0,
+              "fn": 19680.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21077.0,
+              "fn": 19383.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20325.0,
+              "fn": 20046.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14257.0,
+              "fn": 15212.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18773.0,
+              "fn": 21183.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15459.0,
+              "fn": 18973.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18711.0,
+              "fn": 20213.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19009.0,
+              "fn": 14570.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18807.0,
+              "fn": 21823.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15314.0,
+              "fn": 20814.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20504.0,
+              "fn": 17433.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17968.0,
+              "fn": 20893.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19833.0,
+              "fn": 13885.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18222.0,
+              "fn": 17754.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15221.0,
+              "fn": 18013.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17474.0,
+              "fn": 18750.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15673.0,
+              "fn": 22586.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18785.0,
+              "fn": 17502.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13660.0,
+              "fn": 18903.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19115.0,
+              "fn": 17523.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22364.0,
+              "fn": 14708.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17872.0,
+              "fn": 18878.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14033.0,
+              "fn": 18641.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17715.0,
+              "fn": 16803.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21255.0,
+              "fn": 15884.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20558.0,
+              "fn": 16837.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21319.0,
+              "fn": 17629.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20607.0,
+              "fn": 16200.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18338.0,
+              "fn": 15316.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22953.0,
+              "fn": 13660.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19057.0,
+              "fn": 18191.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21192.0,
+              "fn": 19294.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19808.0,
+              "fn": 19843.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19308.0,
+              "fn": 18751.0
+            }
+          }
+        },
+        "2796": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2796.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2796.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.58829716401305,
+            "cross_entropy_text_only": 9.882230294166645,
+            "pixel_accuracy": 0.9415174166666667,
+            "text_pixel_accuracy": 0.016034177287535006,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 680715.0,
+            "alignment_intersection_before": 680715.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 693848.0,
+            "alignment_target_text_pixels": 699880.0,
+            "target_lines": 23.0,
+            "predicted_lines": 8.0,
+            "correctly_detected_lines": 6.0,
+            "line_precision": 0.75,
+            "line_recall": 0.2608695652173913,
+            "line_f1": 0.3870967741935483,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9983049051525222,
+              "recall": 0.9988377999525668,
+              "f1": 0.9985712814567567,
+              "iou": 0.9971466395624812,
+              "tp": 11286987.0,
+              "fp": 19165.0,
+              "fn": 13133.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 196732.0,
+              "fn": 50672.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40071.0,
+              "fn": 37351.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34048.0,
+              "fn": 27306.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 31429.0,
+              "fn": 17323.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 37055.0,
+              "fn": 34142.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34845.0,
+              "fn": 30349.0
+            },
+            "7": {
+              "precision": 0.2268766552776823,
+              "recall": 0.45527201914884985,
+              "f1": 0.3028389464594128,
+              "iou": 0.17843854348863095,
+              "tp": 11222.0,
+              "fp": 38241.0,
+              "fn": 13427.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 270205.0,
+              "fn": 39259.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 33526.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 35668.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 31078.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 28170.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 30245.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 27218.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 20481.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 29401.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 6949.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 22854.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 35884.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 32036.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 34010.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 33307.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 38002.0
+            }
+          }
+        }
+      }
+    },
+    "otsu_mixture_threshold": {
+      "method_name": "otsu_mixture_threshold",
+      "average_metrics": {
+        "cross_entropy": 0.6842839872420695,
+        "cross_entropy_text_only": 10.215546577884355,
+        "pixel_accuracy": 0.9352845206821618,
+        "text_pixel_accuracy": 0.022178538035291784,
+        "alignment_dx": 0.0,
+        "alignment_dy": 0.0,
+        "alignment_intersection": 680305.4,
+        "alignment_intersection_before": 680305.4,
+        "alignment_intersection_gain": 0.0,
+        "alignment_max_shift": 200.0,
+        "alignment_pred_text_pixels": 735548.4,
+        "alignment_target_text_pixels": 744906.0,
+        "target_lines": 36.2,
+        "predicted_lines": 33.6,
+        "correctly_detected_lines": 33.6,
+        "line_precision": 1.0,
+        "line_recall": 0.9110671936758893,
+        "line_f1": 0.9517327117327117,
+        "line_iou_threshold": 0.3
+      },
+      "results": {
+        "1_11": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_11.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_11.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 1.1055197166965474,
+            "cross_entropy_text_only": 10.728160256342472,
+            "pixel_accuracy": 0.8971142565822625,
+            "text_pixel_accuracy": 0.0007672207894718936,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 1083980.0,
+            "alignment_intersection_before": 1083980.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 1163672.0,
+            "alignment_target_text_pixels": 1175672.0,
+            "target_lines": 46.0,
+            "predicted_lines": 44.0,
+            "correctly_detected_lines": 44.0,
+            "line_precision": 1.0,
+            "line_recall": 0.9565217391304348,
+            "line_f1": 0.9777777777777777,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.991686353985857,
+              "recall": 0.9927665148783309,
+              "f1": 0.9922261404599942,
+              "iou": 0.9845722143585781,
+              "tp": 10937404.0,
+              "fp": 91692.0,
+              "fn": 79692.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16666.0,
+              "fn": 43029.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15977.0,
+              "fn": 43372.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19541.0,
+              "fn": 39122.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20607.0,
+              "fn": 37812.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19411.0,
+              "fn": 39095.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21953.0,
+              "fn": 33843.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18097.0,
+              "fn": 39006.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18527.0,
+              "fn": 33444.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20427.0,
+              "fn": 26849.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20819.0,
+              "fn": 35780.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26216.0,
+              "fn": 22160.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26053.0,
+              "fn": 32067.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28016.0,
+              "fn": 34211.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24031.0,
+              "fn": 36312.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 30039.0,
+              "fn": 31808.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32289.0,
+              "fn": 27903.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33261.0,
+              "fn": 30464.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22800.0,
+              "fn": 29723.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 31478.0,
+              "fn": 22111.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33613.0,
+              "fn": 24964.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 38006.0,
+              "fn": 29215.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40488.0,
+              "fn": 26621.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 46717.0,
+              "fn": 26464.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21995.0,
+              "fn": 22648.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13949.0,
+              "fn": 28491.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17853.0,
+              "fn": 9640.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18193.0,
+              "fn": 21032.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20425.0,
+              "fn": 19781.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17207.0,
+              "fn": 21681.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19538.0,
+              "fn": 18325.0
+            },
+            "31": {
+              "precision": 0.04234145425526921,
+              "recall": 0.0435244161358811,
+              "f1": 0.042924786446808,
+              "iou": 0.021933130699088147,
+              "tp": 902.0,
+              "fp": 20401.0,
+              "fn": 19822.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20353.0,
+              "fn": 18168.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32227.0,
+              "fn": 17117.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26592.0,
+              "fn": 21236.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24628.0,
+              "fn": 20430.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28771.0,
+              "fn": 20094.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29040.0,
+              "fn": 18691.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34002.0,
+              "fn": 19393.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 32888.0,
+              "fn": 17801.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36511.0,
+              "fn": 14701.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 27063.0,
+              "fn": 15070.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36814.0,
+              "fn": 10849.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39779.0,
+              "fn": 17079.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 39509.0,
+              "fn": 11825.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 21778.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 23743.0
+            }
+          }
+        },
+        "1_19": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/1_19.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/1_19.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.7679518665438251,
+            "cross_entropy_text_only": 10.505490655944673,
+            "pixel_accuracy": 0.9285586341017888,
+            "text_pixel_accuracy": 0.021508849394988403,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 671993.0,
+            "alignment_intersection_before": 671993.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 770553.0,
+            "alignment_target_text_pixels": 789489.0,
+            "target_lines": 46.0,
+            "predicted_lines": 42.0,
+            "correctly_detected_lines": 42.0,
+            "line_precision": 1.0,
+            "line_recall": 0.9130434782608695,
+            "line_f1": 0.9545454545454545,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9897133787098211,
+              "recall": 0.9913568720014655,
+              "f1": 0.9905344436356995,
+              "iou": 0.9812464005242703,
+              "tp": 11304719.0,
+              "fp": 117496.0,
+              "fn": 98560.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 7889.0,
+              "fn": 26701.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 9926.0,
+              "fn": 25087.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15445.0,
+              "fn": 25691.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 11415.0,
+              "fn": 24886.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 9053.0,
+              "fn": 24034.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17591.0,
+              "fn": 21376.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19636.0,
+              "fn": 22965.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23392.0,
+              "fn": 19138.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 10665.0,
+              "fn": 22491.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12532.0,
+              "fn": 23769.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16626.0,
+              "fn": 24597.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16300.0,
+              "fn": 21070.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18672.0,
+              "fn": 17988.0
+            },
+            "14": {
+              "precision": 0.05761034634791554,
+              "recall": 0.06021197071322513,
+              "f1": 0.0588824354095734,
+              "iou": 0.03033429632686752,
+              "tp": 1176.0,
+              "fp": 19237.0,
+              "fn": 18355.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22600.0,
+              "fn": 23500.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18446.0,
+              "fn": 15605.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20071.0,
+              "fn": 18285.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 24331.0,
+              "fn": 17912.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 26801.0,
+              "fn": 21413.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 7303.0,
+              "fn": 13758.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13245.0,
+              "fn": 17093.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17006.0,
+              "fn": 21304.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16259.0,
+              "fn": 14876.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17027.0,
+              "fn": 19837.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19584.0,
+              "fn": 8888.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18937.0,
+              "fn": 19018.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15546.0,
+              "fn": 8044.0
+            },
+            "28": {
+              "precision": 0.7531929088829584,
+              "recall": 0.7651900266279351,
+              "f1": 0.7591440716635847,
+              "iou": 0.6117906634667493,
+              "tp": 15805.0,
+              "fp": 5179.0,
+              "fn": 4850.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19792.0,
+              "fn": 12573.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19345.0,
+              "fn": 16878.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20354.0,
+              "fn": 17137.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18508.0,
+              "fn": 18374.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19780.0,
+              "fn": 9191.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18809.0,
+              "fn": 20310.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21527.0,
+              "fn": 8916.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18814.0,
+              "fn": 19492.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21877.0,
+              "fn": 2275.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23709.0,
+              "fn": 3829.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23488.0,
+              "fn": 14836.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25667.0,
+              "fn": 17863.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25189.0,
+              "fn": 12956.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25999.0,
+              "fn": 14741.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 11593.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 7487.0
+            },
+            "45": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 9495.0
+            },
+            "46": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12031.0
+            }
+          }
+        },
+        "8_109": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/8_109.JPG",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/8_109.txt",
+          "target_shape": [
+            3024,
+            4032
+          ],
+          "pred_shape": [
+            3024,
+            4032
+          ],
+          "metrics": {
+            "cross_entropy": 0.22440915048102436,
+            "cross_entropy_text_only": 9.998797732340451,
+            "pixel_accuracy": 0.9776542127267573,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 222793.0,
+            "alignment_intersection_before": 222793.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 246071.0,
+            "alignment_target_text_pixels": 249179.0,
+            "target_lines": 22.0,
+            "predicted_lines": 17.0,
+            "correctly_detected_lines": 17.0,
+            "line_precision": 1.0,
+            "line_recall": 0.7727272727272727,
+            "line_f1": 0.8717948717948718,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9977913560543136,
+              "recall": 0.9980510046017156,
+              "f1": 0.9979211634385624,
+              "iou": 0.9958509520696576,
+              "tp": 11920311.0,
+              "fp": 26386.0,
+              "fn": 23278.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17012.0,
+              "fn": 8776.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14048.0,
+              "fn": 584.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12448.0,
+              "fn": 4035.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14316.0,
+              "fn": 13092.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13664.0,
+              "fn": 11502.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13405.0,
+              "fn": 1779.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14091.0,
+              "fn": 11424.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13757.0,
+              "fn": 17117.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15410.0,
+              "fn": 17464.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17395.0,
+              "fn": 17002.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16929.0,
+              "fn": 17392.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17231.0,
+              "fn": 15382.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18959.0,
+              "fn": 13658.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 9022.0,
+              "fn": 14124.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 12835.0,
+              "fn": 13403.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17012.0,
+              "fn": 13817.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 8537.0,
+              "fn": 14617.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12666.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 14003.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 12198.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 964.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 4180.0
+            }
+          }
+        },
+        "2786": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2786.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2786.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.7777617575730253,
+            "cross_entropy_text_only": 10.691944912900425,
+            "pixel_accuracy": 0.927344,
+            "text_pixel_accuracy": 0.0,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 742317.0,
+            "alignment_intersection_before": 742317.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 803879.0,
+            "alignment_target_text_pixels": 810310.0,
+            "target_lines": 44.0,
+            "predicted_lines": 44.0,
+            "correctly_detected_lines": 44.0,
+            "line_precision": 1.0,
+            "line_recall": 1.0,
+            "line_f1": 1.0,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9939270931423482,
+              "recall": 0.994498328371921,
+              "f1": 0.9942126287048524,
+              "iou": 0.9884918592928936,
+              "tp": 11128128.0,
+              "fp": 67993.0,
+              "fn": 61562.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18779.0,
+              "fn": 19900.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19650.0,
+              "fn": 18176.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13125.0,
+              "fn": 19854.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15742.0,
+              "fn": 20979.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16436.0,
+              "fn": 21394.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 16472.0,
+              "fn": 15139.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18601.0,
+              "fn": 19141.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17251.0,
+              "fn": 18850.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17080.0,
+              "fn": 22254.0
+            },
+            "10": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18504.0,
+              "fn": 18849.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17689.0,
+              "fn": 19680.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21061.0,
+              "fn": 19383.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20325.0,
+              "fn": 20046.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14257.0,
+              "fn": 15212.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18773.0,
+              "fn": 21183.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15459.0,
+              "fn": 18973.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18894.0,
+              "fn": 20213.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18830.0,
+              "fn": 14570.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18803.0,
+              "fn": 21823.0
+            },
+            "20": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15329.0,
+              "fn": 20814.0
+            },
+            "21": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20723.0,
+              "fn": 17433.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17734.0,
+              "fn": 20893.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19833.0,
+              "fn": 13885.0
+            },
+            "24": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18222.0,
+              "fn": 17754.0
+            },
+            "25": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15221.0,
+              "fn": 18013.0
+            },
+            "26": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17474.0,
+              "fn": 18750.0
+            },
+            "27": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 15673.0,
+              "fn": 22586.0
+            },
+            "28": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 18785.0,
+              "fn": 17502.0
+            },
+            "29": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 13660.0,
+              "fn": 18903.0
+            },
+            "30": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19115.0,
+              "fn": 17523.0
+            },
+            "31": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22364.0,
+              "fn": 14708.0
+            },
+            "32": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17872.0,
+              "fn": 18878.0
+            },
+            "33": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 14033.0,
+              "fn": 18641.0
+            },
+            "34": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17715.0,
+              "fn": 16803.0
+            },
+            "35": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21255.0,
+              "fn": 15884.0
+            },
+            "36": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 20629.0,
+              "fn": 16837.0
+            },
+            "37": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21248.0,
+              "fn": 17629.0
+            },
+            "38": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19863.0,
+              "fn": 16200.0
+            },
+            "39": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19082.0,
+              "fn": 15316.0
+            },
+            "40": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 22953.0,
+              "fn": 13660.0
+            },
+            "41": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19057.0,
+              "fn": 18191.0
+            },
+            "42": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 21192.0,
+              "fn": 19294.0
+            },
+            "43": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19808.0,
+              "fn": 19843.0
+            },
+            "44": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 19308.0,
+              "fn": 18751.0
+            }
+          }
+        },
+        "2796": {
+          "image_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2796.jpg",
+          "label_path": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_detect_lines/2796.txt",
+          "target_shape": [
+            3000,
+            4000
+          ],
+          "pred_shape": [
+            3000,
+            4000
+          ],
+          "metrics": {
+            "cross_entropy": 0.5457774449159258,
+            "cross_entropy_text_only": 9.153339331893752,
+            "pixel_accuracy": 0.9457515,
+            "text_pixel_accuracy": 0.08861661999199863,
+            "alignment_dx": 0.0,
+            "alignment_dy": 0.0,
+            "alignment_intersection": 680444.0,
+            "alignment_intersection_before": 680444.0,
+            "alignment_intersection_gain": 0.0,
+            "alignment_max_shift": 200.0,
+            "alignment_pred_text_pixels": 693567.0,
+            "alignment_target_text_pixels": 699880.0,
+            "target_lines": 23.0,
+            "predicted_lines": 21.0,
+            "correctly_detected_lines": 21.0,
+            "line_precision": 1.0,
+            "line_recall": 0.9130434782608695,
+            "line_f1": 0.9545454545454545,
+            "line_iou_threshold": 0.3
+          },
+          "per_class": {
+            "0": {
+              "precision": 0.9982809786251774,
+              "recall": 0.9988386848989215,
+              "f1": 0.9985597538908298,
+              "iou": 0.9971236504329322,
+              "tp": 11286997.0,
+              "fp": 19436.0,
+              "fn": 13123.0
+            },
+            "1": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 28669.0,
+              "fn": 50672.0
+            },
+            "2": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 30792.0,
+              "fn": 37351.0
+            },
+            "3": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 17362.0,
+              "fn": 27306.0
+            },
+            "4": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 25911.0,
+              "fn": 17323.0
+            },
+            "5": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29664.0,
+              "fn": 34142.0
+            },
+            "6": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29593.0,
+              "fn": 30349.0
+            },
+            "7": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34276.0,
+              "fn": 24649.0
+            },
+            "8": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36543.0,
+              "fn": 39259.0
+            },
+            "9": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36327.0,
+              "fn": 33526.0
+            },
+            "10": {
+              "precision": 3.0505475732894054e-05,
+              "recall": 2.8036335090277e-05,
+              "f1": 2.9218834460693365e-05,
+              "iou": 1.46096306685367e-05,
+              "tp": 1.0,
+              "fp": 32780.0,
+              "fn": 35667.0
+            },
+            "11": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 36614.0,
+              "fn": 31078.0
+            },
+            "12": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33504.0,
+              "fn": 28170.0
+            },
+            "13": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40480.0,
+              "fn": 30245.0
+            },
+            "14": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 23960.0,
+              "fn": 27218.0
+            },
+            "15": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 29999.0,
+              "fn": 20481.0
+            },
+            "16": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 34934.0,
+              "fn": 29401.0
+            },
+            "17": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 40888.0,
+              "fn": 6949.0
+            },
+            "18": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 33300.0,
+              "fn": 22854.0
+            },
+            "19": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 51635.0,
+              "fn": 35884.0
+            },
+            "20": {
+              "precision": 0.8987658178409623,
+              "recall": 0.8978961168685229,
+              "f1": 0.8983307568588872,
+              "iou": 0.8154269191518313,
+              "tp": 28765.0,
+              "fp": 3240.0,
+              "fn": 3271.0
+            },
+            "21": {
+              "precision": 0.9686862802213807,
+              "recall": 0.977800646868568,
+              "f1": 0.9732221246707637,
+              "iou": 0.9478409576742197,
+              "tp": 33255.0,
+              "fp": 1075.0,
+              "fn": 755.0
+            },
+            "22": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 33307.0
+            },
+            "23": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "iou": 0.0,
+              "tp": 0.0,
+              "fp": 0.0,
+              "fn": 38002.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

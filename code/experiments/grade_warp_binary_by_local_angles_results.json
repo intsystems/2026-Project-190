@@ -1,0 +1,1662 @@
+{
+  "method": "warp_binary_by_local_angles",
+  "samples_per_distortion": 5,
+  "image_size": {
+    "height": 989,
+    "width": 700
+  },
+  "method_params": {
+    "grid_rows": 10,
+    "grid_cols": 16,
+    "min_cell_text_pixels": 24,
+    "max_local_angle_delta": 10.0
+  },
+  "results": [
+    {
+      "sample_name": "sine_easy_000",
+      "distortion_config": {
+        "name": "sine_easy",
+        "type": "sine",
+        "amplitude": 6.0,
+        "period": 480.0,
+        "phase": 0.3
+      },
+      "before_metrics": {
+        "iou": 0.3704119491258574,
+        "dice": 0.5405848210271831,
+        "chamfer_distance": 1.068647861480713,
+        "best_shift_iou": 0.4315092491294306,
+        "best_shift_dice": 0.6028731555759798,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 5.543511102596919,
+        "line_curvature_std": 10.745724300543467
+      },
+      "after_metrics": {
+        "iou": 0.604959075589793,
+        "dice": 0.7538623068846557,
+        "chamfer_distance": 0.37928368151187897,
+        "best_shift_iou": 0.6548899553202052,
+        "best_shift_dice": 0.791460426978651,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -1.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -1.0,
+        "line_center_mae": 3.517481744289398,
+        "line_curvature_std": 10.389782746632894
+      },
+      "improvements": {
+        "iou_delta": 0.2345471264639356,
+        "dice_delta": 0.21327748585747264,
+        "best_shift_iou_delta": 0.2233807061907746,
+        "best_shift_dice_delta": 0.18858727140267129,
+        "chamfer_delta": 0.6893641799688339,
+        "line_center_mae_delta": 2.026029358307521,
+        "line_curvature_std_delta": 0.35594155391057214
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_easy_000"
+    },
+    {
+      "sample_name": "sine_easy_001",
+      "distortion_config": {
+        "name": "sine_easy",
+        "type": "sine",
+        "amplitude": 6.0,
+        "period": 480.0,
+        "phase": 0.3
+      },
+      "before_metrics": {
+        "iou": 0.37430610626486915,
+        "dice": 0.5447201384881708,
+        "chamfer_distance": 1.063974916934967,
+        "best_shift_iou": 0.4,
+        "best_shift_dice": 0.5714285714285714,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 4.9602673053741455,
+        "line_curvature_std": 9.353395223617554
+      },
+      "after_metrics": {
+        "iou": 0.2244583606888541,
+        "dice": 0.366624734486812,
+        "chamfer_distance": 1.218592882156372,
+        "best_shift_iou": 0.5576935432059107,
+        "best_shift_dice": 0.7160504011053598,
+        "best_shift_iou_dx": 3.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": 3.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 7.79834230740865,
+        "line_curvature_std": 9.504425525665283
+      },
+      "improvements": {
+        "iou_delta": -0.14984774557601505,
+        "dice_delta": -0.17809540400135881,
+        "best_shift_iou_delta": 0.15769354320591067,
+        "best_shift_dice_delta": 0.14462182967678838,
+        "chamfer_delta": -0.15461796522140503,
+        "line_center_mae_delta": -2.838075002034505,
+        "line_curvature_std_delta": -0.1510303020477295
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_easy_001"
+    },
+    {
+      "sample_name": "sine_easy_002",
+      "distortion_config": {
+        "name": "sine_easy",
+        "type": "sine",
+        "amplitude": 6.0,
+        "period": 480.0,
+        "phase": 0.3
+      },
+      "before_metrics": {
+        "iou": 0.39052056267359553,
+        "dice": 0.5616897342715018,
+        "chamfer_distance": 1.001735806465149,
+        "best_shift_iou": 0.4277066870279569,
+        "best_shift_dice": 0.599152040001031,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 5.67039970556895,
+        "line_curvature_std": 11.076088693406847
+      },
+      "after_metrics": {
+        "iou": 0.5773550356052899,
+        "dice": 0.7320546390289835,
+        "chamfer_distance": 0.4250580817461014,
+        "best_shift_iou": 0.6353492100322737,
+        "best_shift_dice": 0.7770196189714551,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 3.7947772410180836,
+        "line_curvature_std": 10.43064636654324
+      },
+      "improvements": {
+        "iou_delta": 0.18683447293169436,
+        "dice_delta": 0.17036490475748167,
+        "best_shift_iou_delta": 0.20764252300431685,
+        "best_shift_dice_delta": 0.17786757897042416,
+        "chamfer_delta": 0.5766777247190475,
+        "line_center_mae_delta": 1.8756224645508661,
+        "line_curvature_std_delta": 0.6454423268636074
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_easy_002"
+    },
+    {
+      "sample_name": "sine_easy_003",
+      "distortion_config": {
+        "name": "sine_easy",
+        "type": "sine",
+        "amplitude": 6.0,
+        "period": 480.0,
+        "phase": 0.3
+      },
+      "before_metrics": {
+        "iou": 0.39799851064107755,
+        "dice": 0.5693833113721533,
+        "chamfer_distance": 0.9328978955745697,
+        "best_shift_iou": 0.42512585568548067,
+        "best_shift_dice": 0.5966151747081967,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -3.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -3.0,
+        "line_center_mae": 5.622597914475661,
+        "line_curvature_std": 10.885310576512264
+      },
+      "after_metrics": {
+        "iou": 0.3590300260267886,
+        "dice": 0.5283621688277718,
+        "chamfer_distance": 0.7684308588504791,
+        "best_shift_iou": 0.4810448835021307,
+        "best_shift_dice": 0.6496020328089384,
+        "best_shift_iou_dx": 2.0,
+        "best_shift_iou_dy": 0.0,
+        "best_shift_dice_dx": 2.0,
+        "best_shift_dice_dy": 0.0,
+        "line_center_mae": 6.4868092720325174,
+        "line_curvature_std": 10.295982140761156
+      },
+      "improvements": {
+        "iou_delta": -0.03896848461428898,
+        "dice_delta": -0.041021142544381495,
+        "best_shift_iou_delta": 0.055919027816650035,
+        "best_shift_dice_delta": 0.05298685810074166,
+        "chamfer_delta": 0.16446703672409058,
+        "line_center_mae_delta": -0.8642113575568562,
+        "line_curvature_std_delta": 0.5893284357511082
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_easy_003"
+    },
+    {
+      "sample_name": "sine_easy_004",
+      "distortion_config": {
+        "name": "sine_easy",
+        "type": "sine",
+        "amplitude": 6.0,
+        "period": 480.0,
+        "phase": 0.3
+      },
+      "before_metrics": {
+        "iou": 0.40929316507403896,
+        "dice": 0.5808488612836439,
+        "chamfer_distance": 0.9176774621009827,
+        "best_shift_iou": 0.4180510361363247,
+        "best_shift_dice": 0.5896135265700483,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -1.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -1.0,
+        "line_center_mae": 4.741364274706159,
+        "line_curvature_std": 9.972883292606898
+      },
+      "after_metrics": {
+        "iou": 0.6623699554132846,
+        "dice": 0.7968983718171346,
+        "chamfer_distance": 0.27081602811813354,
+        "best_shift_iou": 0.6749604031677465,
+        "best_shift_dice": 0.8059419218403452,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 1.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 1.0,
+        "line_center_mae": 2.7570928846086775,
+        "line_curvature_std": 9.202038560594831
+      },
+      "improvements": {
+        "iou_delta": 0.2530767903392456,
+        "dice_delta": 0.21604951053349075,
+        "best_shift_iou_delta": 0.2569093670314218,
+        "best_shift_dice_delta": 0.2163283952702969,
+        "chamfer_delta": 0.6468614339828491,
+        "line_center_mae_delta": 1.9842713900974815,
+        "line_curvature_std_delta": 0.7708447320120673
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_easy_004"
+    },
+    {
+      "sample_name": "sine_hard_005",
+      "distortion_config": {
+        "name": "sine_hard",
+        "type": "sine",
+        "amplitude": 18.0,
+        "period": 360.0,
+        "phase": 1.2
+      },
+      "before_metrics": {
+        "iou": 0.1395244801590589,
+        "dice": 0.2448819355589159,
+        "chamfer_distance": 4.347142219543457,
+        "best_shift_iou": 0.21560691087446424,
+        "best_shift_dice": 0.3547313016168431,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 12.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 12.0,
+        "line_center_mae": 8.66472053527832,
+        "line_curvature_std": 11.407629251480103
+      },
+      "after_metrics": {
+        "iou": 0.04354035002430724,
+        "dice": 0.08344737225214732,
+        "chamfer_distance": 7.1611950397491455,
+        "best_shift_iou": 0.15084107919638592,
+        "best_shift_dice": 0.2621405890406968,
+        "best_shift_iou_dx": -7.0,
+        "best_shift_iou_dy": 12.0,
+        "best_shift_dice_dx": -7.0,
+        "best_shift_dice_dy": 12.0,
+        "line_center_mae": 12.866064548492432,
+        "line_curvature_std": 12.125719666481018
+      },
+      "improvements": {
+        "iou_delta": -0.09598413013475167,
+        "dice_delta": -0.16143456330676859,
+        "best_shift_iou_delta": -0.06476583167807831,
+        "best_shift_dice_delta": -0.09259071257614626,
+        "chamfer_delta": -2.8140528202056885,
+        "line_center_mae_delta": -4.201344013214111,
+        "line_curvature_std_delta": -0.7180904150009155
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_hard_005"
+    },
+    {
+      "sample_name": "sine_hard_006",
+      "distortion_config": {
+        "name": "sine_hard",
+        "type": "sine",
+        "amplitude": 18.0,
+        "period": 360.0,
+        "phase": 1.2
+      },
+      "before_metrics": {
+        "iou": 0.1380360283860011,
+        "dice": 0.24258639435478713,
+        "chamfer_distance": 4.312116384506226,
+        "best_shift_iou": 0.1961951878817244,
+        "best_shift_dice": 0.32803206344468844,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 12.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 12.0,
+        "line_center_mae": 9.136806813153354,
+        "line_curvature_std": 11.800770802931352
+      },
+      "after_metrics": {
+        "iou": 0.042620507887435155,
+        "dice": 0.08175651172216652,
+        "chamfer_distance": 7.866253852844238,
+        "best_shift_iou": 0.14903760716233524,
+        "best_shift_dice": 0.2594129317149135,
+        "best_shift_iou_dx": 6.0,
+        "best_shift_iou_dy": 12.0,
+        "best_shift_dice_dx": 6.0,
+        "best_shift_dice_dy": 12.0,
+        "line_center_mae": 13.129188190806996,
+        "line_curvature_std": 12.304144815965133
+      },
+      "improvements": {
+        "iou_delta": -0.09541552049856594,
+        "dice_delta": -0.1608298826326206,
+        "best_shift_iou_delta": -0.047157580719389164,
+        "best_shift_dice_delta": -0.06861913172977496,
+        "chamfer_delta": -3.5541374683380127,
+        "line_center_mae_delta": -3.9923813776536416,
+        "line_curvature_std_delta": -0.5033740130337812
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_hard_006"
+    },
+    {
+      "sample_name": "sine_hard_007",
+      "distortion_config": {
+        "name": "sine_hard",
+        "type": "sine",
+        "amplitude": 18.0,
+        "period": 360.0,
+        "phase": 1.2
+      },
+      "before_metrics": {
+        "iou": 0.1349398546984795,
+        "dice": 0.2377920805932559,
+        "chamfer_distance": 4.457641839981079,
+        "best_shift_iou": 0.20405453817461489,
+        "best_shift_dice": 0.3389456734808177,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -12.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -12.0,
+        "line_center_mae": 9.153289931161064,
+        "line_curvature_std": 12.017739704677037
+      },
+      "after_metrics": {
+        "iou": 0.07601560448628981,
+        "dice": 0.1412908960973314,
+        "chamfer_distance": 8.021600484848022,
+        "best_shift_iou": 0.15830809610337168,
+        "best_shift_dice": 0.2733436753760611,
+        "best_shift_iou_dx": 10.0,
+        "best_shift_iou_dy": 12.0,
+        "best_shift_dice_dx": 10.0,
+        "best_shift_dice_dy": 12.0,
+        "line_center_mae": 13.994400160653251,
+        "line_curvature_std": 13.117182322910853
+      },
+      "improvements": {
+        "iou_delta": -0.05892425021218968,
+        "dice_delta": -0.09650118449592451,
+        "best_shift_iou_delta": -0.045746442071243204,
+        "best_shift_dice_delta": -0.06560199810475664,
+        "chamfer_delta": -3.5639586448669434,
+        "line_center_mae_delta": -4.8411102294921875,
+        "line_curvature_std_delta": -1.099442618233816
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_hard_007"
+    },
+    {
+      "sample_name": "sine_hard_008",
+      "distortion_config": {
+        "name": "sine_hard",
+        "type": "sine",
+        "amplitude": 18.0,
+        "period": 360.0,
+        "phase": 1.2
+      },
+      "before_metrics": {
+        "iou": 0.14424119334165855,
+        "dice": 0.252116763809935,
+        "chamfer_distance": 4.25510835647583,
+        "best_shift_iou": 0.20120146076884846,
+        "best_shift_dice": 0.3350003597898827,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -12.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -12.0,
+        "line_center_mae": 9.100425601005554,
+        "line_curvature_std": 11.73674430847168
+      },
+      "after_metrics": {
+        "iou": 0.10600123326636564,
+        "dice": 0.1916837523830078,
+        "chamfer_distance": 6.166420221328735,
+        "best_shift_iou": 0.1809825942868473,
+        "best_shift_dice": 0.3064949393198062,
+        "best_shift_iou_dx": -6.0,
+        "best_shift_iou_dy": 9.0,
+        "best_shift_dice_dx": -6.0,
+        "best_shift_dice_dy": 9.0,
+        "line_center_mae": 12.464777994155884,
+        "line_curvature_std": 12.031700611114502
+      },
+      "improvements": {
+        "iou_delta": -0.038239960075292914,
+        "dice_delta": -0.06043301142692717,
+        "best_shift_iou_delta": -0.020218866482001163,
+        "best_shift_dice_delta": -0.02850542047007648,
+        "chamfer_delta": -1.9113118648529053,
+        "line_center_mae_delta": -3.3643523931503303,
+        "line_curvature_std_delta": -0.2949563026428219
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_hard_008"
+    },
+    {
+      "sample_name": "sine_hard_009",
+      "distortion_config": {
+        "name": "sine_hard",
+        "type": "sine",
+        "amplitude": 18.0,
+        "period": 360.0,
+        "phase": 1.2
+      },
+      "before_metrics": {
+        "iou": 0.16396118826450842,
+        "dice": 0.2817296485787093,
+        "chamfer_distance": 3.99701189994812,
+        "best_shift_iou": 0.20530408583711432,
+        "best_shift_dice": 0.34066770078942427,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -12.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -12.0,
+        "line_center_mae": 8.254610578219095,
+        "line_curvature_std": 11.132824420928955
+      },
+      "after_metrics": {
+        "iou": 0.16803850286942407,
+        "dice": 0.2877276775664804,
+        "chamfer_distance": 4.9129016399383545,
+        "best_shift_iou": 0.18752833149299702,
+        "best_shift_dice": 0.31582965478765573,
+        "best_shift_iou_dx": 6.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": 6.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 10.701400915781656,
+        "line_curvature_std": 11.136377970377604
+      },
+      "improvements": {
+        "iou_delta": 0.004077314604915644,
+        "dice_delta": 0.005998028987771076,
+        "best_shift_iou_delta": -0.017775754344117295,
+        "best_shift_dice_delta": -0.024838046001768532,
+        "chamfer_delta": -0.9158897399902344,
+        "line_center_mae_delta": -2.446790337562561,
+        "line_curvature_std_delta": -0.0035535494486484964
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/sine_hard_009"
+    },
+    {
+      "sample_name": "parabolic_010",
+      "distortion_config": {
+        "name": "parabolic",
+        "type": "parabolic",
+        "amplitude": 22.0
+      },
+      "before_metrics": {
+        "iou": 0.33525154765018744,
+        "dice": 0.502154890949458,
+        "chamfer_distance": 1.3851386308670044,
+        "best_shift_iou": 0.44956187797490266,
+        "best_shift_dice": 0.620272766282953,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 6.0,
+        "line_center_mae": 5.8301400404710035,
+        "line_curvature_std": 10.048507360311655
+      },
+      "after_metrics": {
+        "iou": 0.33970525683689046,
+        "dice": 0.5071343194382191,
+        "chamfer_distance": 0.8192627727985382,
+        "best_shift_iou": 0.46651694010024375,
+        "best_shift_dice": 0.6362244135664127,
+        "best_shift_iou_dx": -2.0,
+        "best_shift_iou_dy": 1.0,
+        "best_shift_dice_dx": -2.0,
+        "best_shift_dice_dy": 1.0,
+        "line_center_mae": 6.256568046716543,
+        "line_curvature_std": 9.735699066748985
+      },
+      "improvements": {
+        "iou_delta": 0.004453709186703014,
+        "dice_delta": 0.004979428488761095,
+        "best_shift_iou_delta": 0.01695506212534109,
+        "best_shift_dice_delta": 0.015951647283459658,
+        "chamfer_delta": 0.5658758580684662,
+        "line_center_mae_delta": -0.42642800624553967,
+        "line_curvature_std_delta": 0.3128082935626697
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/parabolic_010"
+    },
+    {
+      "sample_name": "parabolic_011",
+      "distortion_config": {
+        "name": "parabolic",
+        "type": "parabolic",
+        "amplitude": 22.0
+      },
+      "before_metrics": {
+        "iou": 0.3477091840497791,
+        "dice": 0.5160003184142968,
+        "chamfer_distance": 1.3344332575798035,
+        "best_shift_iou": 0.4431177708053619,
+        "best_shift_dice": 0.6141117236163903,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 6.0,
+        "line_center_mae": 5.88767871260643,
+        "line_curvature_std": 11.30943868557612
+      },
+      "after_metrics": {
+        "iou": 0.31623331912521724,
+        "dice": 0.4805125573563041,
+        "chamfer_distance": 0.9339366853237152,
+        "best_shift_iou": 0.31980773530069306,
+        "best_shift_dice": 0.48462776319132717,
+        "best_shift_iou_dx": -1.0,
+        "best_shift_iou_dy": 0.0,
+        "best_shift_dice_dx": -1.0,
+        "best_shift_dice_dy": 0.0,
+        "line_center_mae": 7.533801168203354,
+        "line_curvature_std": 10.80317892630895
+      },
+      "improvements": {
+        "iou_delta": -0.031475864924561836,
+        "dice_delta": -0.03548776105799273,
+        "best_shift_iou_delta": -0.12331003550466885,
+        "best_shift_dice_delta": -0.12948396042506316,
+        "chamfer_delta": 0.40049657225608826,
+        "line_center_mae_delta": -1.6461224555969238,
+        "line_curvature_std_delta": 0.50625975926717
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/parabolic_011"
+    },
+    {
+      "sample_name": "parabolic_012",
+      "distortion_config": {
+        "name": "parabolic",
+        "type": "parabolic",
+        "amplitude": 22.0
+      },
+      "before_metrics": {
+        "iou": 0.3470290662779731,
+        "dice": 0.5152510438944903,
+        "chamfer_distance": 1.3287900686264038,
+        "best_shift_iou": 0.427206162902669,
+        "best_shift_dice": 0.5986607597515022,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 6.0,
+        "line_center_mae": 5.499528408050537,
+        "line_curvature_std": 9.657928042941624
+      },
+      "after_metrics": {
+        "iou": 0.6303819552620101,
+        "dice": 0.7732935870977604,
+        "chamfer_distance": 0.3182676434516907,
+        "best_shift_iou": 0.633435295586491,
+        "best_shift_dice": 0.775586639150042,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -1.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -1.0,
+        "line_center_mae": 2.8290251360999212,
+        "line_curvature_std": 9.018782350752089
+      },
+      "improvements": {
+        "iou_delta": 0.28335288898403704,
+        "dice_delta": 0.25804254320327014,
+        "best_shift_iou_delta": 0.20622913268382204,
+        "best_shift_dice_delta": 0.17692587939853976,
+        "chamfer_delta": 1.0105224251747131,
+        "line_center_mae_delta": 2.670503271950616,
+        "line_curvature_std_delta": 0.6391456921895351
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/parabolic_012"
+    },
+    {
+      "sample_name": "parabolic_013",
+      "distortion_config": {
+        "name": "parabolic",
+        "type": "parabolic",
+        "amplitude": 22.0
+      },
+      "before_metrics": {
+        "iou": 0.3404981314268471,
+        "dice": 0.508017316017316,
+        "chamfer_distance": 1.3572657704353333,
+        "best_shift_iou": 0.4375684556407448,
+        "best_shift_dice": 0.6087619047619047,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 6.0,
+        "line_center_mae": 5.240800721304757,
+        "line_curvature_std": 9.774415016174316
+      },
+      "after_metrics": {
+        "iou": 0.48844260171028764,
+        "dice": 0.6563136544856283,
+        "chamfer_distance": 0.6794089674949646,
+        "best_shift_iou": 0.5295449098607302,
+        "best_shift_dice": 0.6924215254443845,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 3.774011101041521,
+        "line_curvature_std": 8.922787189483643
+      },
+      "improvements": {
+        "iou_delta": 0.14794447028344054,
+        "dice_delta": 0.14829633846831225,
+        "best_shift_iou_delta": 0.0919764542199854,
+        "best_shift_dice_delta": 0.08365962068247979,
+        "chamfer_delta": 0.6778568029403687,
+        "line_center_mae_delta": 1.4667896202632362,
+        "line_curvature_std_delta": 0.8516278266906738
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/parabolic_013"
+    },
+    {
+      "sample_name": "parabolic_014",
+      "distortion_config": {
+        "name": "parabolic",
+        "type": "parabolic",
+        "amplitude": 22.0
+      },
+      "before_metrics": {
+        "iou": 0.34886188626968395,
+        "dice": 0.5172685058727123,
+        "chamfer_distance": 1.3291917443275452,
+        "best_shift_iou": 0.44517341291458434,
+        "best_shift_dice": 0.6160830374214695,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 6.0,
+        "line_center_mae": 5.852716185829856,
+        "line_curvature_std": 11.096824819391424
+      },
+      "after_metrics": {
+        "iou": 0.5635878443682271,
+        "dice": 0.7208905420928833,
+        "chamfer_distance": 0.47134871780872345,
+        "best_shift_iou": 0.5844167100017335,
+        "best_shift_dice": 0.7377058147803731,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 1.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 1.0,
+        "line_center_mae": 3.8149054700678047,
+        "line_curvature_std": 10.836737827821212
+      },
+      "improvements": {
+        "iou_delta": 0.2147259580985431,
+        "dice_delta": 0.20362203622017094,
+        "best_shift_iou_delta": 0.1392432970871491,
+        "best_shift_dice_delta": 0.12162277735890359,
+        "chamfer_delta": 0.8578430265188217,
+        "line_center_mae_delta": 2.0378107157620517,
+        "line_curvature_std_delta": 0.260086991570212
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/parabolic_014"
+    },
+    {
+      "sample_name": "piecewise_linear_015",
+      "distortion_config": {
+        "name": "piecewise_linear",
+        "type": "piecewise_linear",
+        "max_shift": 22.0,
+        "control_points": 7
+      },
+      "before_metrics": {
+        "iou": 0.11557448251022268,
+        "dice": 0.20720173206214154,
+        "chamfer_distance": 4.6206440925598145,
+        "best_shift_iou": 0.5154846880036841,
+        "best_shift_dice": 0.6802901963763437,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 9.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 9.0,
+        "line_center_mae": 9.271283388137817,
+        "line_curvature_std": 10.75047492980957
+      },
+      "after_metrics": {
+        "iou": 0.1377369476612538,
+        "dice": 0.24212441715000568,
+        "chamfer_distance": 4.114400625228882,
+        "best_shift_iou": 0.7421080438515387,
+        "best_shift_dice": 0.8519655786800107,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 11.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 11.0,
+        "line_center_mae": 8.785466829935709,
+        "line_curvature_std": 10.206733465194702
+      },
+      "improvements": {
+        "iou_delta": 0.022162465151031124,
+        "dice_delta": 0.03492268508786414,
+        "best_shift_iou_delta": 0.22662335584785465,
+        "best_shift_dice_delta": 0.17167538230366697,
+        "chamfer_delta": 0.5062434673309326,
+        "line_center_mae_delta": 0.48581655820210834,
+        "line_curvature_std_delta": 0.5437414646148682
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/piecewise_linear_015"
+    },
+    {
+      "sample_name": "piecewise_linear_016",
+      "distortion_config": {
+        "name": "piecewise_linear",
+        "type": "piecewise_linear",
+        "max_shift": 22.0,
+        "control_points": 7
+      },
+      "before_metrics": {
+        "iou": 0.1751606199722525,
+        "dice": 0.298104985812728,
+        "chamfer_distance": 3.4882800579071045,
+        "best_shift_iou": 0.30756540808416755,
+        "best_shift_dice": 0.47043980543169844,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -10.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -10.0,
+        "line_center_mae": 8.81163335883099,
+        "line_curvature_std": 11.814686733743418
+      },
+      "after_metrics": {
+        "iou": 0.2532473719312732,
+        "dice": 0.40414586553812626,
+        "chamfer_distance": 1.7587881088256836,
+        "best_shift_iou": 0.2629136529475773,
+        "best_shift_dice": 0.4163604571602342,
+        "best_shift_iou_dx": -7.0,
+        "best_shift_iou_dy": -1.0,
+        "best_shift_dice_dx": -7.0,
+        "best_shift_dice_dy": -1.0,
+        "line_center_mae": 10.34085174228834,
+        "line_curvature_std": 11.331872919331426
+      },
+      "improvements": {
+        "iou_delta": 0.07808675195902073,
+        "dice_delta": 0.10604087972539827,
+        "best_shift_iou_delta": -0.044651755136590254,
+        "best_shift_dice_delta": -0.05407934827146427,
+        "chamfer_delta": 1.729491949081421,
+        "line_center_mae_delta": -1.5292183834573496,
+        "line_curvature_std_delta": 0.4828138144119922
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/piecewise_linear_016"
+    },
+    {
+      "sample_name": "piecewise_linear_017",
+      "distortion_config": {
+        "name": "piecewise_linear",
+        "type": "piecewise_linear",
+        "max_shift": 22.0,
+        "control_points": 7
+      },
+      "before_metrics": {
+        "iou": 0.23830095454898206,
+        "dice": 0.38488374522133323,
+        "chamfer_distance": 2.506837010383606,
+        "best_shift_iou": 0.4081188410060303,
+        "best_shift_dice": 0.579665336647935,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 8.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 8.0,
+        "line_center_mae": 7.004032810529073,
+        "line_curvature_std": 11.004758834838867
+      },
+      "after_metrics": {
+        "iou": 0.236288120900022,
+        "dice": 0.3822541313880836,
+        "chamfer_distance": 1.4129974842071533,
+        "best_shift_iou": 0.3600893924728122,
+        "best_shift_dice": 0.5295084197636815,
+        "best_shift_iou_dx": 3.0,
+        "best_shift_iou_dy": 3.0,
+        "best_shift_dice_dx": 3.0,
+        "best_shift_dice_dy": 3.0,
+        "line_center_mae": 8.764644662539164,
+        "line_curvature_std": 10.370120724042257
+      },
+      "improvements": {
+        "iou_delta": -0.0020128336489600718,
+        "dice_delta": -0.002629613833249611,
+        "best_shift_iou_delta": -0.04802944853321811,
+        "best_shift_dice_delta": -0.0501569168842535,
+        "chamfer_delta": 1.0938395261764526,
+        "line_center_mae_delta": -1.7606118520100908,
+        "line_curvature_std_delta": 0.6346381107966099
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/piecewise_linear_017"
+    },
+    {
+      "sample_name": "piecewise_linear_018",
+      "distortion_config": {
+        "name": "piecewise_linear",
+        "type": "piecewise_linear",
+        "max_shift": 22.0,
+        "control_points": 7
+      },
+      "before_metrics": {
+        "iou": 0.34184520427376136,
+        "dice": 0.5095151112587181,
+        "chamfer_distance": 1.6795169115066528,
+        "best_shift_iou": 0.3478820435342174,
+        "best_shift_dice": 0.5161906343407506,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 6.3378302199499945,
+        "line_curvature_std": 11.064218929835729
+      },
+      "after_metrics": {
+        "iou": 0.2610335444966224,
+        "dice": 0.41399936684606026,
+        "chamfer_distance": 1.5379139184951782,
+        "best_shift_iou": 0.28336059702130845,
+        "best_shift_dice": 0.4415915490610994,
+        "best_shift_iou_dx": 2.0,
+        "best_shift_iou_dy": 2.0,
+        "best_shift_dice_dx": 2.0,
+        "best_shift_dice_dy": 2.0,
+        "line_center_mae": 9.238251447677612,
+        "line_curvature_std": 10.943626914705549
+      },
+      "improvements": {
+        "iou_delta": -0.08081165977713894,
+        "dice_delta": -0.09551574441265781,
+        "best_shift_iou_delta": -0.06452144651290898,
+        "best_shift_dice_delta": -0.07459908527965126,
+        "chamfer_delta": 0.1416029930114746,
+        "line_center_mae_delta": -2.900421227727618,
+        "line_curvature_std_delta": 0.12059201513018003
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/piecewise_linear_018"
+    },
+    {
+      "sample_name": "piecewise_linear_019",
+      "distortion_config": {
+        "name": "piecewise_linear",
+        "type": "piecewise_linear",
+        "max_shift": 22.0,
+        "control_points": 7
+      },
+      "before_metrics": {
+        "iou": 0.24736116086058546,
+        "dice": 0.3966151402211768,
+        "chamfer_distance": 2.6747241020202637,
+        "best_shift_iou": 0.255186165113693,
+        "best_shift_dice": 0.40661086332253926,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -6.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -6.0,
+        "line_center_mae": 7.509910941123962,
+        "line_curvature_std": 11.244811534881592
+      },
+      "after_metrics": {
+        "iou": 0.2453822043697888,
+        "dice": 0.3940673048142062,
+        "chamfer_distance": 1.704446792602539,
+        "best_shift_iou": 0.25700091374689976,
+        "best_shift_dice": 0.4089112600257784,
+        "best_shift_iou_dx": -5.0,
+        "best_shift_iou_dy": -1.0,
+        "best_shift_dice_dx": -5.0,
+        "best_shift_dice_dy": -1.0,
+        "line_center_mae": 9.660711431503296,
+        "line_curvature_std": 11.167543411254883
+      },
+      "improvements": {
+        "iou_delta": -0.0019789564907966573,
+        "dice_delta": -0.0025478354069705667,
+        "best_shift_iou_delta": 0.001814748633206742,
+        "best_shift_dice_delta": 0.002300396703239116,
+        "chamfer_delta": 0.9702773094177246,
+        "line_center_mae_delta": -2.150800490379334,
+        "line_curvature_std_delta": 0.07726812362670898
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/piecewise_linear_019"
+    },
+    {
+      "sample_name": "combined_020",
+      "distortion_config": {
+        "name": "combined",
+        "type": "combined",
+        "sine_amplitude": 12.0,
+        "parabolic_amplitude": 15.0,
+        "tilt": 10.0,
+        "period": 420.0
+      },
+      "before_metrics": {
+        "iou": 0.2346602569332438,
+        "dice": 0.38012118008254886,
+        "chamfer_distance": 2.9604249000549316,
+        "best_shift_iou": 0.2520014764468543,
+        "best_shift_dice": 0.4025577943598398,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 7.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 7.0,
+        "line_center_mae": 7.550340714661972,
+        "line_curvature_std": 11.350536159847094
+      },
+      "after_metrics": {
+        "iou": 0.20503312719494482,
+        "dice": 0.3402945903607104,
+        "chamfer_distance": 2.5996363162994385,
+        "best_shift_iou": 0.21218024994297058,
+        "best_shift_dice": 0.3500803613207739,
+        "best_shift_iou_dx": 7.0,
+        "best_shift_iou_dy": -3.0,
+        "best_shift_dice_dx": 7.0,
+        "best_shift_dice_dy": -3.0,
+        "line_center_mae": 10.788753944894541,
+        "line_curvature_std": 11.707321913346
+      },
+      "improvements": {
+        "iou_delta": -0.02962712973829898,
+        "dice_delta": -0.039826589721838446,
+        "best_shift_iou_delta": -0.0398212265038837,
+        "best_shift_dice_delta": -0.05247743303906588,
+        "chamfer_delta": 0.36078858375549316,
+        "line_center_mae_delta": -3.2384132302325694,
+        "line_curvature_std_delta": -0.3567857534989063
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/combined_020"
+    },
+    {
+      "sample_name": "combined_021",
+      "distortion_config": {
+        "name": "combined",
+        "type": "combined",
+        "sine_amplitude": 12.0,
+        "parabolic_amplitude": 15.0,
+        "tilt": 10.0,
+        "period": 420.0
+      },
+      "before_metrics": {
+        "iou": 0.23094382447512768,
+        "dice": 0.3752304855562385,
+        "chamfer_distance": 3.2010971307754517,
+        "best_shift_iou": 0.24380771818237418,
+        "best_shift_dice": 0.39203441917639825,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": 4.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": 4.0,
+        "line_center_mae": 8.159347132632607,
+        "line_curvature_std": 11.502191844739412
+      },
+      "after_metrics": {
+        "iou": 0.2043624359771442,
+        "dice": 0.33937032553051577,
+        "chamfer_distance": 2.4379717111587524,
+        "best_shift_iou": 0.21538208734492056,
+        "best_shift_dice": 0.3544269569011609,
+        "best_shift_iou_dx": 12.0,
+        "best_shift_iou_dy": -3.0,
+        "best_shift_dice_dx": 12.0,
+        "best_shift_dice_dy": -3.0,
+        "line_center_mae": 10.816427682575426,
+        "line_curvature_std": 11.39967562022962
+      },
+      "improvements": {
+        "iou_delta": -0.02658138849798347,
+        "dice_delta": -0.03586016002572273,
+        "best_shift_iou_delta": -0.028425630837453614,
+        "best_shift_dice_delta": -0.03760746227523737,
+        "chamfer_delta": 0.7631254196166992,
+        "line_center_mae_delta": -2.657080549942819,
+        "line_curvature_std_delta": 0.1025162245097917
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/combined_021"
+    },
+    {
+      "sample_name": "combined_022",
+      "distortion_config": {
+        "name": "combined",
+        "type": "combined",
+        "sine_amplitude": 12.0,
+        "parabolic_amplitude": 15.0,
+        "tilt": 10.0,
+        "period": 420.0
+      },
+      "before_metrics": {
+        "iou": 0.23128666063559694,
+        "dice": 0.37568288202879657,
+        "chamfer_distance": 3.120652675628662,
+        "best_shift_iou": 0.23597562761812696,
+        "best_shift_dice": 0.38184511465307813,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 8.333913922309875,
+        "line_curvature_std": 11.916790413856507
+      },
+      "after_metrics": {
+        "iou": 0.1862975525312091,
+        "dice": 0.31408233479653574,
+        "chamfer_distance": 2.682563900947571,
+        "best_shift_iou": 0.21285810898312157,
+        "best_shift_dice": 0.35100249139874246,
+        "best_shift_iou_dx": 6.0,
+        "best_shift_iou_dy": -3.0,
+        "best_shift_dice_dx": 6.0,
+        "best_shift_dice_dy": -3.0,
+        "line_center_mae": 11.773847436904907,
+        "line_curvature_std": 11.552212929725647
+      },
+      "improvements": {
+        "iou_delta": -0.04498910810438783,
+        "dice_delta": -0.06160054723226083,
+        "best_shift_iou_delta": -0.023117518635005385,
+        "best_shift_dice_delta": -0.030842623254335677,
+        "chamfer_delta": 0.4380887746810913,
+        "line_center_mae_delta": -3.4399335145950314,
+        "line_curvature_std_delta": 0.36457748413086044
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/combined_022"
+    },
+    {
+      "sample_name": "combined_023",
+      "distortion_config": {
+        "name": "combined",
+        "type": "combined",
+        "sine_amplitude": 12.0,
+        "parabolic_amplitude": 15.0,
+        "tilt": 10.0,
+        "period": 420.0
+      },
+      "before_metrics": {
+        "iou": 0.21871203880874307,
+        "dice": 0.35892324329958697,
+        "chamfer_distance": 3.325630784034729,
+        "best_shift_iou": 0.23042516352443249,
+        "best_shift_dice": 0.37454559668529885,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 8.453817049662272,
+        "line_curvature_std": 11.776269223954943
+      },
+      "after_metrics": {
+        "iou": 0.1903813825213235,
+        "dice": 0.319866196358146,
+        "chamfer_distance": 2.548749327659607,
+        "best_shift_iou": 0.21216758833413535,
+        "best_shift_dice": 0.35006312720457117,
+        "best_shift_iou_dx": 1.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": 1.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 11.13159277704027,
+        "line_curvature_std": 11.41505479812622
+      },
+      "improvements": {
+        "iou_delta": -0.02833065628741957,
+        "dice_delta": -0.039057046941440965,
+        "best_shift_iou_delta": -0.018257575190297137,
+        "best_shift_dice_delta": -0.024482469480727687,
+        "chamfer_delta": 0.7768814563751221,
+        "line_center_mae_delta": -2.6777757273779983,
+        "line_curvature_std_delta": 0.361214425828722
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/combined_023"
+    },
+    {
+      "sample_name": "combined_024",
+      "distortion_config": {
+        "name": "combined",
+        "type": "combined",
+        "sine_amplitude": 12.0,
+        "parabolic_amplitude": 15.0,
+        "tilt": 10.0,
+        "period": 420.0
+      },
+      "before_metrics": {
+        "iou": 0.20792800514248982,
+        "dice": 0.34427218221165784,
+        "chamfer_distance": 3.4377981424331665,
+        "best_shift_iou": 0.24679862877363706,
+        "best_shift_dice": 0.39589172313477844,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 8.574381215231758,
+        "line_curvature_std": 11.289781979152135
+      },
+      "after_metrics": {
+        "iou": 0.19230850995982057,
+        "dice": 0.3225817954889899,
+        "chamfer_distance": 2.6055279970169067,
+        "best_shift_iou": 0.26694226077527783,
+        "best_shift_dice": 0.4213960952126237,
+        "best_shift_iou_dx": -10.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": -10.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 11.717016765049525,
+        "line_curvature_std": 10.914682115827288
+      },
+      "improvements": {
+        "iou_delta": -0.015619495182669252,
+        "dice_delta": -0.02169038672266793,
+        "best_shift_iou_delta": 0.020143632001640766,
+        "best_shift_dice_delta": 0.025504372077845283,
+        "chamfer_delta": 0.8322701454162598,
+        "line_center_mae_delta": -3.1426355498177667,
+        "line_curvature_std_delta": 0.3750998633248468
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/combined_024"
+    },
+    {
+      "sample_name": "line_groups_angles_025",
+      "distortion_config": {
+        "name": "line_groups_angles",
+        "type": "line_groups_angles",
+        "angles": [
+          -2.0,
+          1.5,
+          -1.0
+        ],
+        "group_blur": 21
+      },
+      "before_metrics": {
+        "iou": 0.3160281771687735,
+        "dice": 0.48027570024930344,
+        "chamfer_distance": 1.736962914466858,
+        "best_shift_iou": 0.4817470664928292,
+        "best_shift_dice": 0.6502419709634844,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 5.940160433451335,
+        "line_curvature_std": 4.0684811274210615
+      },
+      "after_metrics": {
+        "iou": 0.20293312130046823,
+        "dice": 0.33739717978848416,
+        "chamfer_distance": 1.8904118537902832,
+        "best_shift_iou": 0.4035666426141635,
+        "best_shift_dice": 0.5750587544065805,
+        "best_shift_iou_dx": -5.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": -5.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 3.968125820159912,
+        "line_curvature_std": 2.7621427377065024
+      },
+      "improvements": {
+        "iou_delta": -0.11309505586830529,
+        "dice_delta": -0.14287852046081928,
+        "best_shift_iou_delta": -0.07818042387866575,
+        "best_shift_dice_delta": -0.07518321655690385,
+        "chamfer_delta": -0.1534489393234253,
+        "line_center_mae_delta": 1.9720346132914228,
+        "line_curvature_std_delta": 1.306338389714559
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/line_groups_angles_025"
+    },
+    {
+      "sample_name": "line_groups_angles_026",
+      "distortion_config": {
+        "name": "line_groups_angles",
+        "type": "line_groups_angles",
+        "angles": [
+          -2.0,
+          1.5,
+          -1.0
+        ],
+        "group_blur": 21
+      },
+      "before_metrics": {
+        "iou": 0.3686817968802303,
+        "dice": 0.5387399726081001,
+        "chamfer_distance": 1.3861788511276245,
+        "best_shift_iou": 0.39931553730321695,
+        "best_shift_dice": 0.5707297984738798,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -3.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -3.0,
+        "line_center_mae": 4.687846978505452,
+        "line_curvature_std": 5.1044356028238935
+      },
+      "after_metrics": {
+        "iou": 0.22933846987299103,
+        "dice": 0.3731087499387945,
+        "chamfer_distance": 1.7269462943077087,
+        "best_shift_iou": 0.4365196595624956,
+        "best_shift_dice": 0.6077461685354747,
+        "best_shift_iou_dx": -11.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": -11.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 3.4842752615610757,
+        "line_curvature_std": 2.8775436083475747
+      },
+      "improvements": {
+        "iou_delta": -0.13934332700723925,
+        "dice_delta": -0.16563122266930563,
+        "best_shift_iou_delta": 0.03720412225927866,
+        "best_shift_dice_delta": 0.03701637006159486,
+        "chamfer_delta": -0.34076744318008423,
+        "line_center_mae_delta": 1.2035717169443765,
+        "line_curvature_std_delta": 2.226891994476319
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/line_groups_angles_026"
+    },
+    {
+      "sample_name": "line_groups_angles_027",
+      "distortion_config": {
+        "name": "line_groups_angles",
+        "type": "line_groups_angles",
+        "angles": [
+          -2.0,
+          1.5,
+          -1.0
+        ],
+        "group_blur": 21
+      },
+      "before_metrics": {
+        "iou": 0.37415160391512464,
+        "dice": 0.5445565145055631,
+        "chamfer_distance": 1.383849859237671,
+        "best_shift_iou": 0.41624328105441427,
+        "best_shift_dice": 0.5878132473744411,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 4.697207132975261,
+        "line_curvature_std": 4.961017926534017
+      },
+      "after_metrics": {
+        "iou": 0.20352978254018278,
+        "dice": 0.3382214308159631,
+        "chamfer_distance": 2.3717533349990845,
+        "best_shift_iou": 0.3101413476053245,
+        "best_shift_dice": 0.47344715617471456,
+        "best_shift_iou_dx": -12.0,
+        "best_shift_iou_dy": -4.0,
+        "best_shift_dice_dx": -12.0,
+        "best_shift_dice_dy": -4.0,
+        "line_center_mae": 4.236689647038777,
+        "line_curvature_std": 3.250337998072306
+      },
+      "improvements": {
+        "iou_delta": -0.17062182137494186,
+        "dice_delta": -0.20633508368959996,
+        "best_shift_iou_delta": -0.10610193344908975,
+        "best_shift_dice_delta": -0.11436609119972652,
+        "chamfer_delta": -0.9879034757614136,
+        "line_center_mae_delta": 0.46051748593648334,
+        "line_curvature_std_delta": 1.7106799284617105
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/line_groups_angles_027"
+    },
+    {
+      "sample_name": "line_groups_angles_028",
+      "distortion_config": {
+        "name": "line_groups_angles",
+        "type": "line_groups_angles",
+        "angles": [
+          -2.0,
+          1.5,
+          -1.0
+        ],
+        "group_blur": 21
+      },
+      "before_metrics": {
+        "iou": 0.3329909262112652,
+        "dice": 0.4996146930387876,
+        "chamfer_distance": 1.613975167274475,
+        "best_shift_iou": 0.4481540035338975,
+        "best_shift_dice": 0.6189314153609042,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 5.438717842102051,
+        "line_curvature_std": 4.368036111195882
+      },
+      "after_metrics": {
+        "iou": 0.18471141249903675,
+        "dice": 0.31182515935995836,
+        "chamfer_distance": 2.1744706630706787,
+        "best_shift_iou": 0.3413016925492933,
+        "best_shift_dice": 0.5089111486925979,
+        "best_shift_iou_dx": -9.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": -9.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 5.05933157602946,
+        "line_curvature_std": 3.1149682998657227
+      },
+      "improvements": {
+        "iou_delta": -0.14827951371222844,
+        "dice_delta": -0.18778953367882922,
+        "best_shift_iou_delta": -0.10685231098460418,
+        "best_shift_dice_delta": -0.11002026666830633,
+        "chamfer_delta": -0.5604954957962036,
+        "line_center_mae_delta": 0.37938626607259085,
+        "line_curvature_std_delta": 1.2530678113301592
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/line_groups_angles_028"
+    },
+    {
+      "sample_name": "line_groups_angles_029",
+      "distortion_config": {
+        "name": "line_groups_angles",
+        "type": "line_groups_angles",
+        "angles": [
+          -2.0,
+          1.5,
+          -1.0
+        ],
+        "group_blur": 21
+      },
+      "before_metrics": {
+        "iou": 0.3382669305567507,
+        "dice": 0.5055298353909465,
+        "chamfer_distance": 1.6405624747276306,
+        "best_shift_iou": 0.46633980765604377,
+        "best_shift_dice": 0.636059670781893,
+        "best_shift_iou_dx": 0.0,
+        "best_shift_iou_dy": -5.0,
+        "best_shift_dice_dx": 0.0,
+        "best_shift_dice_dy": -5.0,
+        "line_center_mae": 5.577986240386963,
+        "line_curvature_std": 4.1963160037994385
+      },
+      "after_metrics": {
+        "iou": 0.22936217591856212,
+        "dice": 0.3731401216198732,
+        "chamfer_distance": 1.9095951318740845,
+        "best_shift_iou": 0.3215354364366932,
+        "best_shift_dice": 0.4866088756630871,
+        "best_shift_iou_dx": -10.0,
+        "best_shift_iou_dy": -2.0,
+        "best_shift_dice_dx": -10.0,
+        "best_shift_dice_dy": -2.0,
+        "line_center_mae": 3.50260066986084,
+        "line_curvature_std": 2.793963670730591
+      },
+      "improvements": {
+        "iou_delta": -0.1089047546381886,
+        "dice_delta": -0.13238971377107334,
+        "best_shift_iou_delta": -0.14480437121935058,
+        "best_shift_dice_delta": -0.14945079511880588,
+        "chamfer_delta": -0.26903265714645386,
+        "line_center_mae_delta": 2.075385570526123,
+        "line_curvature_std_delta": 1.4023523330688477
+      },
+      "debug_dir": "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/grade_warp_binary_by_local_angles/line_groups_angles_029"
+    }
+  ],
+  "average": {
+    "before_metrics": {
+      "iou": 0.2784825165732255,
+      "dice": 0.4271431056011386,
+      "chamfer_distance": 2.3955303062995275,
+      "best_shift_iou": 0.35274760493606133,
+      "best_shift_dice": 0.5126265782107655,
+      "best_shift_iou_dx": 0.0,
+      "best_shift_iou_dy": -0.8333333333333334,
+      "best_shift_dice_dx": 0.0,
+      "best_shift_dice_dy": -0.8333333333333334,
+      "line_center_mae": 6.850242240343107,
+      "line_curvature_std": 9.947634395200163
+    },
+    "after_metrics": {
+      "iou": 0.2788228596278369,
+      "dice": 0.4102777353777246,
+      "chamfer_distance": 2.4629650339484215,
+      "best_shift_iou": 0.3734141656169543,
+      "best_shift_dice": 0.5203646916092517,
+      "best_shift_iou_dx": -0.9,
+      "best_shift_iou_dy": 0.7333333333333333,
+      "best_shift_dice_dx": -0.9,
+      "best_shift_dice_dy": 0.7333333333333333,
+      "line_center_mae": 7.832907795881185,
+      "line_curvature_std": 9.522099573822256
+    },
+    "improvements": {
+      "iou_delta": 0.00034034305461141484,
+      "dice_delta": -0.016865370223413906,
+      "best_shift_iou_delta": 0.020666560680892898,
+      "best_shift_dice_delta": 0.007738113398486238,
+      "chamfer_delta": -0.067434727648894,
+      "line_center_mae_delta": -0.9826655555380788,
+      "line_curvature_std_delta": 0.4255348213779057
+    },
+    "by_distortion": {
+      "sine_easy": {
+        "before_metrics": {
+          "iou": 0.38850605875588773,
+          "dice": 0.5594453732885306,
+          "chamfer_distance": 0.9969867885112762,
+          "best_shift_iou": 0.42047856559583857,
+          "best_shift_dice": 0.5919364936567655,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": -3.6,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": -3.6,
+          "line_center_mae": 5.307628060544367,
+          "line_curvature_std": 10.406680417337403
+        },
+        "after_metrics": {
+          "iou": 0.48563449066480197,
+          "dice": 0.6355604442090714,
+          "chamfer_distance": 0.612436306476593,
+          "best_shift_iou": 0.6007875990456533,
+          "best_shift_dice": 0.7480148803409499,
+          "best_shift_iou_dx": 1.0,
+          "best_shift_iou_dy": -0.8,
+          "best_shift_dice_dx": 1.0,
+          "best_shift_dice_dy": -0.8,
+          "line_center_mae": 4.8709006898714655,
+          "line_curvature_std": 9.964575068039482
+        },
+        "improvements": {
+          "iou_delta": 0.09712843190891432,
+          "dice_delta": 0.07611507092054096,
+          "best_shift_iou_delta": 0.1803090334498148,
+          "best_shift_dice_delta": 0.15607838668418447,
+          "chamfer_delta": 0.3845504820346832,
+          "line_center_mae_delta": 0.43672737067290146,
+          "line_curvature_std_delta": 0.4421053492979251
+        }
+      },
+      "sine_hard": {
+        "before_metrics": {
+          "iou": 0.14414054896994127,
+          "dice": 0.25182136457912063,
+          "chamfer_distance": 4.273804140090943,
+          "best_shift_iou": 0.2044724367073533,
+          "best_shift_dice": 0.33947541982433127,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": -2.4,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": -2.4,
+          "line_center_mae": 8.861970691763478,
+          "line_curvature_std": 11.619141697697826
+        },
+        "after_metrics": {
+          "iou": 0.08724323970676438,
+          "dice": 0.15718124200422667,
+          "chamfer_distance": 6.825674247741699,
+          "best_shift_iou": 0.16533954164838743,
+          "best_shift_dice": 0.2834443580478267,
+          "best_shift_iou_dx": 1.8,
+          "best_shift_iou_dy": 8.6,
+          "best_shift_dice_dx": 1.8,
+          "best_shift_dice_dy": 8.6,
+          "line_center_mae": 12.631166361978044,
+          "line_curvature_std": 12.14302507736982
+        },
+        "improvements": {
+          "iou_delta": -0.05689730926317691,
+          "dice_delta": -0.09464012257489395,
+          "best_shift_iou_delta": -0.039132895058965826,
+          "best_shift_dice_delta": -0.056031061776504576,
+          "chamfer_delta": -2.551870107650757,
+          "line_center_mae_delta": -3.769195670214566,
+          "line_curvature_std_delta": -0.5238833796719966
+        }
+      },
+      "parabolic": {
+        "before_metrics": {
+          "iou": 0.34386996313489415,
+          "dice": 0.5117384150296547,
+          "chamfer_distance": 1.346963894367218,
+          "best_shift_iou": 0.44052553604765254,
+          "best_shift_dice": 0.611578038366844,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": 6.0,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": 6.0,
+          "line_center_mae": 5.662172813652517,
+          "line_curvature_std": 10.377422784879027
+        },
+        "after_metrics": {
+          "iou": 0.46767019546052657,
+          "dice": 0.627628932094159,
+          "chamfer_distance": 0.6444449573755264,
+          "best_shift_iou": 0.5067443181699783,
+          "best_shift_dice": 0.6653132312265078,
+          "best_shift_iou_dx": -0.6,
+          "best_shift_iou_dy": -0.2,
+          "best_shift_dice_dx": -0.6,
+          "best_shift_dice_dy": -0.2,
+          "line_center_mae": 4.841662184425829,
+          "line_curvature_std": 9.863437072222975
+        },
+        "improvements": {
+          "iou_delta": 0.12380023232563238,
+          "dice_delta": 0.11589051706450433,
+          "best_shift_iou_delta": 0.06621878212232576,
+          "best_shift_dice_delta": 0.053735192859663924,
+          "chamfer_delta": 0.7025189369916915,
+          "line_center_mae_delta": 0.8205106292266879,
+          "line_curvature_std_delta": 0.5139857126560521
+        }
+      },
+      "piecewise_linear": {
+        "before_metrics": {
+          "iou": 0.22364848443316082,
+          "dice": 0.3592641429152196,
+          "chamfer_distance": 2.9940004348754883,
+          "best_shift_iou": 0.36684742914835844,
+          "best_shift_dice": 0.5306393672238534,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": -0.2,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": -0.2,
+          "line_center_mae": 7.786938143714368,
+          "line_curvature_std": 11.175790192621836
+        },
+        "after_metrics": {
+          "iou": 0.22673763787179202,
+          "dice": 0.3673182171472964,
+          "chamfer_distance": 2.1057093858718874,
+          "best_shift_iou": 0.38109452000802724,
+          "best_shift_dice": 0.5296674529381609,
+          "best_shift_iou_dx": -1.4,
+          "best_shift_iou_dy": 2.8,
+          "best_shift_dice_dx": -1.4,
+          "best_shift_dice_dy": 2.8,
+          "line_center_mae": 9.357985222788823,
+          "line_curvature_std": 10.803979486905764
+        },
+        "improvements": {
+          "iou_delta": 0.003089153438631237,
+          "dice_delta": 0.008054074232076885,
+          "best_shift_iou_delta": 0.014247090859668809,
+          "best_shift_dice_delta": -0.0009719142856925878,
+          "chamfer_delta": 0.8882910490036011,
+          "line_center_mae_delta": -1.5710470790744568,
+          "line_curvature_std_delta": 0.3718107057160719
+        }
+      },
+      "combined": {
+        "before_metrics": {
+          "iou": 0.2247061571990403,
+          "dice": 0.3668459946357657,
+          "chamfer_distance": 3.2091207265853883,
+          "best_shift_iou": 0.24180172290908497,
+          "best_shift_dice": 0.3893749296018787,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": -0.4,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": -0.4,
+          "line_center_mae": 8.214360006899698,
+          "line_curvature_std": 11.567113924310018
+        },
+        "after_metrics": {
+          "iou": 0.19567660163688844,
+          "dice": 0.32723904850697955,
+          "chamfer_distance": 2.5748898506164553,
+          "best_shift_iou": 0.2239060590760852,
+          "best_shift_dice": 0.3653938064075744,
+          "best_shift_iou_dx": 3.2,
+          "best_shift_iou_dy": -3.0,
+          "best_shift_dice_dx": 3.2,
+          "best_shift_dice_dy": -3.0,
+          "line_center_mae": 11.245527721292934,
+          "line_curvature_std": 11.397789475450956
+        },
+        "improvements": {
+          "iou_delta": -0.02902955556215182,
+          "dice_delta": -0.03960694612878618,
+          "best_shift_iou_delta": -0.017895663832999814,
+          "best_shift_dice_delta": -0.023981123194304267,
+          "chamfer_delta": 0.6342308759689331,
+          "line_center_mae_delta": -3.031167714393237,
+          "line_curvature_std_delta": 0.16932444885906292
+        }
+      },
+      "line_groups_angles": {
+        "before_metrics": {
+          "iou": 0.3460238869464288,
+          "dice": 0.5137433431585402,
+          "chamfer_distance": 1.552305853366852,
+          "best_shift_iou": 0.44235993920808037,
+          "best_shift_dice": 0.6127552205909205,
+          "best_shift_iou_dx": 0.0,
+          "best_shift_iou_dy": -4.4,
+          "best_shift_dice_dx": 0.0,
+          "best_shift_dice_dy": -4.4,
+          "line_center_mae": 5.268383725484212,
+          "line_curvature_std": 4.539657354354858
+        },
+        "after_metrics": {
+          "iou": 0.20997499242624817,
+          "dice": 0.34673852830461466,
+          "chamfer_distance": 2.014635455608368,
+          "best_shift_iou": 0.36261295575359404,
+          "best_shift_dice": 0.530354420694491,
+          "best_shift_iou_dx": -9.4,
+          "best_shift_iou_dy": -3.0,
+          "best_shift_dice_dx": -9.4,
+          "best_shift_dice_dy": -3.0,
+          "line_center_mae": 4.050204594930014,
+          "line_curvature_std": 2.959791262944539
+        },
+        "improvements": {
+          "iou_delta": -0.1360488945201807,
+          "dice_delta": -0.1670048148539255,
+          "best_shift_iou_delta": -0.07974698345448632,
+          "best_shift_dice_delta": -0.08240079989642954,
+          "chamfer_delta": -0.4623296022415161,
+          "line_center_mae_delta": 1.2181791305541991,
+          "line_curvature_std_delta": 1.5798660914103189
+        }
+      }
+    }
+  }
+}

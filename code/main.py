@@ -31,15 +31,15 @@ if __name__ == "__main__":
 
     # этот кусок кода из чего состоит датаскт
     generator = CocoMaskGenerator('datasets/school_notebooks_RU/annotations_train.json')
-    img_id = generator.get_image_id_by_filename('1_10.JPG')
+    img_id = generator.get_image_id_by_filename('2_24.JPG')
     print('img_id', img_id)
-    category_id = 4
+    category_id = 3
 
     if img_id is not None:
         mask = generator.create_mask(img_id, category_id=category_id)
 
         # Визуализация (без bounding boxes)
-        generator.visualize('datasets/school_notebooks_RU/images_base/1_10.JPG', img_id, category_id=category_id, show_bbox=True)
+        generator.visualize('datasets/school_notebooks_RU/images_base/2_24.JPG', img_id, category_id=category_id, show_bbox=True, stretch_x_percent=20.0, stretch_y_percent=50.0, padding_px=20)
 
         # Пример расчёта IoU между двумя масками (здесь просто сравнение с самой собой)
         iou_val = generator.iou(mask, mask)

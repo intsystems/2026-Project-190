@@ -12,6 +12,7 @@ from skimage.morphology import skeletonize
 from tqdm import tqdm
 from ultralytics import YOLO
 
+import grade_hpp
 from hpp_method import LineSegmentation
 from u_net_binarization import load_unet_model, binarize_image_with_loaded_model
 
@@ -44,7 +45,7 @@ IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG")
 MAX_IMAGES = 20
 
 # Ручной список label-файлов для обработки; если [], берутся первые MAX_IMAGES.
-LABEL_NAMES = ["1_11.txt", "1_19.txt", "8_109.txt", "2786.txt", "2796.txt"]
+LABEL_NAMES = ["1_11.txt", "1_19.txt", "8_109.txt", "2786.txt", "2796.txt", "1_18.txt", "1_23.txt", "2910.txt", "2812.txt", "2013.txt", "2015.txt", "2016.txt", "2884.txt"]
 
 # Включает сохранение debug-визуализаций.
 DEBUG = True
@@ -84,6 +85,9 @@ MIN_WORD_WIDTH = 3
 
 # Минимальное число черных пикселей, чтобы маска считалась непустой строкой.
 MIN_TEXT_PIXELS = 5
+
+# Максимальный сдвиг class-matrix при честном сравнении по текстовым пикселям.
+MAX_MASK_ALIGNMENT_SHIFT = 200
 
 # Счетчик уже сохраненных PCA-debug примеров.
 PCA_DEBUG_COUNTER = 0
@@ -506,6 +510,150 @@ def masks_from_hpp(image_path: Path) -> List[np.ndarray]:
     return masks
 
 
+def class_matrix_from_yolo_model(image: np.ndarray, binary: np.ndarray, model: YOLO) -> np.ndarray:
+    """
+    Короткое описание:
+        строит class-matrix строк по YOLO-lines: 0 фон, 1 первая строка, 2 вторая и т.д.
+    Вход:
+        image: np.ndarray -- исходное изображение BGR.
+        binary: np.ndarray -- бинарное изображение, где текст равен 0.
+        model: YOLO -- загруженная YOLO-seg модель строк.
+    Выход:
+        np.ndarray -- матрица классов размера исходного изображения.
+    """
+    class_matrix = np.zeros(binary.shape[:2], dtype=np.int32)
+    results = model(image, conf=YOLO_CONF_THRESHOLD, verbose=False)
+    if not results or results[0].masks is None:
+        return class_matrix
+
+    image_height, image_width = binary.shape[:2]
+    black_pixels = binary == 0
+    line_items = []
+    for mask in results[0].masks.data.cpu().numpy():
+        mask_uint8 = (mask > 0.5).astype(np.uint8) * 255
+        mask_big = cv2.resize(mask_uint8, (image_width, image_height), interpolation=cv2.INTER_NEAREST)
+        line_mask = np.logical_and(mask_big == 255, black_pixels)
+        if int(line_mask.sum()) < MIN_TEXT_PIXELS:
+            continue
+        ys = np.where(line_mask)[0]
+        line_items.append((float(np.mean(ys)), line_mask))
+
+    # Сортировка сверху вниз нужна, чтобы номера классов были стабильнее.
+    line_items.sort(key=lambda item: item[0])
+    for class_idx, (_, line_mask) in enumerate(line_items, start=1):
+        class_matrix[line_mask] = class_idx
+    return class_matrix
+
+
+def class_matrix_from_hpp(image_path: Path) -> np.ndarray:
+    """
+    Короткое описание:
+        получает full-size class-matrix строк методом HPP.
+    Вход:
+        image_path: Path -- путь к изображению.
+    Выход:
+        np.ndarray -- матрица классов в координатах исходного изображения.
+    """
+    segmenter = LineSegmentation(debug=False)
+    hpp_result = segmenter.segment_lines(image_path=str(image_path), return_class_matrix=True)
+    if len(hpp_result) < 3 or hpp_result[2] is None:
+        image = cv2.imread(str(image_path))
+        if image is None:
+            return np.zeros((1, 1), dtype=np.int32)
+        return np.zeros(image.shape[:2], dtype=np.int32)
+    return hpp_result[2]
+
+
+def text_iou_and_dice(pred: np.ndarray, target: np.ndarray) -> Dict[str, float]:
+    """
+    Короткое описание:
+        считает IoU и Dice только по факту текста class > 0, без учета номера строки.
+    Вход:
+        pred: np.ndarray -- предсказанная class-matrix.
+        target: np.ndarray -- target class-matrix.
+    Выход:
+        Dict[str, float] -- text_iou и text_dice.
+    """
+    pred_text = pred > 0
+    target_text = target > 0
+    intersection = int(np.sum(np.logical_and(pred_text, target_text)))
+    union = int(np.sum(np.logical_or(pred_text, target_text)))
+    denominator = int(np.sum(pred_text) + np.sum(target_text))
+    return {
+        "text_iou": float(intersection / union) if union > 0 else 1.0,
+        "text_dice": float(2.0 * intersection / denominator) if denominator > 0 else 1.0,
+    }
+
+
+def evaluate_class_matrix(pred_matrix: np.ndarray,
+                          target_matrix: np.ndarray) -> Dict[str, object]:
+    """
+    Короткое описание:
+        считает честные метрики class-matrix по аналогии с grade_hpp/experiment_find_line_regions.
+    Вход:
+        pred_matrix: np.ndarray -- предсказанная class-matrix.
+        target_matrix: np.ndarray -- target class-matrix.
+    Выход:
+        Dict[str, object] -- metrics и per_class.
+    """
+    pred_metric, target_metric = grade_hpp.prepare_pair_for_metrics(pred_matrix, target_matrix)
+    pred_metric, alignment_metrics = grade_hpp.align_pred_by_text_intersection(
+        pred_metric,
+        target_metric,
+        max_shift=MAX_MASK_ALIGNMENT_SHIFT,
+    )
+
+    metrics = {
+        "cross_entropy": grade_hpp.deterministic_cross_entropy(pred_metric, target_metric, text_only=False),
+        "cross_entropy_text_only": grade_hpp.deterministic_cross_entropy(pred_metric, target_metric, text_only=True),
+        "pixel_accuracy": float(np.mean(pred_metric == target_metric)),
+        "text_pixel_accuracy": float(np.mean(pred_metric[target_metric > 0] == target_metric[target_metric > 0]))
+        if int(np.sum(target_metric > 0)) > 0 else 0.0,
+    }
+    metrics.update(text_iou_and_dice(pred_metric, target_metric))
+    metrics.update(alignment_metrics)
+    metrics.update(grade_hpp.line_detection_metrics(pred_metric, target_metric))
+
+    return {
+        "metrics": metrics,
+        "per_class": grade_hpp.per_class_metrics(pred_metric, target_metric),
+    }
+
+
+def save_class_matrix_debug(stem: str,
+                            method_name: str,
+                            pred_matrix: np.ndarray,
+                            target_matrix: np.ndarray) -> None:
+    """
+    Короткое описание:
+        сохраняет debug class-matrix для нового сравнения.
+    Вход:
+        stem: str -- имя изображения.
+        method_name: str -- hpp или yolo.
+        pred_matrix: np.ndarray -- предсказанная матрица.
+        target_matrix: np.ndarray -- target матрица.
+    Выход:
+        None
+    """
+    if not DEBUG:
+        return
+    DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+    pred_metric, target_metric = grade_hpp.prepare_pair_for_metrics(pred_matrix, target_matrix)
+    pred_metric, _ = grade_hpp.align_pred_by_text_intersection(
+        pred_metric,
+        target_metric,
+        max_shift=MAX_MASK_ALIGNMENT_SHIFT,
+    )
+    cv2.imwrite(
+        str(DEBUG_DIR / f"{stem}_{method_name}_pred_classes.png"),
+        grade_hpp.class_matrix_to_color(pred_metric),
+    )
+    cv2.imwrite(
+        str(DEBUG_DIR / f"{stem}_target_classes.png"),
+        grade_hpp.class_matrix_to_color(target_metric),
+    )
+
+
 def pca_align_mask(mask: np.ndarray, canvas_size: Tuple[int, int] = PCA_CANVAS_SIZE) -> np.ndarray:
     """
     Короткое описание:
@@ -840,32 +988,59 @@ def evaluate_image(label_path: Path, yolo_model: YOLO, unet_model, unet_device) 
     binary = binarize_image_with_loaded_model(image, unet_model, unet_device)
     image_height, image_width = binary.shape[:2]
 
-    # Шаг 3: строим target-маски из YOLO-seg разметки и черных пикселей.
+    # Шаг 3: строим target class-matrix из YOLO-seg разметки и черных пикселей.
     polygons = read_yolo_polygons(label_path, image_width, image_height)
-    target_masks = masks_from_polygons(polygons, binary)
-    if DEBUG:
-        save_first_masks_debug(target_masks, label_path.stem, "target")
+    target_matrix = grade_hpp.build_target_class_matrix(polygons, binary)
 
-    # Шаг 4: получаем предсказания YOLO-lines и HPP.
-    yolo_masks = masks_from_yolo_model(image, binary, yolo_model)
-    hpp_masks = masks_from_hpp(image_path)
+    # Шаг 4: получаем предсказания YOLO-lines и HPP как full-size class-matrix.
+    yolo_matrix = class_matrix_from_yolo_model(image, binary, yolo_model)
+    hpp_matrix = class_matrix_from_hpp(image_path)
     if DEBUG:
-        save_first_masks_debug(yolo_masks, label_path.stem, "yolo")
-        save_first_masks_debug(hpp_masks, label_path.stem, "hpp")
+        save_class_matrix_debug(label_path.stem, "yolo", yolo_matrix, target_matrix)
+        save_class_matrix_debug(label_path.stem, "hpp", hpp_matrix, target_matrix)
 
-    # Шаг 5: считаем метрики двух методов относительно target.
+    # Шаг 5: считаем честные class-matrix метрики двух методов относительно target.
+    hpp_score = evaluate_class_matrix(hpp_matrix, target_matrix)
+    yolo_score = evaluate_class_matrix(yolo_matrix, target_matrix)
     result = {
-        "target_count": float(len(target_masks)),
-        "hpp": match_and_score(hpp_masks, target_masks, f"{label_path.stem}_hpp"),
-        "yolo": match_and_score(yolo_masks, target_masks, f"{label_path.stem}_yolo"),
+        "target_shape": [int(target_matrix.shape[0]), int(target_matrix.shape[1])],
+        "hpp_shape": [int(hpp_matrix.shape[0]), int(hpp_matrix.shape[1])],
+        "yolo_shape": [int(yolo_matrix.shape[0]), int(yolo_matrix.shape[1])],
+        "hpp": hpp_score,
+        "yolo": yolo_score,
     }
 
     # Шаг 6: очищаем тяжелые объекты после изображения.
-    del image, binary, polygons, target_masks, yolo_masks, hpp_masks
+    del image, binary, polygons, target_matrix, yolo_matrix, hpp_matrix
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     return result
+
+
+def average_method_metrics(results: Dict[str, Dict]) -> Dict[str, Dict[str, float]]:
+    """
+    Короткое описание:
+        усредняет новые metrics отдельно для HPP и YOLO.
+    Вход:
+        results: Dict[str, Dict] -- результаты по изображениям.
+    Выход:
+        Dict[str, Dict[str, float]] -- средние метрики методов.
+    """
+    averaged: Dict[str, Dict[str, float]] = {}
+    for method_name in ("hpp", "yolo"):
+        metric_values: Dict[str, List[float]] = {}
+        for result in results.values():
+            if method_name not in result or "metrics" not in result[method_name]:
+                continue
+            for key, value in result[method_name]["metrics"].items():
+                metric_values.setdefault(key, []).append(float(value))
+        averaged[method_name] = {
+            key: float(np.mean(values))
+            for key, values in metric_values.items()
+            if values
+        }
+    return averaged
 
 
 def main() -> None:
@@ -891,8 +1066,13 @@ def main() -> None:
             results[label_path.stem] = {"error": str(exc)}
 
     # Шаг 3: сохраняем итоговые метрики в JSON.
+    output = {
+        "label_names": LABEL_NAMES,
+        "average_metrics": average_method_metrics(results),
+        "results": results,
+    }
     OUTPUT_JSON_PATH.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
+        json.dumps(output, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 

@@ -8,8 +8,8 @@ import joblib
 import numpy as np
 from tqdm import tqdm
 
-from param_optimization_hough_transform_method import evaluate_image, load_ground_truth_masks
-from collect_boost_hough_dataset import (
+from hough_method.param_optimization_hough_transform_method import evaluate_image, load_ground_truth_masks
+from hough_method.collect_boost_hough_dataset import (
     FIXED_PARAMS,
     UNET_MODEL_PATH,
     extract_unet_avg_feature,

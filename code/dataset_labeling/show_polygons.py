@@ -11,7 +11,7 @@ IMAGES_DIR = DATASET_DIR / "images_base"
 LABELS_DIR = DATASET_DIR / "images_detect_lines"
 OUTPUT_PATH = PROJECT_ROOT / "debug_images" / "show_polygons.jpg"
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG")
-LABEL_NAME = "2796"
+LABEL_NAME = "ru_hw2022_6_IMG_7175"
 LABEL_PATH = None
 SHOW_WINDOW = True
 

@@ -13,6 +13,7 @@ from processing import (
     correct_perspective,
     warp_binary_by_local_angles,
     warp_binary_by_local_angles_bijection,
+    image_hyperparameter_estimation
 )
 
 # Общая папка для всех отладочных изображений метода.
@@ -20,7 +21,14 @@ DEBUG_IMAGES_DIR = "debug_images"
 
 # Размер морфологического ядра для сглаживания HPP-профиля.
 # Используется как 1D open/close по профилю: помогает закрывать мелкие провалы и убирать мелкие пики.
-HPP_MORPH_KERNEL_SIZE = 21
+HPP_MORPH_KERNEL_SIZE = 7 #21
+
+# Минимальный подъем HPP от соседней впадины до плато, чтобы пик считался строкой.
+HPP_MIN_PLATEAU_RISE_FRACTION = 0.05
+
+# Процент центральной части плато, который оставляем после HPP.
+# Например 50 означает: убрать 25 процентов слева, 25 процентов справа, оставить центральные 50 процентов.
+HPP_PLATEAU_KEEP_PERCENT = 50.0
 
 # Цена черного пикселя для A*: текст дорогой, но проходимый, если другого пути нет.
 HPP_TEXT_PIXEL_COST = 10.0
@@ -32,7 +40,10 @@ HPP_GRADIENT_COST = 0.5
 HPP_BLOCK_REGION_TOP_PADDING = 2
 
 # Расширение HPP-региона строки вниз для жесткого запрета A*.
-HPP_BLOCK_REGION_BOTTOM_PADDING = 5
+HPP_BLOCK_REGION_BOTTOM_PADDING = 10
+
+# Запасные значения нижнего padding: если A* не нашел путь, пробуем ослабить запрет.
+HPP_BLOCK_REGION_BOTTOM_PADDING_FALLBACKS = [HPP_BLOCK_REGION_BOTTOM_PADDING, 5, 2, 0]
 
 
 class LineSegmentation:
@@ -144,36 +155,31 @@ class LineSegmentation:
         smoothed = opened.reshape(-1).astype(np.float32) / 255.0
         return smoothed * (profile_max - profile_min) + profile_min
 
-    def _find_line_regions(self,
-                           normalized_hpp: np.ndarray,
-                           debug_filename: Optional[str] = None) -> List[Tuple[int, int]]:
+    def _find_plateau_rows_by_kernel(self,
+                                     normalized_hpp: np.ndarray,
+                                     kernel_size: int) -> Tuple[np.ndarray, np.ndarray]:
         """
         Короткое описание:
-            находит области строк как плато локальных максимумов после морфологического сглаживания HPP.
+            находит строки плато локальных максимумов HPP для одного морфологического ядра.
         Вход:
-            normalized_hpp: np.ndarray -- нормализованный профиль со значениями от 0 до 1.
-            debug_filename: Optional[str] -- имя файла для debug-графика HPP.
+            normalized_hpp: np.ndarray -- нормализованный HPP со значениями от 0 до 1.
+            kernel_size: int -- размер морфологического ядра.
         Выход:
-            List[Tuple[int, int]] -- список пар start_row и end_row.
+            Tuple[np.ndarray, np.ndarray] -- сглаженный HPP и bool-маска строк, попавших в валидные плато.
         """
-        if len(normalized_hpp) == 0:
-            return []
-        if float(np.max(normalized_hpp)) <= 1e-9:
-            return []
-
-        # Шаг 1: сглаживаем HPP только морфологией, без Otsu и ручных порогов.
+        # Шаг 1: сглаживаем профиль выбранным морфологическим ядром.
         smoothed_hpp = self._morphological_smooth_profile(
             normalized_hpp.astype(np.float32),
-            HPP_MORPH_KERNEL_SIZE,
+            kernel_size,
         )
         smoothed_u8 = np.clip(
             self._normalize_profile_for_debug(smoothed_hpp) * 255.0,
             0,
             255,
         ).astype(np.uint8)
+        min_rise = int(np.ceil(255.0 * HPP_MIN_PLATEAU_RISE_FRACTION))
 
-        # Шаг 2: идем по сглаженному профилю и ищем форму "подъем -> плато максимума -> спад".
-        regions = []
+        # Шаг 2: ищем форму "подъем -> плато -> спад" и проверяем силу подъема.
         plateau_rows = np.zeros_like(smoothed_u8, dtype=bool)
         row_idx = 0
         while row_idx < len(smoothed_u8):
@@ -186,9 +192,88 @@ class LineSegmentation:
             has_left_rise = plateau_start > 0 and int(smoothed_u8[plateau_start - 1]) < plateau_value
             has_right_fall = plateau_end + 1 < len(smoothed_u8) and int(smoothed_u8[plateau_end + 1]) < plateau_value
             if plateau_value > 0 and has_left_rise and has_right_fall:
-                regions.append((plateau_start, plateau_end))
-                plateau_rows[plateau_start:plateau_end + 1] = True
+                left_base = plateau_start - 1
+                while left_base > 0 and int(smoothed_u8[left_base - 1]) <= int(smoothed_u8[left_base]):
+                    left_base -= 1
 
+                right_base = plateau_end + 1
+                while right_base + 1 < len(smoothed_u8) and int(smoothed_u8[right_base + 1]) <= int(smoothed_u8[right_base]):
+                    right_base += 1
+
+                left_rise = plateau_value - int(smoothed_u8[left_base])
+                right_rise = plateau_value - int(smoothed_u8[right_base])
+                if min(left_rise, right_rise) >= min_rise:
+                    plateau_rows[plateau_start:plateau_end + 1] = True
+
+            row_idx += 1
+
+        return smoothed_hpp, plateau_rows
+
+    def _shrink_plateau_region(self, start: int, end: int) -> Tuple[int, int]:
+        """
+        Короткое описание:
+            симметрично обрезает HPP-плато, оставляя центральный процент региона.
+        Вход:
+            start: int -- начальная строка плато.
+            end: int -- конечная строка плато.
+        Выход:
+            Tuple[int, int] -- новые границы плато после обрезания.
+        """
+        # Шаг 1: ограничиваем процент, чтобы регион не исчез и не расширился.
+        keep_percent = float(np.clip(HPP_PLATEAU_KEEP_PERCENT, 1.0, 100.0))
+        region_height = int(end) - int(start) + 1
+        if region_height <= 1 or keep_percent >= 100.0:
+            return int(start), int(end)
+
+        # Шаг 2: считаем, сколько строк оставить в центре плато.
+        keep_height = max(1, int(round(region_height * keep_percent / 100.0)))
+        trim_total = region_height - keep_height
+        trim_top = trim_total // 2
+        trim_bottom = trim_total - trim_top
+
+        # Шаг 3: возвращаем центральный кусок плато.
+        new_start = int(start) + trim_top
+        new_end = int(end) - trim_bottom
+        if new_start > new_end:
+            middle = (int(start) + int(end)) // 2
+            return middle, middle
+        return new_start, new_end
+
+    def _find_line_regions(self,
+                           normalized_hpp: np.ndarray,
+                           debug_filename: Optional[str] = None) -> List[Tuple[int, int]]:
+        """
+        Короткое описание:
+            находит области строк как валидные плато после морфологического сглаживания HPP.
+        Вход:
+            normalized_hpp: np.ndarray -- нормализованный профиль со значениями от 0 до 1.
+            debug_filename: Optional[str] -- имя файла для debug-графика HPP.
+        Выход:
+            List[Tuple[int, int]] -- список пар start_row и end_row.
+        """
+        if len(normalized_hpp) == 0:
+            return []
+        if float(np.max(normalized_hpp)) <= 1e-9:
+            return []
+
+        # Шаг 1: ищем плато одним морфологическим ядром и фильтруем слабый подъем.
+        smoothed_hpp, plateau_rows = self._find_plateau_rows_by_kernel(
+            normalized_hpp,
+            HPP_MORPH_KERNEL_SIZE,
+        )
+
+        # Шаг 2: переводим маску валидных плато в регионы start/end.
+        regions = []
+        row_idx = 0
+        while row_idx < len(plateau_rows):
+            if not plateau_rows[row_idx]:
+                row_idx += 1
+                continue
+            region_start = row_idx
+            while row_idx + 1 < len(plateau_rows) and plateau_rows[row_idx + 1]:
+                row_idx += 1
+            region_end = row_idx
+            regions.append(self._shrink_plateau_region(region_start, region_end))
             row_idx += 1
 
         if self.debug and debug_filename is not None:
@@ -231,12 +316,13 @@ class LineSegmentation:
         ax1.grid(True, linestyle='--', alpha=0.5)
         ax1.legend(loc='upper right')
 
-        ax2.plot(x, plateau_rows.astype(np.float32), color='tab:green', linewidth=2.0)
+        ax2.plot(x, plateau_rows.astype(np.float32), color='tab:green', linewidth=2.0, label='accepted mask')
         for start, end in regions:
             ax2.axvspan(start, end, color='tab:green', alpha=0.18)
         ax2.set_xlabel('Номер строки y')
         ax2.set_ylabel('plateau mask')
         ax2.grid(True, linestyle='--', alpha=0.5)
+        ax2.legend(loc='upper right')
 
         fig.tight_layout()
         fig.savefig(os.path.join(DEBUG_IMAGES_DIR, debug_filename))
@@ -268,13 +354,15 @@ class LineSegmentation:
 
     def _build_hpp_blocked_mask(self,
                                 shape: Tuple[int, int],
-                                line_regions: List[Tuple[int, int]]) -> np.ndarray:
+                                line_regions: List[Tuple[int, int]],
+                                bottom_padding: int = HPP_BLOCK_REGION_BOTTOM_PADDING) -> np.ndarray:
         """
         Короткое описание:
             строит жесткую маску запрещенных зон A* по HPP-регионам строк.
         Вход:
             shape: Tuple[int, int] -- размер изображения H x W.
             line_regions: List[Tuple[int, int]] -- области строк по HPP.
+            bottom_padding: int -- расширение HPP-региона вниз для текущей попытки A*.
         Выход:
             np.ndarray -- bool-маска, где True означает запрет для A*.
         """
@@ -283,7 +371,7 @@ class LineSegmentation:
         blocked_mask = np.zeros((height, width), dtype=bool)
         for start, end in line_regions:
             y0 = max(0, int(start) - HPP_BLOCK_REGION_TOP_PADDING)
-            y1 = min(height - 1, int(end) + HPP_BLOCK_REGION_BOTTOM_PADDING)
+            y1 = min(height - 1, int(end) + int(bottom_padding))
             blocked_mask[y0:y1 + 1, :] = True
 
         return blocked_mask
@@ -645,7 +733,7 @@ class LineSegmentation:
         if return_class_matrix:
             pages, binary_pages, page_infos = extract_pages_with_yolo(
                 image_path=image_path,
-                model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+                model_path='models/yolo_segment_notebook/yolo_segment_notebook_3_(2-architecture).pt',
                 output_dir=DEBUG_IMAGES_DIR,
                 conf_threshold=0.8,
                 return_binary=True,
@@ -655,7 +743,7 @@ class LineSegmentation:
         else:
             pages, binary_pages = extract_pages_with_yolo(
                 image_path=image_path,
-                model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+                model_path='models/yolo_detect_notebook/yolo_detect_notebook_3_(2-architecture).pt',
                 output_dir=DEBUG_IMAGES_DIR,
                 conf_threshold=0.8,
                 return_binary=True,
@@ -689,6 +777,7 @@ class LineSegmentation:
                 binary, transform_sequence = warp_function(
                     page,
                     return_transform_sequence=True,
+                    hyperparameter_selection = True
                 )
             elif self.use_warp_binary_by_local_angles:
                 binary = warp_function(page)
@@ -736,6 +825,8 @@ class LineSegmentation:
                 cv2.imwrite(debug_page_path, page)
                 cv2.imwrite(debug_binary_path, binary)
 
+            _, _, robust_height = image_hyperparameter_estimation(page)
+            HPP_MORPH_KERNEL_SIZE = int(robust_height)
             # Шаг 3: строим HPP и нормализуем профиль.
             hpp = self._horizontal_projection_profile(binary)
             norm_hpp = self._normalize_hpp(hpp, method='minmax')
@@ -804,11 +895,25 @@ class LineSegmentation:
 
             # Шаг 7: ищем швы между строками с помощью A*.
             seams = []
+            seam_fallback_debug = []
             for start_y in start_points:
                 if 0 <= start_y < binary.shape[0]:
-                    seam = self._find_seam_a_star(energy, blocked_mask, start_y)
-                    if seam:
-                        seams.append(seam)
+                    for bottom_padding in HPP_BLOCK_REGION_BOTTOM_PADDING_FALLBACKS:
+                        retry_blocked_mask = self._build_hpp_blocked_mask(
+                            binary.shape,
+                            line_regions,
+                            bottom_padding=bottom_padding,
+                        )
+                        seam = self._find_seam_a_star(energy, retry_blocked_mask, start_y)
+                        if seam:
+                            seams.append(seam)
+                            seam_fallback_debug.append((int(start_y), int(bottom_padding)))
+                            break
+
+            if self.debug:
+                with open(debug_text_path, 'a', encoding='utf-8') as file:
+                    file.write(f'a_star_bottom_padding_fallbacks {HPP_BLOCK_REGION_BOTTOM_PADDING_FALLBACKS}\n')
+                    file.write(f'a_star_used_bottom_padding {seam_fallback_debug}\n')
 
             if self.debug:
                 if len(binary.shape) == 2:
@@ -954,7 +1059,8 @@ class LineSegmentation:
 
 
 if __name__ == "__main__":
-    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/school_notebooks_RU/images_base/2555.jpg'
+    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/184/reuse7/ФотоСветлое/2.jpg'
+
     lineSegmentation = LineSegmentation(use_warp_binary_by_local_angles = True, use_bijection_warp=False)
 
     _, _ = lineSegmentation.segment_lines(image_path=image_path, return_class_matrix=True)

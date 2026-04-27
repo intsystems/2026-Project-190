@@ -13,7 +13,7 @@ import torch
 from ultralytics import YOLO
 from tqdm import tqdm
 
-from param_optimization_hough_transform_method import evaluate_image, load_ground_truth_masks
+from hough_method.param_optimization_hough_transform_method import evaluate_image, load_ground_truth_masks
 from u_net_binarization import UNetTiny
 
 

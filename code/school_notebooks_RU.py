@@ -159,7 +159,9 @@ class CocoMaskGenerator:
 
 
     def visualize(self, image_path: str, image_id: int, category_id: int = 0,
-                  show_bbox: bool = False, window_name: str = 'Visualization'):
+                  show_bbox: bool = False, window_name: str = 'Visualization',
+                  stretch_x_percent: float = 0.0, stretch_y_percent: float = 0.0,
+                  padding_px: int = 0):
         """
         Отображает изображение с наложенной маской (и опционально bounding boxes).
 
@@ -169,6 +171,9 @@ class CocoMaskGenerator:
             category_id (int): Категория объектов для маски.
             show_bbox (bool): Если True, рисует bounding boxes вокруг объектов.
             window_name (str): Имя окна OpenCV.
+            stretch_x_percent (float): Процент расширения bbox по оси X (например, 10.0 = +10% к ширине).
+            stretch_y_percent (float): Процент расширения bbox по оси Y (например, 10.0 = +10% к высоте).
+            padding_px (int): Дополнительный паддинг (в пикселях) по всем сторонам bbox.
 
         Выход:
             None
@@ -191,13 +196,24 @@ class CocoMaskGenerator:
 
         if show_bbox:
             annotations = self.get_annotations(image_id, category_id)
+            h_img, w_img = overlay.shape[:2]
             for ann in annotations:
                 seg = ann.get('segmentation')
                 if not seg:
                     continue
                 pts = np.array(seg[0], dtype=np.int32).reshape(-1, 2)
                 x, y, w, h = cv2.boundingRect(pts)
-                cv2.rectangle(overlay, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # Процентное расширение относительно размеров bbox.
+                dx = int(round(w * (max(stretch_x_percent, 0.0) / 100.0) / 2.0))
+                dy = int(round(h * (max(stretch_y_percent, 0.0) / 100.0) / 2.0))
+                pad = max(int(padding_px), 0)
+
+                x1 = max(0, x - dx - pad)
+                y1 = max(0, y - dy - pad)
+                x2 = min(w_img - 1, x + w + dx + pad)
+                y2 = min(h_img - 1, y + h + dy + pad)
+
+                cv2.rectangle(overlay, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.imshow(window_name, overlay)
