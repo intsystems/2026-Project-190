@@ -23,163 +23,11 @@ class YoloMaskNotFoundError(RuntimeError):
     """
     pass
 
-LOCAL_OTSU_WHITE_THRESHOLD = 245  # Порог белого фона для fallback в почти пустых областях.
-LOCAL_OTSU_LINE_KERNEL_FACTOR = 0.04  # Доля размера изображения для поиска длинных линий.
-LOCAL_OTSU_MIN_LINE_KERNEL = 25  # Минимальная длина ядра для поиска линий клеток.
-LOCAL_OTSU_GRID_DILATE_SIZE = 3  # Расширение найденной сетки перед выбеливанием.
-LOCAL_OTSU_MIN_STD = 2.0  # Минимальная дисперсия яркости, ниже которой область считаем почти однотонной.
-LOCAL_OTSU_GRID_SIZE = (3, 3)  # Количество областей по x и y для локального Otsu.
-LOCAL_OTSU_REMOVE_GRID_LINES = True  # Удалять длинные линии клеток после локального Otsu.
-def binarize_local_otsu_by_regions(
-    image: np.ndarray,
-    grid_size: Tuple[int, int] = LOCAL_OTSU_GRID_SIZE,
-    remove_grid_lines: bool = LOCAL_OTSU_REMOVE_GRID_LINES,
-    debug: bool = False,
-    debug_output_dir: str = "debug_images",
-) -> np.ndarray:
-    """
-    Короткое описание:
-        Переводит изображение в серый формат и применяет Otsu отдельно в каждой области сетки.
-    Вход:
-        image (np.ndarray): входное цветное или серое изображение.
-        grid_size (Tuple[int, int]): количество областей по x и y.
-        remove_grid_lines (bool): удалять длинные горизонтальные и вертикальные линии.
-        debug (bool): сохранять debug-изображения.
-        debug_output_dir (str): папка для debug-файлов.
-    Выход:
-        np.ndarray: бинарное изображение uint8, где фон белый, текст черный.
-    """
-    if image is None:
-        raise ValueError("image не должен быть None")
-    if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = image.copy()
-    if gray.dtype != np.uint8:
-        gray = np.clip(gray, 0, 255).astype(np.uint8)
-
-    grid_x, grid_y = grid_size
-    if grid_x <= 0 or grid_y <= 0:
-        raise ValueError("grid_size должен содержать положительные значения")
-
-    height, width = gray.shape
-    binary = np.full((height, width), 255, dtype=np.uint8)
-    thresholds = []
-
-    # Шаг 1: применяем Otsu независимо в каждой ячейке сетки.
-    for y_idx in range(grid_y):
-        y1 = int(round(y_idx * height / grid_y))
-        y2 = int(round((y_idx + 1) * height / grid_y))
-        for x_idx in range(grid_x):
-            x1 = int(round(x_idx * width / grid_x))
-            x2 = int(round((x_idx + 1) * width / grid_x))
-            region = gray[y1:y2, x1:x2]
-            if region.size == 0:
-                continue
-
-            if float(np.std(region)) < LOCAL_OTSU_MIN_STD:
-                threshold = LOCAL_OTSU_WHITE_THRESHOLD
-                region_binary = np.where(region < threshold, 0, 255).astype(np.uint8)
-            else:
-                threshold, region_binary = cv2.threshold(
-                    region,
-                    0,
-                    255,
-                    cv2.THRESH_BINARY + cv2.THRESH_OTSU,
-                )
-            binary[y1:y2, x1:x2] = region_binary
-            thresholds.append((x1, y1, x2, y2, float(threshold)))
-
-    binary_before_grid_removal = binary.copy()
-    grid_mask = np.zeros_like(binary)
-    horizontal_lines = np.zeros_like(binary)
-    vertical_lines = np.zeros_like(binary)
-
-    # Шаг 2: ищем длинные линии клеток морфологией и выбеливаем их.
-    if remove_grid_lines:
-        foreground = np.where(binary < 128, 255, 0).astype(np.uint8)
-        horizontal_kernel_width = max(LOCAL_OTSU_MIN_LINE_KERNEL, int(width * LOCAL_OTSU_LINE_KERNEL_FACTOR))
-        vertical_kernel_height = max(LOCAL_OTSU_MIN_LINE_KERNEL, int(height * LOCAL_OTSU_LINE_KERNEL_FACTOR))
-        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (horizontal_kernel_width, 1))
-        vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, vertical_kernel_height))
-
-        horizontal_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, horizontal_kernel)
-        vertical_lines = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, vertical_kernel)
-        grid_mask = cv2.bitwise_or(horizontal_lines, vertical_lines)
-
-        if LOCAL_OTSU_GRID_DILATE_SIZE > 1:
-            dilate_kernel = cv2.getStructuringElement(
-                cv2.MORPH_RECT,
-                (LOCAL_OTSU_GRID_DILATE_SIZE, LOCAL_OTSU_GRID_DILATE_SIZE),
-            )
-            grid_mask = cv2.dilate(grid_mask, dilate_kernel, iterations=1)
-        binary[grid_mask > 0] = 255
-
-    # Шаг 3: сохраняем debug-карты для проверки локальных порогов и найденной сетки.
-    if debug:
-        os.makedirs(debug_output_dir, exist_ok=True)
-        debug_grid = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-        for x1, y1, x2, y2, threshold in thresholds:
-            cv2.rectangle(debug_grid, (x1, y1), (x2 - 1, y2 - 1), (0, 255, 0), 2)
-            cv2.putText(
-                debug_grid,
-                f"{threshold:.0f}",
-                (x1 + 5, min(y1 + 25, y2 - 5)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (0, 0, 255),
-                2,
-                cv2.LINE_AA,
-            )
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_gray.jpg"), gray)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_binary_before_grid_removal.jpg"), binary_before_grid_removal)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_binary.jpg"), binary)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_grid.jpg"), debug_grid)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_horizontal_lines.jpg"), horizontal_lines)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_vertical_lines.jpg"), vertical_lines)
-        cv2.imwrite(os.path.join(debug_output_dir, "local_otsu_grid_lines_mask.jpg"), grid_mask)
-
-    return binary
-
-
-def clean_binary_opening_closing(binary_image: np.ndarray) -> np.ndarray:
-    """
-    Короткое описание:
-        Очищает бинарное изображение через opening и closing.
-    Вход:
-        binary_image (np.ndarray): бинарное изображение, где фон белый, текст черный.
-    Выход:
-        np.ndarray: очищенное бинарное изображение uint8.
-    """
-    # Шаг 1: приводим изображение к одноканальному uint8 и жестко бинаризуем.
-    if binary_image is None:
-        raise ValueError("binary_image не должен быть None")
-    if len(binary_image.shape) == 3:
-        binary = cv2.cvtColor(binary_image, cv2.COLOR_BGR2GRAY)
-    else:
-        binary = binary_image.copy()
-    if binary.dtype != np.uint8:
-        binary = np.clip(binary, 0, 255).astype(np.uint8)
-    binary = np.where(binary < 128, 0, 255).astype(np.uint8)
-
-    # Шаг 2: инвертируем, чтобы морфология работала по черному тексту как по foreground.
-    foreground = 255 - binary
-
-    # Шаг 3: opening убирает мелкий шум, closing склеивает маленькие разрывы.
-    opening_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-    closing_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    opened = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, opening_kernel, iterations=1)
-    closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, closing_kernel, iterations=1)
-
-    # Шаг 4: возвращаем формат фон белый, текст черный.
-    return 255 - closed
-
-
 def extract_pages_with_yolo(
     image_path,
     model_path,
     output_dir="debug_images",
-    conf_threshold=0.7,
+    conf_threshold=0.3,
     debug=False,
     binary_image=None, 
     return_binary=False,
@@ -292,8 +140,6 @@ def extract_pages_with_yolo(
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-
-
 
 def correct_perspective(image, debug=False, debug_output_dir="debug_images", return_matrix=False):
     """
@@ -410,9 +256,101 @@ def correct_perspective(image, debug=False, debug_output_dir="debug_images", ret
         return rotated_image, rotated_binary, best_angle, best_matrix
     return rotated_image, rotated_binary, best_angle
 
-ROBUST_CUTOFF_LOW = 0.15
-ROBUST_CUTOFF_HIGH = 0.95
-def image_hyperparameter_estimation(binary_image: np.ndarray, fallback_num_lines: int = 20) -> int:
+ROBUST_CUTOFF_LOW = 0.3
+ROBUST_CUTOFF_HIGH = 0.7
+
+
+def _connect_nearest_components_by_distance_variance(
+    binary: np.ndarray,
+    debug: bool = False,
+    debug_output_dir: str = "debug_images/image_hyperparameter_estimation",
+) -> np.ndarray:
+    """
+    Соединяет ближайшие компоненты, расстояния между которыми попали в малый класс
+    после максимизации межклассовой дисперсии по расстояниям центров масс.
+    """
+    text_mask = (binary == 0).astype(np.uint8)
+    num_labels, _, _, centroids = cv2.connectedComponentsWithStats(text_mask, connectivity=8)
+    if num_labels <= 2:
+        return binary
+
+    centers = centroids[1:].astype(np.float32)
+    nearest_pairs = []
+    nearest_distances = []
+    for center_idx, center in enumerate(centers):
+        deltas = centers - center
+        distances = np.sqrt(np.sum(deltas * deltas, axis=1))
+        distances[center_idx] = np.inf
+        nearest_idx = int(np.argmin(distances))
+        nearest_distance = float(distances[nearest_idx])
+        if np.isfinite(nearest_distance):
+            nearest_pairs.append((center_idx, nearest_idx, nearest_distance))
+            nearest_distances.append(nearest_distance)
+
+    if not nearest_distances:
+        return binary
+
+    distances = np.asarray(nearest_distances, dtype=np.float32)
+    best_threshold = float(np.median(distances))
+    best_variance = -1.0
+    for threshold in np.unique(distances):
+        left = distances <= float(threshold)
+        if not np.any(left) or np.all(left):
+            continue
+        left_values = distances[left]
+        right_values = distances[~left]
+        left_weight = float(left_values.size) / float(distances.size)
+        right_weight = float(right_values.size) / float(distances.size)
+        variance = left_weight * right_weight * (float(np.mean(left_values)) - float(np.mean(right_values))) ** 2
+        if variance > best_variance:
+            best_variance = variance
+            best_threshold = float(threshold)
+
+    connected = binary.copy()
+    for center_idx, nearest_idx, nearest_distance in nearest_pairs:
+        if nearest_distance > best_threshold:
+            continue
+        x0, y0 = centers[center_idx]
+        x1, y1 = centers[nearest_idx]
+        y = int(round((float(y0) + float(y1)) / 2.0))
+        x_start = int(round(min(float(x0), float(x1))))
+        x_end = int(round(max(float(x0), float(x1))))
+        cv2.line(connected, (x_start, y), (x_end, y), 0, 1)
+
+    if debug:
+        os.makedirs(debug_output_dir, exist_ok=True)
+        with open(os.path.join(debug_output_dir, "nearest_component_distances.txt"), "w", encoding="utf-8") as file:
+            file.write(f"threshold={best_threshold:.6f}\n")
+            file.write(f"between_class_variance={best_variance:.6f}\n")
+            file.write("component_idx\tnearest_component_idx\tdistance\n")
+            for center_idx, nearest_idx, nearest_distance in nearest_pairs:
+                file.write(f"{center_idx + 1}\t{nearest_idx + 1}\t{nearest_distance:.6f}\n")
+
+        sorted_distances = np.sort(distances)
+        graph_h, graph_w = 420, 900
+        graph = np.full((graph_h, graph_w, 3), 255, dtype=np.uint8)
+        pad_l, pad_r, pad_t, pad_b = 60, 20, 20, 50
+        y_max = max(float(np.max(sorted_distances)), 1.0)
+        points = []
+        denom = max(1, len(sorted_distances) - 1)
+        for idx, distance in enumerate(sorted_distances):
+            x = int(pad_l + idx / denom * (graph_w - pad_l - pad_r))
+            y = int(graph_h - pad_b - float(distance) / y_max * (graph_h - pad_t - pad_b))
+            points.append((x, y))
+        for idx in range(1, len(points)):
+            cv2.line(graph, points[idx - 1], points[idx], (255, 0, 0), 2)
+        threshold_y = int(graph_h - pad_b - best_threshold / y_max * (graph_h - pad_t - pad_b))
+        cv2.line(graph, (pad_l, threshold_y), (graph_w - pad_r, threshold_y), (0, 0, 255), 1)
+        cv2.rectangle(graph, (pad_l, pad_t), (graph_w - pad_r, graph_h - pad_b), (0, 0, 0), 1)
+        cv2.putText(graph, f"threshold={best_threshold:.2f}", (pad_l, graph_h - 12),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+        cv2.imwrite(os.path.join(debug_output_dir, "nearest_component_distances_plot.jpg"), graph)
+        cv2.imwrite(os.path.join(debug_output_dir, "binary_connected_components.jpg"), connected)
+
+    return connected
+
+
+def image_hyperparameter_estimation(binary_image: np.ndarray, debug: bool = True) -> int:
     """Оценивает гиперпараметры бинарного изображения"""
 
     if len(binary_image.shape) == 3:
@@ -423,38 +361,19 @@ def image_hyperparameter_estimation(binary_image: np.ndarray, fallback_num_lines
         binary = binary.astype(np.uint8)
     binary = np.where(binary < 128, 0, 255).astype(np.uint8)
 
-    # Шаг 2: HPP-порог выбираем по максимальной межклассовой дисперсии.
-    hpp = np.sum(binary == 0, axis=1).astype(np.float32)
-    hpp_max = float(np.max(hpp)) if hpp.size else 0.0
-    best_threshold = 0.0
-    best_variance = -1.0
-    num_lines = int(fallback_num_lines)
-    if hpp_max > 0:
-        thresholds = np.linspace(
-            0.05 * hpp_max,
-            0.95 * hpp_max,
-            WARP_AUTO_HPP_THRESHOLD_COUNT,
-            dtype=np.float32,
-        )
-        for threshold in thresholds:
-            text_rows = hpp >= float(threshold)
-            if not np.any(text_rows) or np.all(text_rows):
-                continue
-            background_values = hpp[~text_rows]
-            text_values = hpp[text_rows]
-            w0 = float(background_values.size) / float(hpp.size)
-            w1 = float(text_values.size) / float(hpp.size)
-            variance = w0 * w1 * (float(np.mean(text_values)) - float(np.mean(background_values))) ** 2
-            if variance > best_variance:
-                best_variance = variance
-                best_threshold = float(threshold)
+    kernel = np.ones((3,3), np.uint8)
+    binary = cv2.erode(binary, kernel, iterations=3)
+    binary = cv2.dilate(binary, kernel, iterations=3)
+    binary = _connect_nearest_components_by_distance_variance(binary, debug=debug)
 
-        if best_variance >= 0:
-            estimated_rows = _count_true_regions(hpp >= best_threshold)
-            if estimated_rows > 0:
-                num_lines = estimated_rows
+    if debug:
+        output_dir = 'debug_images/image_hyperparameter_estimation'
+        
+        # Проверка на существование папки, если нет — создаем
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        cv2.imwrite('debug_images/image_hyperparameter_estimation/img_binary_erode.jpg', binary)
 
-    # Шаг 3: по связным компонентам оцениваем среднюю ширину слова/буквенного куска.
     text_mask = (binary == 0).astype(np.uint8)
     num_labels, _, stats, _ = cv2.connectedComponentsWithStats(text_mask, connectivity=8)
     component_widths = []
@@ -467,36 +386,9 @@ def image_hyperparameter_estimation(binary_image: np.ndarray, fallback_num_lines
     robust_width = float(np.mean(component_widths[int(len(component_widths) * ROBUST_CUTOFF_LOW): int(len(component_widths) * ROBUST_CUTOFF_HIGH)])) if component_widths else 0.0
     robust_height = float(np.mean(component_heights[int(len(component_heights) * ROBUST_CUTOFF_LOW): int(len(component_heights) * ROBUST_CUTOFF_HIGH)])) if component_heights else 0.0
 
-    return num_lines, robust_width, robust_height
+    return robust_width, robust_height
 
 
-def _count_true_regions(mask: np.ndarray) -> int:
-    """
-    Короткое описание:
-        Считает количество непрерывных True-участков в одномерной маске.
-    Вход:
-        mask: np.ndarray -- одномерная bool-маска.
-    Выход:
-        int -- количество найденных участков.
-    """
-    count = 0
-    in_region = False
-    for value in mask.astype(bool):
-        if value and not in_region:
-            count += 1
-            in_region = True
-        elif not value:
-            in_region = False
-    return count
-
-
-WARP_AUTO_HPP_THRESHOLD_COUNT = 64  # Число кандидатов порога HPP для автоподбора строк.
-WARP_AUTO_MIN_GRID_ROWS = 2  # Нижняя граница числа строк сетки локального warp.
-WARP_AUTO_MAX_GRID_ROWS = 80  # Верхняя граница числа строк сетки локального warp.
-WARP_AUTO_MIN_GRID_COLS = 2  # Нижняя граница числа столбцов сетки локального warp.
-WARP_AUTO_MAX_GRID_COLS = 120  # Верхняя граница числа столбцов сетки локального warp.
-WARP_AUTO_MIN_CELL_TEXT_PIXELS = 8  # Нижняя граница min_cell_text_pixels.
-WARP_AUTO_MAX_CELL_TEXT_PIXELS = 512  # Верхняя граница min_cell_text_pixels.
 def select_warp_binary_by_local_angles_hyperparameters(
     binary_image: np.ndarray,
     fallback_grid_rows: int = 20,
@@ -507,12 +399,12 @@ def select_warp_binary_by_local_angles_hyperparameters(
 ) -> Tuple[int, int, int]:
     """
     Короткое описание:
-        Автоматически подбирает сетку и порог текста для warp_binary_by_local_angles.
+        Автоматически оценивает размер сетки для warp_binary_by_local_angles.
     Вход:
         binary_image: np.ndarray -- бинарное изображение, где текст равен 0, фон равен 255.
-        fallback_grid_rows: int -- число строк сетки, если HPP не смог оценить строки.
+        fallback_grid_rows: int -- число строк сетки, если компоненты не найдены.
         fallback_grid_cols: int -- число столбцов сетки, если компоненты не найдены.
-        fallback_min_cell_text_pixels: int -- порог текста, если плотность не оценена.
+        fallback_min_cell_text_pixels: int -- порог текста.
         debug: bool -- сохранять debug-отчет.
         debug_output_dir: str -- папка для debug-файлов.
     Выход:
@@ -526,91 +418,23 @@ def select_warp_binary_by_local_angles_hyperparameters(
     if binary.dtype != np.uint8:
         binary = binary.astype(np.uint8)
     binary = np.where(binary < 128, 0, 255).astype(np.uint8)
-    _, width = binary.shape
+    height, width = binary.shape
 
-    # Шаг 2: HPP-порог выбираем по максимальной межклассовой дисперсии.
-    hpp = np.sum(binary == 0, axis=1).astype(np.float32)
-    hpp_max = float(np.max(hpp)) if hpp.size else 0.0
-    best_threshold = 0.0
-    best_variance = -1.0
-    grid_rows = int(fallback_grid_rows)
-    if hpp_max > 0:
-        thresholds = np.linspace(
-            0.05 * hpp_max,
-            0.95 * hpp_max,
-            WARP_AUTO_HPP_THRESHOLD_COUNT,
-            dtype=np.float32,
-        )
-        for threshold in thresholds:
-            text_rows = hpp >= float(threshold)
-            if not np.any(text_rows) or np.all(text_rows):
-                continue
-            background_values = hpp[~text_rows]
-            text_values = hpp[text_rows]
-            w0 = float(background_values.size) / float(hpp.size)
-            w1 = float(text_values.size) / float(hpp.size)
-            variance = w0 * w1 * (float(np.mean(text_values)) - float(np.mean(background_values))) ** 2
-            if variance > best_variance:
-                best_variance = variance
-                best_threshold = float(threshold)
+    component_width, component_height = image_hyperparameter_estimation(binary, debug=False)
+    grid_rows = int(round(float(height) / float(component_height))) if component_height > 0 else int(fallback_grid_rows)
+    grid_cols = int(round(float(width) / float(component_width))) if component_width > 0 else int(fallback_grid_cols)
+    min_cell_text_pixels = int(fallback_min_cell_text_pixels)
 
-        if best_variance >= 0:
-            estimated_rows = _count_true_regions(hpp >= best_threshold)
-            if estimated_rows > 0:
-                grid_rows = estimated_rows
-    grid_rows = int(np.clip(grid_rows, WARP_AUTO_MIN_GRID_ROWS, WARP_AUTO_MAX_GRID_ROWS))
-
-    # Шаг 3: по связным компонентам оцениваем среднюю ширину слова/буквенного куска.
-    text_mask = (binary == 0).astype(np.uint8)
-    num_labels, _, stats, _ = cv2.connectedComponentsWithStats(text_mask, connectivity=8)
-    component_widths = []
-    for label_idx in range(1, num_labels):
-        area = int(stats[label_idx, cv2.CC_STAT_AREA])
-        comp_width = int(stats[label_idx, cv2.CC_STAT_WIDTH])
-        component_widths.append(comp_width)
-
-    grid_cols = int(fallback_grid_cols)
-    avg_component_width = 0.0
-    if component_widths:
-        avg_component_width = float(np.mean(component_widths))
-        if avg_component_width > 0:
-            grid_cols = int(round(float(width) / avg_component_width))
-    grid_cols = int(np.clip(grid_cols, WARP_AUTO_MIN_GRID_COLS, WARP_AUTO_MAX_GRID_COLS))
-
-    # Шаг 4: по плотности текста оцениваем, сколько черных пикселей должно быть в ячейке.
-    black_pixels = int(np.sum(binary == 0))
-    white_pixels = int(np.sum(binary == 255))
-    total_pixels = max(1, black_pixels + white_pixels)
-    black_ratio = float(black_pixels) / float(total_pixels)
-    white_black_ratio = float(white_pixels) / float(max(1, black_pixels))
-    avg_black_per_cell = float(black_pixels) / float(max(1, grid_rows * grid_cols))
-    min_cell_text_pixels = int(round(avg_black_per_cell * 0.35))
-    if min_cell_text_pixels <= 0:
-        min_cell_text_pixels = int(fallback_min_cell_text_pixels)
-    min_cell_text_pixels = int(np.clip(
-        min_cell_text_pixels,
-        WARP_AUTO_MIN_CELL_TEXT_PIXELS,
-        WARP_AUTO_MAX_CELL_TEXT_PIXELS,
-    ))
-
-    # Шаг 5: сохраняем короткий отчет, чтобы было видно, почему выбраны такие значения.
     if debug:
         os.makedirs(debug_output_dir, exist_ok=True)
         with open(os.path.join(debug_output_dir, "warp_local_hyperparameters.txt"), "w", encoding="utf-8") as file:
-            file.write(f"hpp_best_threshold={best_threshold:.6f}\n")
-            file.write(f"hpp_best_variance={best_variance:.6f}\n")
+            file.write(f"component_width={component_width:.6f}\n")
+            file.write(f"component_height={component_height:.6f}\n")
             file.write(f"estimated_grid_rows={grid_rows}\n")
-            file.write(f"component_count={len(component_widths)}\n")
-            file.write(f"avg_component_width={avg_component_width:.6f}\n")
             file.write(f"estimated_grid_cols={grid_cols}\n")
-            file.write(f"black_pixels={black_pixels}\n")
-            file.write(f"white_pixels={white_pixels}\n")
-            file.write(f"black_ratio={black_ratio:.6f}\n")
-            file.write(f"white_black_ratio={white_black_ratio:.6f}\n")
-            file.write(f"avg_black_per_cell={avg_black_per_cell:.6f}\n")
             file.write(f"estimated_min_cell_text_pixels={min_cell_text_pixels}\n")
 
-    return int(grid_rows / 4), int(grid_cols / 4), min_cell_text_pixels # / 4 / 8
+    return 3, 3, min_cell_text_pixels
 
 
 def _estimate_rotation_padding(height: int, width: int, angle_deg: float, safety_px: int = 2) -> Tuple[int, int]:
@@ -640,7 +464,7 @@ def warp_binary_by_local_angles(
     grid_rows: int = 20,
     grid_cols: int = 20,
     min_cell_text_pixels: int = 32,
-    max_local_angle_delta: float = 15.0,
+    max_local_angle_delta: float = 8.0,
     hyperparameter_selection: bool = False,
     debug: bool = False,
     debug_output_dir: str = "debug_images",
@@ -895,20 +719,6 @@ def warp_binary_by_local_angles(
         cv2.imwrite(os.path.join(debug_output_dir, "warp_local_angle_map.jpg"), angle_vis)
         cv2.imwrite(os.path.join(debug_output_dir, "warp_local_displacement_y.jpg"), disp_vis)
         cv2.imwrite(os.path.join(debug_output_dir, "warp_local_result.jpg"), warped)
-        with open(os.path.join(debug_output_dir, "warp_local_angles.txt"), "w", encoding="utf-8") as file:
-            file.write(f"global_angle={float(global_angle):.6f}\n")
-            file.write(f"preliminary_global_angle={float(preliminary_global_angle):.6f}\n")
-            file.write(f"final_global_angle={float(final_global_angle):.6f}\n")
-            file.write(f"hyperparameter_selection={bool(hyperparameter_selection)}\n")
-            file.write(f"grid_rows={int(grid_rows)}\n")
-            file.write(f"grid_cols={int(grid_cols)}\n")
-            file.write(f"min_cell_text_pixels={int(min_cell_text_pixels)}\n")
-            file.write(f"adaptive_pad_y={int(pad_y)}\n")
-            file.write(f"adaptive_pad_x={int(pad_x)}\n")
-            file.write(f"safe_crop=({crop_x0}, {crop_y0}) - ({crop_x1}, {crop_y1})\n")
-            for gy in range(angle_map.shape[0]):
-                row_values = " ".join(f"{float(value):.4f}" for value in angle_map[gy])
-                file.write(f"row_{gy:02d}: {row_values}\n")
 
     if return_transform_sequence:
         transform_sequence = {
@@ -1195,15 +1005,6 @@ def warp_binary_by_local_angles_bijection(
         cv2.imwrite(os.path.join(debug_output_dir, "warp_bijection_map_y.jpg"), map_vis)
         cv2.imwrite(os.path.join(debug_output_dir, "warp_bijection_vertical_jacobian.jpg"), jac_vis)
         cv2.imwrite(os.path.join(debug_output_dir, "warp_bijection_result.jpg"), warped)
-        with open(os.path.join(debug_output_dir, "warp_bijection_angles.txt"), "w", encoding="utf-8") as file:
-            file.write(f"global_angle={float(global_angle):.6f}\n")
-            file.write(f"final_global_angle={float(final_global_angle):.6f}\n")
-            file.write(f"min_vertical_step={float(min_vertical_step):.6f}\n")
-            file.write(f"min_vertical_jacobian={float(jac_min):.6f}\n")
-            file.write(f"safe_crop=({crop_x0}, {crop_y0}) - ({crop_x1}, {crop_y1})\n")
-            for gy in range(angle_map.shape[0]):
-                row_values = " ".join(f"{float(value):.4f}" for value in angle_map[gy])
-                file.write(f"row_{gy:02d}: {row_values}\n")
 
     if return_transform_sequence:
         transform_sequence = {
@@ -1261,7 +1062,7 @@ def _apply_clahe_and_gamma(channel, clip_limit, tile_grid_size, gamma):
 
 if __name__ == "__main__":
     # 1_18.JPG 3_51.JPG ru_hw2022_1_IMG_7886.JPG 77_742.JPG 1_11.JPG
-    img_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/184/reuse7/ФотоСветлое/2.jpg'
+    img_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/compare_hpp_dbnetpp/011_1/00_input.jpg'
 
     # Бинаризация страницы локальным otsu после нормализации освещения
     # img = cv2.imread(img_path)
@@ -1283,12 +1084,14 @@ if __name__ == "__main__":
     #     binary = binarize_local_otsu_by_regions(img_corrected, debug=True, debug_output_dir='debug_images')
 
     # Измененния искревления страницы
+    img_path = normalize_illumination(cv2.imread(img_path), clip_limit=4, gamma=0.2)
+    
     start_time = time.time()
     pages, binary_pages = extract_pages_with_yolo(
         image_path=img_path,
         model_path='models/yolo_segment_notebook/yolo_segment_notebook_3_(2-architecture).pt',
         output_dir='debug_images',
-        conf_threshold=0.8,
+        conf_threshold=0.5,
         return_binary = True
     )
     end_time = time.time()
@@ -1300,21 +1103,18 @@ if __name__ == "__main__":
         print('Время выполнения correct_perspective:', end_time - start_time)
 
         start_time = time.time()
-        num_lines, robust_width, robust_height = image_hyperparameter_estimation(page)
+        robust_width, robust_height = image_hyperparameter_estimation(page)
         end_time = time.time()
-        print('Время выполнения image_hyperparameter_estimation:', end_time - start_time, "Число строк:", num_lines, "Робастная ширина:", robust_width, "Робастная высота:", robust_height)
+        print('Время выполнения image_hyperparameter_estimation:', end_time - start_time, "Робастная ширина:", robust_width, "Робастная высота:", robust_height)
 
 
         start_time = time.time()
         warp_binary = warp_binary_by_local_angles(page, debug=True, hyperparameter_selection=True)
         end_time = time.time()
-        clean_binary = clean_binary_opening_closing(warp_binary)
         print('Время выполнения warp_binary_by_local_angles:', end_time - start_time)
         cv2.imwrite(f'debug_images/img_binary_page_{idx}.jpg', page)
         cv2.imwrite(f'debug_images/img_binary_final_page_{idx}.jpg', binary_final)
         cv2.imwrite(f'debug_images/img_warp_binary_page_{idx}.jpg', warp_binary)
-        cv2.imwrite(f'debug_images/img_clean_binary_page_{idx}.jpg', clean_binary)
-
     #Исправление наклона
     # start_time = time.time()
     # img_final, binary_final = correct_perspective(img, debug=True)

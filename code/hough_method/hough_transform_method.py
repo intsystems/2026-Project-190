@@ -1444,7 +1444,7 @@ if __name__ == "__main__":
         }
 
     start = time.time()
-    img_path = 'datasets/school_notebooks_RU/images_base/21_225.JPG'
+    img_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/5/reuse1/ФотоТемное/2.jpg'
     img = cv2.imread(img_path)
 
     #загружаем параметры (простая optuna)
@@ -1511,7 +1511,7 @@ if __name__ == "__main__":
 
     pages, binary_pages = extract_pages_with_yolo(
         image_path=img_path,
-        model_path='models/yolo_detect_notebook/yolo_detect_notebook_1_(1-architecture).pt',
+        model_path='models/yolo_segment_notebook/yolo_segment_notebook_3_(2-architecture).pt',
         output_dir='debug_images',
         conf_threshold=0.7,
         return_binary = True

@@ -4,10 +4,11 @@ from pathlib import Path
 from collections import defaultdict
 
 
-INPUT_DIR = Path("datasets/boost_hough_datasets/3/param_importances")
-DATASET_ROWS_PATH = Path("datasets/boost_hough_datasets/3/dataset_rows.json")
-OUTPUT_IMPORTANCES_PATH = Path("debug_images/param_importances_mean_variance_cv.json")
-OUTPUT_HYPERPARAMS_PATH = Path("debug_images/hyperparams_mean_variance_cv.json")
+BASE_DIR = Path(__file__).resolve().parent
+INPUT_DIR = BASE_DIR / "datasets/boost_hough_datasets/3/param_importances"
+DATASET_ROWS_PATH = BASE_DIR / "datasets/boost_hough_datasets/3/dataset_rows.json"
+OUTPUT_IMPORTANCES_PATH = BASE_DIR / "debug_images/param_importances_mean_variance_cv.json"
+OUTPUT_HYPERPARAMS_PATH = BASE_DIR / "debug_images/hyperparams_mean_variance_cv.json"
 EPS = 1e-12
 IMPORTANT_THRESHOLD = 0.15
 
@@ -57,7 +58,8 @@ def main() -> None:
         отсутствует.
     """
     importances_values = defaultdict(list)
-    for json_path in sorted(INPUT_DIR.glob("*.json")):
+    importance_files = sorted(INPUT_DIR.glob("*.json"))
+    for json_path in importance_files:
         with open(json_path, "r", encoding="utf-8") as fp:
             row = json.load(fp)
         for key, value in row.items():
@@ -80,6 +82,11 @@ def main() -> None:
         json.dump(compute_stats(importances_values, add_importance_label=True), fp, ensure_ascii=False, indent=2)
     with open(OUTPUT_HYPERPARAMS_PATH, "w", encoding="utf-8") as fp:
         json.dump(compute_stats(hyperparams_values), fp, ensure_ascii=False, indent=2)
+
+    print(f"Read importance files: {len(importance_files)} from {INPUT_DIR}")
+    print(f"Read dataset rows: {len(dataset_rows)} from {DATASET_ROWS_PATH}")
+    print(f"Wrote importance stats: {len(importances_values)} params -> {OUTPUT_IMPORTANCES_PATH}")
+    print(f"Wrote hyperparam stats: {len(hyperparams_values)} params -> {OUTPUT_HYPERPARAMS_PATH}")
 
 
 if __name__ == "__main__":

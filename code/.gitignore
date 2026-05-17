@@ -7,3 +7,5 @@ test.py
 tmp_files/
 boost_hough/
 handwriting-recognition/
+dataset_labeling/
+models/

@@ -13,7 +13,8 @@ from processing import (
     correct_perspective,
     warp_binary_by_local_angles,
     warp_binary_by_local_angles_bijection,
-    image_hyperparameter_estimation
+    image_hyperparameter_estimation,
+    normalize_illumination
 )
 
 # Общая папка для всех отладочных изображений метода.
@@ -725,9 +726,13 @@ class LineSegmentation:
             List[set] -- список множеств координат (x, y) текстовых пикселей строк.
         """
         image = cv2.imread(image_path) if (self.debug or return_class_matrix) else None
+        image = cv2.resize(image, (240, 320)) # resize
         if self.debug:
             os.makedirs(DEBUG_IMAGES_DIR, exist_ok=True)
             cv2.imwrite(os.path.join(DEBUG_IMAGES_DIR, 'main_input.jpg'), image)
+        
+        # Шаг 0: нормализуем освещение для лучшей работы YOLO и HPP.
+        image_path = normalize_illumination(image, clip_limit=4, gamma=0.2)
 
         # Шаг 1: находим страницы тетради и получаем бинарные изображения страниц.
         if return_class_matrix:
@@ -735,7 +740,7 @@ class LineSegmentation:
                 image_path=image_path,
                 model_path='models/yolo_segment_notebook/yolo_segment_notebook_3_(2-architecture).pt',
                 output_dir=DEBUG_IMAGES_DIR,
-                conf_threshold=0.8,
+                conf_threshold=0.5,
                 return_binary=True,
                 return_page_infos=True,
                 yolo_model=self.page_yolo_model,
@@ -745,7 +750,7 @@ class LineSegmentation:
                 image_path=image_path,
                 model_path='models/yolo_detect_notebook/yolo_detect_notebook_3_(2-architecture).pt',
                 output_dir=DEBUG_IMAGES_DIR,
-                conf_threshold=0.8,
+                conf_threshold=0.5,
                 return_binary=True,
                 yolo_model=self.page_yolo_model,
             )
@@ -825,8 +830,10 @@ class LineSegmentation:
                 cv2.imwrite(debug_page_path, page)
                 cv2.imwrite(debug_binary_path, binary)
 
-            _, _, robust_height = image_hyperparameter_estimation(page)
-            HPP_MORPH_KERNEL_SIZE = int(robust_height)
+
+            global HPP_MORPH_KERNEL_SIZE
+            _, robust_height = image_hyperparameter_estimation(page, debug=False)
+            HPP_MORPH_KERNEL_SIZE = int(robust_height / 2)
             # Шаг 3: строим HPP и нормализуем профиль.
             hpp = self._horizontal_projection_profile(binary)
             norm_hpp = self._normalize_hpp(hpp, method='minmax')
@@ -1059,7 +1066,7 @@ class LineSegmentation:
 
 
 if __name__ == "__main__":
-    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/184/reuse7/ФотоСветлое/2.jpg'
+    image_path = '/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/debug_images/compare_hpp_dbnetpp/007_2/00_input.jpg'
 
     lineSegmentation = LineSegmentation(use_warp_binary_by_local_angles = True, use_bijection_warp=False)
 
