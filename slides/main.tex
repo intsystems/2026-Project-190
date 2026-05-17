@@ -23,7 +23,7 @@
 \usetikzlibrary{positioning,arrows}
 \tikzstyle{name} = [parameters]
 \definecolor{name}{rgb}{0.5,0.5,0.5}
-
+\definecolor{beamerblue}{rgb}{0.20,0.20,0.75}
 % ===== Пакет textpos подключён в преамбуле =====
 \usepackage[absolute, overlay]{textpos}
 \setlength{\TPHorizModule}{1mm}
@@ -39,78 +39,625 @@
 % colors
 \definecolor{darkgreen}{rgb}{0.0, 0.2, 0.13}
 \definecolor{darkcyan}{rgb}{0.0, 0.55, 0.55}
+\newcommand{\argmax}{\mathop{\mathrm{arg\,max}}}
 %\AtBeginEnvironment{figure}{\setcounter{subfigure}{0}}
 %\captionsetup[subfloat]{labelformat=empty}
 
-%----------------------------------------------------------------------------------------------------------
+% ------------------------------------------------------------
+% Небольшие команды без добавления новых библиотек
+% ------------------------------------------------------------
+\newcommand{\argmin}{\mathop{\mathrm{arg\,min}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\HRule}{\rule{\linewidth}{0.3mm}}
 
-\title{ Детекция строк в фотографиях страниц рукописных текстов}
+\title{Детекция строк в фотографиях страниц рукописных текстов}
 \author{Александр Забарянский}
-\institute[]{}
+\institute[]{Московский физико-технический институт}
 \date{2026}
 
-%---------------------------------------------------------------------------------------------------------
 \begin{document}
+
+% ------------------------------------------------------------
 \begin{frame}
 \titlepage
 \end{frame}
-\setcounter{page}{2}%remove here for the title
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{Алгоритм детекции строк в фотографиях}
+\setcounter{page}{2}
 
-\begin{block}{Проблема}
-Часто рукописные тексты имеют переменное освещение, наклон строк, пересечения и зачеркивания, что затрудняет стандартные методы детекции строк.
-\end{block}
+% ------------------------------------------------------------
+\begin{frame}{Цель исследования}
 
-\begin{block}{Предлагаемый подход:}
-Используем свёрточный автокодировщик для классификации каждого пикселя на два класса: текст/фон. После с помощью преобразования Хафа выделяются линии строк.
-\end{block}
+\vspace{3mm}
 
-\begin{block}{Результат}
-Работающий алгоритм, дающий на выходе множество задетектированных строк.
-\end{block}
+\begin{center}
+\begin{minipage}{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{без_разметки.jpg}
+    
+    \vspace{1mm}
+    \scriptsize Входное изображение
+\end{minipage}
+\hfill
+\begin{minipage}{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{с_разметкой.jpg}
+    
+    \vspace{1mm}
+    \scriptsize Результат детекции
+\end{minipage}
+\end{center}
+
+% картинка на входе, картинка на выходе
+
+Разработать алгоритм детекции строк в фотографиях страниц рукописных текстов,
+устойчивый к \textbf{глобальному наклону}, \textbf{локальной кривизне} строки,
+шуму бинаризации и неидеальной геометрии страницы.
+
+
 \end{frame}
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{U‑Net + Преобразование Хафа}
 
-% Здесь располагается содержимое фрейма, например, картинки
-% Можно использовать textpos для абсолютного позиционирования
-  % Верхний левый угол
-\begin{tikzpicture}[remember picture, overlay]
-    % Верхний ряд: смещаем вниз на 10 мм
-    \node[anchor=north west, inner sep=0pt, yshift=-15mm] at (current page.north west) 
-      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-49.jpg}};
-    \node[anchor=north, inner sep=0pt, yshift=-15mm] at (current page.north) 
-      {\includegraphics[width=40mm]{автокодировшик_со_скип_конекшенами.jpg}};
-    \node[anchor=north east, inner sep=0pt, yshift=-15mm] at (current page.north east) 
-      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-46.jpg}};
+\begin{frame}{Постановка задачи}
 
-    \node[anchor=north, inner sep=0pt, yshift=-38mm] at (current page.north) 
-      {\includegraphics[width=10mm]{чёрная_стрелка.jpg}};
-    
-    % Нижний ряд: смещаем вверх на 10 мм (отрицательный yshift)
-    \node[anchor=south west, inner sep=0pt, yshift=36mm] at (current page.south west) 
-      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-52.jpg}};
-    \node[anchor=south, inner sep=0pt, yshift=36mm] at (current page.south) 
-      {\includegraphics[width=40mm]{photo_2026-04-01_18-09-55.jpg}};
-    \node[anchor=south east, inner sep=0pt, yshift=36mm] at (current page.south east) 
-      {\includegraphics[width=40mm]{решения_задачи сегментации.jpg}};
+\small
 
-    \node[anchor=south, inner sep=0pt, yshift=24mm] at (current page.south) 
-      {\includegraphics[width=10mm]{чёрная_стрелка.jpg}};
-    
-      \node[anchor=south west, inner sep=0pt, yshift=20mm] at (current page.south west) 
-      {\includegraphics[width=40mm]{line_001.jpg}};
-    \node[anchor=south, inner sep=0pt, yshift=20mm] at (current page.south) 
-      {\includegraphics[width=40mm]{line_000.jpg}};
-    \node[anchor=south east, inner sep=0pt, yshift=20mm] at (current page.south east) 
-      {\includegraphics[width=40mm]{line_002.jpg}};
-\end{tikzpicture}
+Набор изображений страниц с рукописным текстом:
+\[
+\mathcal{I}=\{I_k\}_{k=1}^K,
+\qquad
+I_k\in\mathbb{R}_+^{H_k\times W_k\times C}.
+\]
+
+Для каждого изображения задано множество строк:
+\[
+\mathcal{R}_k=\{R_{k,1},\dots,R_{k,n_k}\}.
+\]
+
+\vspace{1mm}
+Найти отображение:
+    \[
+        f \colon \mathcal{I} \to 2^{B},
+    \]
+    \[
+    B =
+    \left\{
+    \{p_i\}_{i=1}^{4}
+    \;\middle|\;
+    p_i=(x_i,y_i)\in \mathbb{Z}_{\ge 0}^{2},
+    \text{ - вершинами прямоугольника}
+    \right\}.
+    \]
+
+Необходимо, чтобы:
+    \[
+        \forall  R = \{p_i\}_{i=1}^{4} \in \hat{\mathcal{R}},
+        \qquad p_i=(x_i,y_i),
+    \]
+    выполнялось: %условие принадлежности всех его вершин области изображения:
+    \[
+        p_i \in \Omega_I,
+        \qquad
+        \Omega_I = \{0,\dots,W\}\times\{0,\dots,H\},
+        \qquad i=1,\dots,4.
+    \]
+    где $H$ и $W$ — высота и ширина изображения.
+
+\end{frame}
+% ------------------------------------------------------------
+\begin{frame}{Датасет и синтетические данные}
+
+\small
+
+\begin{block}{Основной датасет}
+Используется датасет HWR200: фотографии страниц с рукописным русским текстом. С помощью модели PaddleOCR-VL (1.5)
+проведена разметка.
+\end{block}
+
+\vspace{1mm}
+
+\begin{block}{Синтетика}
+Дополнительно генерируем синтетические страницы:
+\begin{itemize}
+    \item $16000$ страниц размера $1400 \times 1700$;
+    \item текст берётся из русских слов и рендерится handwritten-fonts;
+    \item на странице от $10$ до $64$ строк;
+    \item добавляется глобальная деформация страницы:
+    парабола или загиб одного края.
+\end{itemize}
+\end{block}
 
 \let\thefootnote\relax
-\footnotetext{\href{https://sci-hub.ru/meta/10.1016/j.patcog.2008.05.011}{Text line detection in handwritten documents. Hough transform.}}
-\footnotetext{\href{https://www.mdpi.com/2313-433X/10/3/65}{Historical text line segmentation using u-net networks.}}
+\footnotetext{\href{https://huggingface.co/datasets/AntiplagiatCompany/HWR200}{HWR200: Russian handwritten text dataset.}}
+
 \end{frame}
-% Можно добавить поясняющий текст, если нужно
+
+
+% ------------------------------------------------------------
+\begin{frame}{Оценка качества алгоритма}
+
+\footnotesize
+%Intersection over Union}
+Для каждой пары предсказанного и истинного полигонов:
+\[
+\operatorname{IoU}(\hat{R}_i,R_j)
+=
+\frac{|\hat{R}_i\cap R_j|}
+     {|\hat{R}_i\cup R_j|}.
+\]
+
+
+%Для каждого предсказанного полигона $\hat{R}_i$ выбирается ещё не занятый
+%ground truth полигон с максимальным IoU:
+\[
+j^*=\argmax_{j\in\mathcal{R}_{\mathrm{free}}}
+\operatorname{IoU}(\hat{R}_i,R_j).
+\]
+
+Если
+\[
+\operatorname{IoU}(\hat{R}_i,R_{j^*})\ge 0.5,
+\]
+то пара считается $TP$. Иначе предсказание считается $FP$.
+Все несопоставленные полигоны считаются $FN$.
+
+\vspace{1mm}
+
+\[
+\operatorname{precision}=\frac{TP}{TP+FP},
+\qquad
+\operatorname{recall}=\frac{TP}{TP+FN},
+\]
+\[
+\operatorname{hmean}
+=
+\frac{
+2\cdot\operatorname{precision}\cdot\operatorname{recall}
+}{
+\operatorname{precision}+\operatorname{recall}
+}.
+\]
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 1: метод Хафа}
+
+\small
+
+\vspace{1mm}
+
+\begin{enumerate}
+    \item Бинаризуем изображение и выделяем связные компоненты.
+    \item Оцениваем среднюю высоту символа $AH$ и ширину $AW$.
+    \item Делим компоненты на три множества:
+    \[
+    \mathcal{C}_1 = \{c: 0.5AH \le h_c < 3AH,\; w_c \ge 0.5AW\},
+    \]
+    \[
+    \mathcal{C}_2 = \{c: h_c \ge 3AH\},
+    \qquad
+    \mathcal{C}_3 = \mathcal{C}\setminus(\mathcal{C}_1\cup\mathcal{C}_2).
+    \]
+    \item Для компонент из $\mathcal{C}_1$ строятся block-centers.
+    \item Эти точки голосуют в пространстве Хафа:
+    \[
+        \rho = x\cos\theta + y\sin\theta.
+    \]
+    \item Найденные линии используются для группировки компонент в строки.
+\end{enumerate}
+
+\let\thefootnote\relax
+\footnotetext{\href{https://doi.org/10.1016/j.patcog.2008.05.011}{Louloudis et al., Text line detection in handwritten documents, Pattern Recognition, 2008.}}
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 1: наши изменения метода Хафа}
+
+\small
+
+\begin{block}{Что меняем}
+\begin{enumerate}
+    \item При оценке $AH$ отсекаем первый bin гистограммы высот.
+    \item До голосования Хафа разделяем компоненты из \texttt{subset\_2}.
+    \item Диапазон углов Хафа задаём относительно глобального угла, найденного через HPP:
+    \[
+    \theta^*=\argmax_{\theta\in[-30^\circ,30^\circ]}
+    \operatorname{Var}\left(\sum_x B_\theta(x,y)\right).
+    \]
+    \item Убираем стадию создания новых строк.
+\end{enumerate}
+\end{block}
+
+\vspace{1mm}
+
+\begin{block}{Результат}
+\centering
+\scriptsize
+\begin{tabular}{|l|c|c|c|}
+\hline
+Метод & Precision & Recall & Hmean \\
+\hline
+Paper method & 0.4519 & 0.5472 & 0.4950 \\
+Our method   & 0.7426 & 0.7955 & 0.7681 \\
+\hline
+\end{tabular}
+\end{block}
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 2: HPP + seam carving}
+
+\small
+
+\vspace{1mm}
+
+\begin{enumerate}
+    \item По бинарному изображению строится HPP:
+    \[
+        H(y)=\sum_{x=0}^{W-1} B(x,y).
+    \]
+    \item Профиль нормализуется:
+    \[
+        H_{\text{norm}}(y)=
+        \frac{H(y)-\mu_H}{\sigma_H}.
+    \]
+    \item Строки выбираются по порогу:
+    \[
+        H_{\text{norm}}(y) > \tau.
+    \]
+    \item Соседние строки объединяются в регионы.
+    \item Между соседними регионами запускается поиск минимального разреза.
+\end{enumerate}
+
+\let\thefootnote\relax
+\footnotetext{\href{https://www.sciencedirect.com/science/article/pii/S2590123023002372}{Das and Panda, Seam carving, HPP and contour tracing, Results in Engineering, 2023.}}
+
+\vspace{1mm}
+
+%Метод почти не учитывает наклон строк и слишком грубо анализирует HPP.
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 2: наши изменения HPP}
+
+\small
+
+\begin{block}{Что меняем}
+\begin{enumerate}
+    \item Сначала исправляем глобальный наклон:
+    \[
+    \theta^*=\argmax_{\theta\in[-30^\circ,30^\circ]}
+    \operatorname{Var}\left(\sum_x B_\theta(x,y)\right).
+    \]
+    \item Затем делаем локальное выпрямление.
+    \item HPP анализируем после морфологического сглаживания:
+    $
+        H_{\text{smoothed}}
+        =
+        \operatorname{open}(\operatorname{close}(\tilde H,k),k).
+    $
+    \item Проверяем два ядра:
+    $
+        k_1=\frac{AH}{2}, k_2=\frac{AH}{3}.
+    $
+    %и выбираем вариант с большим числом найденных строк.
+\end{enumerate}
+\end{block}
+
+\vspace{1mm}
+
+\begin{block}{Результат}
+\centering
+\scriptsize
+\begin{tabular}{|l|c|c|c|}
+\hline
+Метод & Hmean & Precision & Recall \\
+\hline
+Paper method & 0.7337 & 0.8492 & 0.6458 \\
+Our method   & 0.8419 & 0.8494 & 0.8345 \\
+\hline
+\end{tabular}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Локальное выпрямление кривизны}
+
+\small
+
+\begin{textblock*}{72mm}(6mm,16mm)
+1. Оценка локального угла.
+
+Для каждой ячейки находим
+$\alpha(x,y)$.
+
+\vspace{1.5mm}
+2. Оценка локального наклона.
+
+\hspace*{2mm}$s(x,y)=\tan\alpha(x,y)$
+
+\vspace{1.5mm}
+3. Интегрирование наклона по горизонтали.
+
+\hspace*{2mm}$d_y(x,y)=\sum_{t=0}^{x-1}s(t,y)$
+
+\vspace{1.5mm}
+4. Центрирование смещений по каждой строке.
+
+\hspace*{2mm}$d_y(x,y)\leftarrow d_y(x,y)-\frac{1}{W}\sum_{x=0}^{W-1}d_y(x,y)$
+
+\vspace{1.5mm}
+5. Построение remap-преобразования.
+
+\hspace*{2mm}$T(x,y)=(x,\; y+d_y(x,y))$
+
+\vspace{1.5mm}
+6. Получение выпрямленного изображения.
+
+\hspace*{2mm}$B_{\text{warp}}(x,y)=B\!\left(T(x,y)\right)$
+
+\vspace{2mm}
+\textbf{Идея.}
+Локальные углы интерполируются на всё изображение,
+после чего по карте вертикальных смещений выполняется
+геометрическое выпрямление бинарной страницы.
+\end{textblock*}
+
+\begin{textblock*}{40mm}(82mm,14mm)
+\centering
+\includegraphics[width=40mm,height=28mm,keepaspectratio]{карта_углов.jpg}
+\end{textblock*}
+
+\begin{textblock*}{40mm}(82mm,43mm)
+\centering
+\includegraphics[width=40mm,height=28mm,keepaspectratio]{карта_смещений.jpg}
+\end{textblock*}
+
+\begin{textblock*}{40mm}(82mm,72mm)
+\centering
+\includegraphics[width=40mm,height=28mm,keepaspectratio]{итоговое_выпрямление.jpg}
+\end{textblock*}
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 3: DBNet++}
+
+\small
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Dbnet.jpg}
+\end{center}
+
+\begin{enumerate}
+    \item Сеть строит вероятностную карту текста:
+    \[
+        P(x,y)\in[0,1].
+    \]
+    \item Дополнительно предсказывается адаптивный порог:
+    \[
+        T(x,y)\in[0,1].
+    \]
+    \item Дифференцируемая бинаризация:
+    \[
+        \hat{B}(x,y)=
+        \frac{1}{1+\exp(-k(P(x,y)-T(x,y)))}.
+    \]
+    \item По бинарной карте строятся итоговые полигоны строк.
+\end{enumerate}
+
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Метод 3: DBNet++ и синтетика}
+
+\small
+
+\begin{block}{Что сравниваем}
+Сравниваем DBNet++ без синтетики и DBNet++ с добавлением синтетических страниц.
+\end{block}
+
+\vspace{2mm}
+
+\begin{block}{Результат}
+\centering
+\scriptsize
+\begin{tabular}{|l|c|c|c|}
+\hline
+Метод & Hmean & Precision & Recall \\
+\hline
+DBNet++ без синтетики & 0.9567 & 0.9817 & 0.9329 \\
+DBNet++ с синтетикой  & 0.9577 & 0.9805 & 0.9359 \\
+\hline
+\end{tabular}
+\end{block}
+
+\vspace{1mm}
+
+\begin{block}{Вывод}
+Синтетика немного увеличивает recall и итоговый Hmean,
+то есть модель начинает пропускать меньше строк.
+\end{block}
+
+\let\thefootnote\relax
+\footnotetext{\href{https://arxiv.org/abs/2202.10304}{Liao et al., Real-Time Scene Text Detection with Differentiable Binarization and Adaptive Scale Fusion, 2022.}}
+
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Выводы и дальнейшая работа}
+
+\small
+
+\begin{block}{Выводы}
+\begin{enumerate}
+    \item Для метода Хафа и HPP удалось заметно улучшить precision, recall и Hmean.
+    \item Лучшее качество показал DBNet++:
+    \[
+        Hmean = 0.9577.
+    \]
+\end{enumerate}
+\end{block}
+
+\vspace{1mm}
+
+\begin{block}{Дальнейшая работа}
+\begin{enumerate}
+    \item Сравнить DBNet++ с другими современными нейросетевыми детекторами строк.
+    \item Оптимизировать предварительную обработку для улучшения методов обучения без учителя.
+\end{enumerate}
+\end{block}
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Источники}
+
+\footnotesize
+
+\begin{enumerate}
+    \item Hough-based text line extraction: \\
+    \href{https://ieeexplore.ieee.org/document/602034}
+    {Likforman-Sulem et al., ICDAR 1995}
+
+    \item Text line detection in handwritten documents: \\
+    \href{https://doi.org/10.1016/j.patcog.2008.05.011}
+    {Louloudis et al., Pattern Recognition, 2008}
+
+    \item HPP + seam carving: \\
+    \href{https://www.sciencedirect.com/science/article/pii/S2590123023002372}
+    {Das and Panda, Results in Engineering, 2023}
+
+    \item DBNet++: \\
+    \href{https://arxiv.org/abs/2202.10304}
+    {Liao et al., Differentiable Binarization and Adaptive Scale Fusion, 2022}
+
+    \item HWR200 dataset: \\
+    \href{https://huggingface.co/datasets/AntiplagiatCompany/HWR200}
+    {HWR200: Russian handwritten text dataset}
+\end{enumerate}
+
+\end{frame}
+
+
+% \begin{frame}{Постановка задачи} \begin{block}{Дано} $\mathcal{I}=\{I_k\}_{k=1}^K$, --- множество изображений рукописного текста, где $I_k \in \mathbb{R}_+^{H_k \times W_k \times C}$ Для каждого изображения $I_k$ задано множество $\mathcal{R}_k=\{R_{k,1},\dots,R_{k,n_k}\}$, где $R_{k,j}$ --- минимальный ограничивающий прямоугольник $j$-й строки. \end{block} \vspace{0.5mm} \begin{block}{Найти} Построить отображение $f:\mathcal{I}\to 2^B$, где $B=\{(x_1,y_1),(x_2,y_2),(x_3,y_3),(x_4,y_4)\mid x_i,y_i\in\mathbb{Z}_{\ge0}\}$. \end{block} \vspace{0.5mm} \begin{block}{Критерий} $\mathrm{Score}= \frac{1}{K}\sum_{k=1}^K \frac{1}{\max(n_k,\hat n_k)} \sum_{(i,j)\in \mathrm{matching}_k}\mathrm{IoU}(i,j)$, где $\mathrm{matching}_k$ --- оптимальное соответствие для $k$-го изображения. \end{block} \end{frame} 
+%
+% \begin{frame}{Решение}
+%
+% \begin{tikzpicture}[remember picture, overlay]
+%
+%     \def\imgw{36mm}
+%     \def\topY{-11mm}
+%     \def\midArrowY{-33mm}
+%     \def\bottomY{39mm}
+%     \def\bottomArrowY{27mm}
+%     \def\lineY{15mm}
+%
+%     \node[anchor=north west, inner sep=0pt] 
+%         (top1) at ([xshift=4mm,yshift=\topY]current page.north west)
+%         {\includegraphics[width=\imgw]{input_image.jpg}};
+%
+%     \node[anchor=north, inner sep=0pt]
+%         (top2) at ([yshift=\topY]current page.north)
+%         {\includegraphics[width=\imgw]{binary.jpg}};
+%
+%     \node[anchor=north, inner sep=0pt]
+%         at ([xshift=-20mm, yshift=\midArrowY]current page.north)
+%         {\includegraphics[width=9mm]{чёрная_стрелка.jpg}};
+%
+%     \node[anchor=south west, inner sep=0pt]
+%         (mid1) at ([xshift=4mm,yshift=\bottomY]current page.south west)
+%         {\includegraphics[width=\imgw]{angle_map.jpg}};
+%
+%     \node[anchor=south, inner sep=0pt]
+%         (mid2) at ([yshift=\bottomY]current page.south)
+%         {\includegraphics[width=\imgw]{correct_binary.jpg}};
+%
+%     \node[anchor=south, inner sep=0pt]
+%         at ([xshift=-20mm, yshift=29mm]current page.south)
+%         {\includegraphics[width=9mm]{чёрная_стрелка.jpg}};
+%
+%     \node[anchor=south west, inner sep=0pt]
+%         (line1) at ([xshift=4mm,yshift=\lineY]current page.south west)
+%         {\includegraphics[width=\imgw]{seems_lines.jpg}};
+%
+%     \node[anchor=south, inner sep=0pt]
+%         (line2) at ([yshift=\lineY]current page.south)
+%         {\includegraphics[width=\imgw]{segment_lines.jpg}};
+%
+% \end{tikzpicture}
+%
+% \let\thefootnote\relax
+% \footnotetext{\href{https://www.sciencedirect.com/science/article/pii/S2590123023002372?via\%3Dihub}{Seam carving, horizontal projection profile.}}
+% \footnotetext{\href{https://www.mdpi.com/2313-433X/10/3/65}{Historical text line segmentation using U-Net networks.}}
+%
+% \end{frame}
+% % ------------------------------------------------------------
+% \begin{frame}{Вычислительный эксперимент}
+%
+% \begin{columns}[T]
+% \begin{column}{0.46\textwidth}
+%
+%
+% \begin{block}{Коррекция строк}
+% Для изображения оценивается единый угол поворота:
+% \[
+% \theta^*=\argmax_{\theta\in[\theta_{\min},\,\theta_{\max}]}
+% \mathrm{Var}\bigl(h_\theta(y)\bigr).
+% \]
+% \end{block}
+%
+% \vspace{1mm}
+%
+% \end{column}
+%
+% \begin{column}{0.54\textwidth}
+%
+% \centering
+% \includegraphics[width=0.82\linewidth,height=28mm,keepaspectratio]{прибер_без_геометрической корекции.jpg}
+%
+%
+% \vspace{3mm}
+%
+% \includegraphics[width=0.82\linewidth,height=28mm,keepaspectratio]{пример_улучшения.jpg}
+%
+%
+% \end{column}
+% \end{columns}
+%
+% \vspace{2mm}
+%
+% \begin{block}{Результаты}
+% \centering
+% \scriptsize
+% \begin{tabular}{|l|c|c|}
+% \hline
+% Метрика & Коррекция строк & Геом. выпрямление \\
+% \hline
+% correctly detected lines & 31.67 & 33.67 \\
+% \hline
+% \end{tabular}
+% \end{block}
+%
+% \end{frame}
+%
+% % ------------------------------------------------------------
+% \begin{frame}{Заключение}
+%
+% \begin{enumerate}
+%     \item Реализован алгоритм детекции строк в фотографиях рукописных страниц.
+%     \item Предложено \textbf{локальное выпрямление страницы}.
+%     \item Проведён эксперимент, демонстрирующий преимущество предложенного метода выпрямления по сравнению с простой коррекцией перспективы.
+% \end{enumerate}
+%
+% \end{frame}
 
 \end{document}
