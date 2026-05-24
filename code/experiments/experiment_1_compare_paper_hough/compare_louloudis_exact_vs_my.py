@@ -27,11 +27,11 @@ PROJECT_ROOT = EXPERIMENT_DIR.parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits/my_split_with_manual_train" / "test.txt"
+SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits" / "my_split_with_manual_train" / "test.txt"
 HWR200_IMAGE_ROOT = PROJECT_ROOT / "datasets" / "HWR200" / "hw_dataset"
-HWR200_LABELS_PATH = PROJECT_ROOT / "datasets" / "HWR200" / "labels.txt"
+HWR200_LABELS_PATH = PROJECT_ROOT / "datasets" / "HWR200" / "labels_DBNet++_sync_test_manual.txt"
 BEST_SUMMARY_PATH = PROJECT_ROOT / "debug_images" / "experiment_1_compare_paper_hough" / "optuna_louloudis_yolo_unet" / "best_summary.json"
-OUTPUT_DIR = PROJECT_ROOT / "debug_images" / "experiment_1_compare_paper_hough" / "compare_louloudis_exact_vs_my"
+OUTPUT_DIR = PROJECT_ROOT / "debug_images" / "experiment_1_compare_paper_hough" / "louloudis_exact"
 OUTPUT_JSON_PATH = OUTPUT_DIR / "comparison_summary.json"
 
 EXACT_MODULE_PATH = EXPERIMENT_DIR / "louloudis_text_line_detection_exact.py"

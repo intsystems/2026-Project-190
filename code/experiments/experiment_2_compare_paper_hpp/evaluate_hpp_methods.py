@@ -20,6 +20,7 @@ import numpy as np
 from shapely.geometry import Polygon
 from tqdm import tqdm
 
+from post_processing import class_matrix_to_postprocessed_polygons, class_matrix_to_center_mass_cropped_polygons
 
 EXPERIMENT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = EXPERIMENT_DIR.parents[1]
@@ -28,32 +29,36 @@ if str(PROJECT_ROOT) not in sys.path:
 if str(EXPERIMENT_DIR) not in sys.path:
     sys.path.insert(0, str(EXPERIMENT_DIR))
 
-SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits/my_split_with_manual_train" / "test.txt"
+SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits" / "my_split_with_only_test_train" / "test.txt"
 HWR200_IMAGE_ROOT = PROJECT_ROOT / "datasets" / "HWR200" / "hw_dataset"
-HWR200_LABELS_PATH = PROJECT_ROOT / "datasets" / "HWR200" / "labels.txt"
+HWR200_LABELS_PATH = PROJECT_ROOT / "datasets" / "HWR200" / "labels_with_manual_test_and_paddle_ocr_train.txt"
+
+NUM_POSTPROCESSING_METHODS = 3
 
 BEST_SUMMARY_PATH = PROJECT_ROOT / "debug_images" / "experiment_2_compare_paper_hpp" / "optuna_das_panda_hpp_seam" / "best_summary.json"
-OUTPUT_DIR = PROJECT_ROOT / "debug_images" / "experiment_2_compare_paper_hpp" / "compare_das_panda_hpp_exact_vs_my"
+OUTPUT_DIR = PROJECT_ROOT / "debug_images" / "experiment_2_hpp_methods" / "evaluate_hpp_methods"
 OUTPUT_JSON_PATH = OUTPUT_DIR / "comparison_summary.json"
 TARGET_VIS_DIR = OUTPUT_DIR / "targets"
 
 EXACT_MODULE_PATH = EXPERIMENT_DIR / "das_panda_hpp_seam_exact.py"
 MY_MODULE_PATH = EXPERIMENT_DIR / "my_das_panda_hpp_seam_exact.py"
+MY_SMALL_MODULE_PATH = EXPERIMENT_DIR / "my_small_size_das_panda_hpp_seam_exact.py"
 
 # None: весь test.txt. Число: первые N.
-COMPARE_N_IMAGES = None
+EVALUATE_N_IMAGES = None
 IOU_THRESHOLD = 0.5
 CLEAR_OUTPUT_DIR_ON_START = True
 SKIPPED_INPUT_ROWS: List[Dict[str, str]] = []
+
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate Das-Panda exact/my methods separately or together.")
     parser.add_argument(
         "--method",
-        choices=["exact", "my", "both"],
-        default="both",
-        help="exact: только das_panda_hpp_seam_exact; my: только my_; both: старое сравнение.",
+        choices=["exact", "my", "my_small"],
+        default="exact",
+        help="exact: только das_panda_hpp_seam_exact; my: только my_; my_small: только my_small",
     )
     return parser.parse_args()
 
@@ -63,6 +68,8 @@ def output_json_path_for_method(method: str) -> Path:
         return OUTPUT_DIR / "das_panda_hpp_seam_exact_summary.json"
     if method == "my":
         return OUTPUT_DIR / "my_das_panda_hpp_seam_exact_summary.json"
+    if method == "my_small":
+        return OUTPUT_DIR / "my_small_size_das_panda_hpp_seam_exact_summary.json"
     return OUTPUT_JSON_PATH
 
 
@@ -78,9 +85,9 @@ def load_module(module_name: str, module_path: Path) -> Any:
 def read_split_paths() -> List[str]:
     with open(SPLIT_PATH, "r", encoding="utf-8") as file:
         paths = [line.strip() for line in file if line.strip()]
-    if COMPARE_N_IMAGES is None:
+    if EVALUATE_N_IMAGES is None:
         return paths
-    return paths[: int(COMPARE_N_IMAGES)]
+    return paths[: int(EVALUATE_N_IMAGES)]
 
 
 def safe_name(relative_path: str) -> str:
@@ -158,29 +165,30 @@ def load_best_params() -> Dict[str, Any]:
 
 def apply_params(module: Any, params: Dict[str, Any]) -> List[str]:
     applied = []
-    module_file = Path(getattr(module, "__file__", ""))
-    is_my_hpp = module_file.name == "my_das_panda_hpp_seam_exact.py"
-    for name, value in params.items():
-        if is_my_hpp and name in {"HPP_ZSCORE_THRESHOLD", "REGION_MERGE_GAP_ROWS", "MIN_TEXT_REGION_HEIGHT"}:
-            continue
-        if hasattr(module, name):
-            setattr(module, name, value)
-            applied.append(name)
-    # my_das_panda_hpp_seam_exact импортирует exact-модуль внутрь себя.
-    # Пробрасываем параметры туда тоже, чтобы summary/debug и вспомогательные
-    # функции видели тот же набор best-параметров.
-    nested_exact = getattr(module, "exact", None)
-    if nested_exact is not None:
-        for name, value in params.items():
-            if is_my_hpp and name in {"HPP_ZSCORE_THRESHOLD", "REGION_MERGE_GAP_ROWS", "MIN_TEXT_REGION_HEIGHT"}:
-                continue
-            if hasattr(nested_exact, name):
-                setattr(nested_exact, name, value)
-                nested_name = f"exact.{name}"
-                if nested_name not in applied:
-                    applied.append(nested_name)
-    return applied
 
+    def apply_to(target: Any, prefix: str = "") -> None:
+        if target is None:
+            return
+
+        for name, value in params.items():
+            if hasattr(target, name):
+                setattr(target, name, value)
+                applied_name = f"{prefix}{name}" if prefix else name
+                if applied_name not in applied:
+                    applied.append(applied_name)
+
+    apply_to(module)
+
+    nested_exact = getattr(module, "exact", None)
+    apply_to(nested_exact, "exact.")
+
+    nested_base_my = getattr(module, "base_my", None)
+    apply_to(nested_base_my, "base_my.")
+
+    nested_base_my_exact = getattr(nested_base_my, "exact", None)
+    apply_to(nested_base_my_exact, "base_my.exact.")
+
+    return applied
 
 def class_matrix_to_polygons(class_matrix: np.ndarray, x_offset: int, y_offset: int) -> List[np.ndarray]:
     polygons = []
@@ -292,6 +300,7 @@ def save_method_visuals(
     method_name: str,
     predicted_polygons: List[np.ndarray],
     metrics: Dict[str, Any],
+    i: int = 0
 ) -> None:
     image = cv2.imread(str(row["image_path"]), cv2.IMREAD_COLOR)
     if image is None:
@@ -305,7 +314,7 @@ def save_method_visuals(
     for index, polygon in enumerate(predicted_polygons):
         points = np.round(np.asarray(polygon, dtype=np.float32)).astype(np.int32).reshape(-1, 1, 2)
         cv2.polylines(pred_canvas, [points], True, tuple(int(v) for v in colors[index % len(colors)]), 2, cv2.LINE_AA)
-    cv2.imwrite(str(method_dir / "00_final_class_matrix.png"), pred_canvas)
+    cv2.imwrite(str(method_dir / f"00_final_class_matrix_method_{i}.png"), pred_canvas)
 
     matched_overlay = image.copy()
     for match in metrics.get("matches", []):
@@ -317,7 +326,7 @@ def save_method_visuals(
         if 0 <= gt_index < len(row["gt_polygons"]):
             gt_points = np.round(np.asarray(row["gt_polygons"][gt_index], dtype=np.float32)).astype(np.int32).reshape(-1, 1, 2)
             cv2.polylines(matched_overlay, [gt_points], True, (255, 140, 0), 2, cv2.LINE_AA)
-    cv2.imwrite(str(method_dir / "01_matches_tp_fp_fn.jpg"), matched_overlay)
+    cv2.imwrite(str(method_dir / f"01_matches_tp_fp_fn_method_{i}.jpg"), matched_overlay)
 
     with open(method_dir / "result_info.json", "w", encoding="utf-8") as file:
         json.dump(
@@ -334,48 +343,6 @@ def save_method_visuals(
         )
 
 
-def aggregate(per_image: List[Dict[str, Any]]) -> Dict[str, float]:
-    tp = sum(item["metrics"]["tp"] for item in per_image)
-    fp = sum(item["metrics"]["fp"] for item in per_image)
-    fn = sum(item["metrics"]["fn"] for item in per_image)
-    precision = tp / max(tp + fp, 1)
-    recall = tp / max(tp + fn, 1)
-    hmean = 2.0 * precision * recall / max(precision + recall, 1e-9)
-    return {
-        "tp": float(tp),
-        "fp": float(fp),
-        "fn": float(fn),
-        "precision": float(precision),
-        "recall": float(recall),
-        "hmean": float(hmean),
-    }
-
-
-def aggregate_runtime(per_image: List[Dict[str, Any]]) -> Dict[str, float]:
-    runtimes = [
-        float(item["runtime_sec"])
-        for item in per_image
-        if "runtime_sec" in item and item["runtime_sec"] is not None
-    ]
-    if not runtimes:
-        return {
-            "count": 0.0,
-            "total_runtime_sec": 0.0,
-            "mean_runtime_sec": 0.0,
-            "median_runtime_sec": 0.0,
-            "min_runtime_sec": 0.0,
-            "max_runtime_sec": 0.0,
-        }
-    values = np.asarray(runtimes, dtype=np.float64)
-    return {
-        "count": float(len(runtimes)),
-        "total_runtime_sec": float(np.sum(values)),
-        "mean_runtime_sec": float(np.mean(values)),
-        "median_runtime_sec": float(np.median(values)),
-        "min_runtime_sec": float(np.min(values)),
-        "max_runtime_sec": float(np.max(values)),
-    }
-
 
 def evaluate_module(
     module: Any,
@@ -383,11 +350,12 @@ def evaluate_module(
     yolo_model: Any,
     unet_model: Any,
     unet_device: Any,
-    method_name: str,
+    method_name = "my_small_size_das_panda_hpp_seam_exact"
 ) -> Dict[str, Any]:
     per_image = []
     skipped_missing = 0
     skipped_runtime = 0
+
     for row in tqdm(rows, desc=f"Evaluate {method_name}"):
         if cv2.imread(str(row["image_path"]), cv2.IMREAD_COLOR) is None:
             skipped_missing += 1
@@ -405,42 +373,216 @@ def evaluate_module(
             runtime_sec = time.perf_counter() - start_time
         except Exception as error:
             skipped_runtime += 1
+            error_metrics = {
+                "tp": 0.0,
+                "fp": 0.0,
+                "fn": float(len(row["gt_polygons"])),
+                "precision": 0.0,
+                "recall": 0.0,
+                "hmean": 0.0,
+                "pred_count": 0.0,
+                "gt_count": float(len(row["gt_polygons"])),
+                "matches": [],
+                "pred_matched": [],
+                "gt_matched": [False] * len(row["gt_polygons"]),
+            }
+
             per_image.append(
                 {
                     "relative_path": row["relative_path"],
                     "error": repr(error),
-                    "runtime_sec": None,
-                    "metrics": {
-                        "tp": 0.0,
-                        "fp": 0.0,
-                        "fn": float(len(row["gt_polygons"])),
-                        "precision": 0.0,
-                        "recall": 0.0,
-                        "hmean": 0.0,
-                    },
+                    "all_metrics": [dict(error_metrics) for _ in range(NUM_POSTPROCESSING_METHODS)],
+                    "segment_method_time": None,
+                    "post_processing_times": [None] * NUM_POSTPROCESSING_METHODS,
+                    "method_timing_seconds": None,
                     "line_count": 0,
+                    "page_bbox": None,
+                    "page_confidence": None,
                 }
             )
             continue
+
         bbox = page_info["bbox"]
+
+        # пробуем разные мтеоды посто обработки
+        predicted_method = []
+        post_processing_times = []
+
+        start_time = time.perf_counter()
         predicted = class_matrix_to_polygons(class_matrix, int(bbox["x"]), int(bbox["y"]))
-        metrics = match_polygons(predicted, row["gt_polygons"])
-        save_method_visuals(row, method_name, predicted, metrics)
+        post_processing_times.append(time.perf_counter() - start_time)
+        predicted_method.append(predicted)
+        
+        start_time = time.perf_counter()
+        predicted = class_matrix_to_postprocessed_polygons(
+            class_matrix=class_matrix,
+            x_offset=int(bbox["x"]),
+            y_offset=int(bbox["y"]),
+            tall_factor=1.2,
+        )
+        post_processing_times.append(time.perf_counter() - start_time)
+        predicted_method.append(predicted)
+
+        start_time = time.perf_counter()
+        predicted = class_matrix_to_center_mass_cropped_polygons(
+            class_matrix=class_matrix,
+            x_offset=int(bbox["x"]),
+            y_offset=int(bbox["y"]),
+            min_component_area=6,
+        )
+        post_processing_times.append(time.perf_counter() - start_time)
+        predicted_method.append(predicted)
+
+        # start_time = time.perf_counter()
+        # predicted = class_matrix_to_pca_detection_boxes(
+        #     class_matrix=class_matrix,
+        #     x_offset=int(bbox["x"]),
+        #     y_offset=int(bbox["y"]),
+        #     min_component_area=6,
+        #     min_points=10,
+        # )
+        # post_processing_times.append(time.perf_counter() - start_time)
+        # predicted_method.append(predicted)
+
+        # for i in [0.98]:
+        #     start_time = time.perf_counter()
+        #     predicted = class_matrix_to_top_polygons(
+        #         class_matrix=class_matrix,
+        #         x_offset=int(bbox["x"]),
+        #         y_offset=int(bbox["y"]),
+        #         min_component_area=3,
+        #         keep_pixel_fraction=i,
+        #     )
+        #     post_processing_times.append(time.perf_counter() - start_time)
+        #     predicted_method.append(predicted)
+
+        # for i in [0.98]:
+        #     start_time = time.perf_counter()
+
+        #     predicted = class_matrix_to_pca_top_polygons(
+        #         class_matrix=class_matrix,
+        #         x_offset=int(bbox["x"]),
+        #         y_offset=int(bbox["y"]),
+        #         min_component_area=3,
+        #         keep_pixel_fraction=i,
+        #         min_points=10,
+        #         min_height=2.0,
+        #     )
+
+        #     post_processing_times.append(time.perf_counter() - start_time)
+        #     predicted_method.append(predicted)
+
+        # start_time = time.perf_counter()
+
+        # safe_name = row["relative_path"].replace("/", "_").replace("\\", "_")
+
+        # predicted = class_matrix_to_morph_pca_polygons_debug(
+        #     class_matrix=class_matrix,
+        #     x_offset=int(bbox["x"]),
+        #     y_offset=int(bbox["y"]),
+        #     min_component_area=6,
+        #     min_points=3,
+        #     kernel_size=3,
+        #     morph_iterations=2,
+        #     min_height=2.0,
+        #     debug_dir=OUTPUT_DIR / "morph_pca_debug",
+        #     debug_name=safe_name,
+        # )
+
+        # post_processing_times.append(time.perf_counter() - start_time)
+        # predicted_method.append(predicted)
+
+        metrics = []
+        for i in range(0, len(predicted_method)):
+            metrics_i = match_polygons(predicted_method[i], row["gt_polygons"])
+            save_method_visuals(row, method_name + f"_method_{i}", predicted_method[i], metrics_i, i = i)
+            metrics.append(metrics_i)
         per_image.append(
             {
                 "relative_path": row["relative_path"],
-                "metrics": metrics,
-                "runtime_sec": float(runtime_sec),
+                "all_metrics": metrics,
+                "segment_method_time": float(runtime_sec),
+                "post_processing_times": [float(x) for x in post_processing_times],
+                "method_timing_seconds": page_info.get("timing_seconds"),
                 "line_count": int(len(lines)),
                 "page_bbox": bbox,
                 "page_confidence": page_info.get("confidence"),
             }
         )
+
+    aggregates = []
+    def aggregate(per_image: List[Dict[str, Any]], i : int) -> Dict[str, float]:
+        tp = sum(item["all_metrics"][i]["tp"] for item in per_image)
+        fp = sum(item["all_metrics"][i]["fp"] for item in per_image)
+        fn = sum(item["all_metrics"][i]["fn"] for item in per_image)
+        precision = tp / max(tp + fp, 1)
+        recall = tp / max(tp + fn, 1)
+        hmean = 2.0 * precision * recall / max(precision + recall, 1e-9)
+        return {
+            "tp": float(tp),
+            "fp": float(fp),
+            "fn": float(fn),
+            "precision": float(precision),
+            "recall": float(recall),
+            "hmean": float(hmean),
+        }
+    
+    def aggregate_scalar_runtime(per_image, time_name: str) -> Dict[str, float]:
+        runtimes = [
+            float(item[time_name])
+            for item in per_image
+            if time_name in item and item[time_name] is not None
+        ]
+        return summarize_runtimes(runtimes, time_name)
+
+
+    def aggregate_indexed_runtime(per_image, i: int, time_name: str) -> Dict[str, float]:
+        runtimes = [
+            float(item[time_name][i])
+            for item in per_image
+            if time_name in item
+            and item[time_name] is not None
+            and len(item[time_name]) > i
+            and item[time_name][i] is not None
+        ]
+        return summarize_runtimes(runtimes, time_name)
+
+
+    def summarize_runtimes(runtimes, time_name: str) -> Dict[str, float]:
+        if not runtimes:
+            return {
+                "count": 0.0,
+                f"total_{time_name}_sec": 0.0,
+                f"mean_{time_name}_sec": 0.0,
+                f"median_{time_name}_sec": 0.0,
+                f"min_{time_name}_sec": 0.0,
+                f"max_{time_name}_sec": 0.0,
+            }
+
+        values = np.asarray(runtimes, dtype=np.float64)
+        return {
+            "count": float(len(runtimes)),
+            f"total_{time_name}_sec": float(np.sum(values)),
+            f"mean_{time_name}_sec": float(np.mean(values)),
+            f"median_{time_name}_sec": float(np.median(values)),
+            f"min_{time_name}_sec": float(np.min(values)),
+            f"max_{time_name}_sec": float(np.max(values)),
+        }
+
+    num_methods = NUM_POSTPROCESSING_METHODS # количесвто метовод
+    for i in range(0, num_methods):
+        aggregates.append(aggregate(per_image, i))
+
+    post_processing_times = []
+    for i in range(0, num_methods):
+        post_processing_times.append(aggregate_indexed_runtime(per_image, i, time_name = "post_processing_times"))
+
     return {
         "method": method_name,
-        "aggregate": aggregate(per_image),
-        "runtime": aggregate_runtime(per_image),
-        "runtime_scope": "module.run_on_image: YOLO page crop + U-Net binarization + method logic",
+        "aggregates": aggregates,
+        "segment_method_time": aggregate_scalar_runtime(per_image, time_name="segment_method_time"),
+        "post_processing_times" : post_processing_times,
+        "runtime_scope": f"module.run_on_image: YOLO page crop + U-Net binarization + {method_name} logic",
         "per_image": per_image,
         "skipped_missing": int(skipped_missing),
         "skipped_runtime": int(skipped_runtime),
@@ -454,15 +596,34 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     TARGET_VIS_DIR.mkdir(parents=True, exist_ok=True)
 
-    exact_module = load_module("das_panda_hpp_exact_compare", EXACT_MODULE_PATH) if args.method in {"exact", "both"} else None
-    my_module = load_module("my_das_panda_hpp_compare", MY_MODULE_PATH) if args.method in {"my", "both"} else None
+    exact_module = load_module("das_panda_hpp_exact_compare", EXACT_MODULE_PATH) if args.method in {"exact"} else None
+    my_module = load_module("my_das_panda_hpp_compare", MY_MODULE_PATH) if args.method in {"my"} else None
+    my_small_module = load_module("my_small_size_das_panda_hpp_seam_exact", MY_SMALL_MODULE_PATH) if args.method in {"my_small"} else None
+    
+    module = None
+    module_name = None
+    module_path = None
+    if exact_module is not None:
+        module = exact_module
+        module_name = "das_panda_hpp_exact_compare"
+        module_path = EXACT_MODULE_PATH
+    if my_module is not None:
+        module = my_module
+        module_name = "my_das_panda_hpp_compare"
+        module_path = MY_MODULE_PATH
+    if my_small_module is not None:
+        module = my_small_module
+        module_name = "my_small_size_das_panda_hpp_seam_exact"
+        module_path = MY_SMALL_MODULE_PATH
+
+    if module is None:
+        raise RuntimeError(f"Module was not loaded for method={args.method}")
+
     best_params = load_best_params()
-    exact_applied_params = apply_params(exact_module, best_params) if exact_module is not None else {}
-    my_applied_params = apply_params(my_module, best_params) if my_module is not None else {}
+    applied_params = apply_params(module, best_params) if module is not None else []
+    print(f"[OK] Applied params: {applied_params}")
     print(f"[OK] Best params path: {BEST_SUMMARY_PATH}")
     print(f"[OK] Best params loaded: {best_params}")
-    print(f"[OK] Applied to exact: {exact_applied_params}")
-    print(f"[OK] Applied to my: {my_applied_params}")
 
     rows = build_rows()
     for row in tqdm(rows, desc="Save target GT overlays"):
@@ -471,50 +632,49 @@ def main() -> None:
     from ultralytics import YOLO
     from u_net_binarization import load_unet_model
 
-    reference_module = exact_module if exact_module is not None else my_module
-    yolo_model = YOLO(str(reference_module.YOLO_PAGE_SEGMENTATION_MODEL_PATH))
+    yolo_model = YOLO(str(module.YOLO_PAGE_SEGMENTATION_MODEL_PATH))
     unet_model, unet_device = load_unet_model(
-        model_path=str(reference_module.UNET_BINARIZATION_MODEL_PATH),
-        device=reference_module.UNET_DEVICE,
+        model_path=str(module.UNET_BINARIZATION_MODEL_PATH),
+        device=module.UNET_DEVICE,
     )
 
-    results: Dict[str, Any] = {}
-    if exact_module is not None:
-        results["das_panda_hpp_seam_exact"] = evaluate_module(exact_module, rows, yolo_model, unet_model, unet_device, "das_panda_hpp_seam_exact")
-    if my_module is not None:
-        results["my_das_panda_hpp_seam_exact"] = evaluate_module(my_module, rows, yolo_model, unet_model, unet_device, "my_das_panda_hpp_seam_exact")
-
-    winner = None
-    if len(results) == 2:
-        exact_h = results["das_panda_hpp_seam_exact"]["aggregate"]["hmean"]
-        my_h = results["my_das_panda_hpp_seam_exact"]["aggregate"]["hmean"]
-        winner = "my_das_panda_hpp_seam_exact" if my_h > exact_h else "das_panda_hpp_seam_exact"
+    result = evaluate_module(module, rows, yolo_model, unet_model, unet_device, module_name)
     summary = {
-        "method_mode": args.method,
-        "compare_n_images": COMPARE_N_IMAGES,
+        "evaluate_n_images": EVALUATE_N_IMAGES,
         "rows_count": len(rows),
         "skipped_input_rows": SKIPPED_INPUT_ROWS,
         "iou_threshold": IOU_THRESHOLD,
-        "best_summary_path": str(BEST_SUMMARY_PATH),
-        "best_params_applied": best_params,
-        "best_params_applied_to_exact": exact_applied_params,
-        "best_params_applied_to_my": my_applied_params,
-        "winner": winner,
-        "results": results,
+        "module_path": str(module_path),
+        "applied_params": applied_params,
+        "best_params": best_params,
+        "result": result,
     }
     output_json_path = output_json_path_for_method(args.method)
+
     with open(output_json_path, "w", encoding="utf-8") as file:
         json.dump(summary, file, indent=2, ensure_ascii=False)
 
-    for method_name, result in results.items():
-        aggregate = result["aggregate"]
-        runtime = result["runtime"]
-        print(f"[OK] {method_name}: hmean={aggregate['hmean']:.6f}, precision={aggregate['precision']:.6f}, recall={aggregate['recall']:.6f}")
-        print(f"[OK] {method_name}: runtime mean/median={runtime['mean_runtime_sec']:.3f}s / {runtime['median_runtime_sec']:.3f}s")
-    if winner is not None:
-        print(f"[OK] Winner: {winner}")
+    print(f"[OK] Summary: {output_json_path}")
+
+    aggregates = result["aggregates"]
+    post_processing_times = result["post_processing_times"]
+    segment_method_time = result["segment_method_time"]
+    for i in range(0, len(aggregates)):
+        print()
+        print(f"Method_{i}:")
+        print(
+            f"[OK] {module_name} method_{i} hmean: "
+            f"{aggregates[i]['hmean']:.6f}, precision: {aggregates[i]['precision']:.6f}, recall: {aggregates[i]['recall']:.6f}"
+        )
+        print(f"[OK] TP/FP/FN: {aggregates[i]['tp']:.0f}/{aggregates[i]['fp']:.0f}/{aggregates[i]['fn']:.0f}")
+        print(f"[OK] Post processing times mean/median: {post_processing_times[i]['mean_post_processing_times_sec']:.3f}s / {post_processing_times[i]['median_post_processing_times_sec']:.3f}s")
+        print()
+
+    print("Time segment block")
+    print(f"[OK] Runtime mean/median: {segment_method_time['mean_segment_method_time_sec']:.3f}s / {segment_method_time['median_segment_method_time_sec']:.3f}s")
     print(f"[OK] Summary: {output_json_path}")
     print(f"[OK] Targets/debug: {TARGET_VIS_DIR}")
+
 
 
 if __name__ == "__main__":

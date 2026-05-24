@@ -46,9 +46,16 @@ YOLO_PAGE_CONF = exact.YOLO_PAGE_CONF
 YOLO_PAGE_IMGSZ = exact.YOLO_PAGE_IMGSZ
 YOLO_PAGE_DEVICE = exact.YOLO_PAGE_DEVICE
 
+
+UNET_BINARIZATION_MODEL_PATH = base_my.UNET_BINARIZATION_MODEL_PATH
+UNET_TARGET_SIZE = base_my.UNET_TARGET_SIZE
+UNET_THRESHOLD = base_my.UNET_THRESHOLD
+UNET_DEVICE = base_my.UNET_DEVICE
+
+
 # None: ширина считается по пропорции от HPP_SMALL_HEIGHT и aspect ratio текущего изображения.
 HPP_SMALL_WIDTH = None
-HPP_SMALL_HEIGHT = 320
+HPP_SMALL_HEIGHT = 640
 
 
 class MySmallSizeDasPandaHPPSeamSegmenter(base_my.MyDasPandaHPPSeamSegmenter):
@@ -408,53 +415,147 @@ class MySmallSizeDasPandaHPPSeamSegmenter(base_my.MyDasPandaHPPSeamSegmenter):
         merged.append((current_start, current_end))
         return merged
 
+    # def trace_horizontal_seam_a_star(self, energy: np.ndarray, start_row: int) -> np.ndarray:
+    #     rows, cols = energy.shape
+    #     start_y = int(np.clip(start_row, 0, rows - 1))
+    #     start = (start_y, 0)
+    #     goal_col = cols - 1
+
+    #     open_set: List[Tuple[float, int, int]] = []
+    #     heapq.heappush(open_set, (float(energy[start_y, 0]), start_y, 0))
+    #     came_from: Dict[Tuple[int, int], Tuple[int, int]] = {}
+    #     g_score: Dict[Tuple[int, int], float] = {start: float(energy[start_y, 0])}
+    #     visited = set()
+
+    #     while open_set:
+    #         _, y, x = heapq.heappop(open_set)
+    #         current = (y, x)
+    #         if current in visited:
+    #             continue
+    #         visited.add(current)
+
+    #         if x == goal_col:
+    #             points: List[Tuple[int, int]] = []
+    #             while True:
+    #                 cy, cx = current
+    #                 points.append((cx, cy))
+    #                 if current == start:
+    #                     break
+    #                 current = came_from[current]
+    #             points.reverse()
+    #             return np.asarray(points, dtype=np.int32)
+
+    #         next_x = x + 1
+    #         if next_x >= cols:
+    #             continue
+    #         for dy in (-1, 0, 1):
+    #             next_y = y + dy
+    #             if not (0 <= next_y < rows):
+    #                 continue
+    #             neighbor = (next_y, next_x)
+    #             tentative_g = g_score[current] + float(energy[next_y, next_x])
+    #             if tentative_g >= g_score.get(neighbor, np.inf):
+    #                 continue
+    #             came_from[neighbor] = current
+    #             g_score[neighbor] = tentative_g
+    #             heuristic = float(goal_col - next_x)
+    #             heapq.heappush(open_set, (tentative_g + heuristic, next_y, next_x))
+
+    #     return self.trace_horizontal_seam(self.compute_horizontal_min_energy_path_matrix(energy), start_row)
+
     def trace_horizontal_seam_a_star(self, energy: np.ndarray, start_row: int) -> np.ndarray:
         rows, cols = energy.shape
+
         start_y = int(np.clip(start_row, 0, rows - 1))
         start = (start_y, 0)
         goal_col = cols - 1
 
-        open_set: List[Tuple[float, int, int]] = []
-        heapq.heappush(open_set, (float(energy[start_y, 0]), start_y, 0))
+        vertical_penalty = 2.0
+        drift_penalty_weight = 0.05
+
+        open_set: List[Tuple[float, float, float, int, int]] = []
+        heapq.heappush(open_set, (float(energy[start_y, 0]), 0.0, 0.0, start_y, 0))
+
         came_from: Dict[Tuple[int, int], Tuple[int, int]] = {}
-        g_score: Dict[Tuple[int, int], float] = {start: float(energy[start_y, 0])}
+        g_score: Dict[Tuple[int, int], float] = {
+            start: float(energy[start_y, 0])
+        }
+
         visited = set()
 
         while open_set:
-            _, y, x = heapq.heappop(open_set)
+            _, _, _, y, x = heapq.heappop(open_set)
+
             current = (y, x)
+
             if current in visited:
                 continue
+
             visited.add(current)
 
             if x == goal_col:
                 points: List[Tuple[int, int]] = []
+
                 while True:
                     cy, cx = current
                     points.append((cx, cy))
+
                     if current == start:
                         break
+
                     current = came_from[current]
+
                 points.reverse()
                 return np.asarray(points, dtype=np.int32)
 
             next_x = x + 1
+
             if next_x >= cols:
                 continue
-            for dy in (-1, 0, 1):
+
+            # ВАЖНО:
+            # Сначала прямо, потом вверх/вниз.
+            for dy in (0, -1, 1):
                 next_y = y + dy
+
                 if not (0 <= next_y < rows):
                     continue
+
                 neighbor = (next_y, next_x)
-                tentative_g = g_score[current] + float(energy[next_y, next_x])
+
+                move_penalty = vertical_penalty * abs(dy)
+                drift_penalty = drift_penalty_weight * abs(next_y - start_y)
+
+                tentative_g = (
+                    g_score[current]
+                    + float(energy[next_y, next_x])
+                    + move_penalty
+                    + drift_penalty
+                )
+
                 if tentative_g >= g_score.get(neighbor, np.inf):
                     continue
+
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g
-                heuristic = float(goal_col - next_x)
-                heapq.heappush(open_set, (tentative_g + heuristic, next_y, next_x))
 
-        return self.trace_horizontal_seam(self.compute_horizontal_min_energy_path_matrix(energy), start_row)
+                heuristic = float(goal_col - next_x)
+
+                heapq.heappush(
+                    open_set,
+                    (
+                        tentative_g + heuristic,
+                        abs(next_y - start_y),
+                        abs(dy),
+                        next_y,
+                        next_x,
+                    )
+                )
+
+        return self.trace_horizontal_seam(
+            self.compute_horizontal_min_energy_path_matrix(energy),
+            start_row,
+        )
 
     def save_small_size_debug(
         self,

@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import cv2
 from typing import Union, Tuple
+import time
 
 class DoubleConv(nn.Module):
     def __init__(self, in_ch, out_ch):
@@ -141,7 +142,7 @@ def binarize_image_with_loaded_model(
     device: Union[str, torch.device],
     target_size: Tuple[int, int] = (3000, 3000),
     threshold: float = 0.5,
-    debug: bool = False,
+    debug: bool = True,
 ) -> np.ndarray:
     """
     Бинаризация изображения с уже загруженной U-Net моделью.
@@ -167,6 +168,9 @@ def binarize_image_with_loaded_model(
         pred_padded = (prob > threshold).float() * 255
 
     pred_padded = pred_padded.squeeze().cpu().numpy().astype(np.uint8)
+    # print("Yes")
+    # cv2.imwrite("pred_padded.png", pred_padded)
+
     if debug:
         cv2.imwrite("pred_padded.png", pred_padded)
 
@@ -239,5 +243,8 @@ def binarize_image(
 
 if __name__ == "__main__":
     # Пример 1: из файла
-    binary_mask = binarize_image("/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/2/reuse5/ФотоТемное/2.jpg", target_size = (3000, 3000))
+    start_time = time.time()
+    binary_mask = binarize_image("/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/2/reuse5/ФотоТемное/2.jpg", target_size = (320, 320), model_path='models/u_net/unet_binarization_5(2).pth')
+    finish_time = time.time()
+    print('Время ', finish_time - start_time)
     cv2.imwrite("result_binary.png", binary_mask)

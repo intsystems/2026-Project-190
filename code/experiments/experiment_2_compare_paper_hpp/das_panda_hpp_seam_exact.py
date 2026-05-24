@@ -30,7 +30,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 DEBUG_IMAGES_DIR = str(PROJECT_ROOT / "debug_images" / "experiment_2_compare_paper_hpp" / "das_panda_hpp_seam_exact")
-INPUT_IMAGE_PATH = "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/3/reuse9/ФотоСветлое/1.JPG"
+INPUT_IMAGE_PATH = "/home/sasha/Documents/CourseMIPT/MyFirstScientificWork/2026-Project-190/code/datasets/HWR200/hw_dataset/157/fpr17/ФотоСветлое/4.jpg"  #157__fpr17__ФотоСветлое__4.jpg
 DEBUG = True
 
 # В задаче договорились: вместо Otsu из статьи используем YOLO page + U-Net binarization.

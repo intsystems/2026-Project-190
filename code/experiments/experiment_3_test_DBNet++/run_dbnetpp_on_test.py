@@ -38,7 +38,7 @@ from src.postprocess import PostprocessConfig, decode_prob_map
 from src.utils import preprocess_image_pil
 
 
-SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits" / "test.txt"
+SPLIT_PATH = PROJECT_ROOT / "handwriting-recognition" / "splits" / "my_split_with_manual_train" / "test.txt"
 HWR200_IMAGE_ROOT = PROJECT_ROOT / "datasets" / "HWR200" / "hw_dataset"
 HWR200_LABELS_PATH = PROJECT_ROOT / "datasets" / "HWR200" / "labels_DBNet++_sync_test_manual.txt"
 
@@ -55,7 +55,7 @@ SINGLE_OUTPUT_DIR = OUTPUT_DIR / "single_image"
 
 # None: весь test split. Int: первые N.
 TEST_N_IMAGES = None
-DEBUG_FIRST_IMAGES = 10
+DEBUG_FIRST_IMAGES = 30
 IOU_THRESHOLD = 0.5
 
 
@@ -423,6 +423,49 @@ def save_single_prediction(
         )
     return prediction_path
 
+def quadrilateral_length(poly):
+    """
+    Возвращает длину большей стороны минимального повёрнутого прямоугольника,
+    которым можно аппроксимировать четырёхугольник.
+    """
+    rect = cv2.minAreaRect(poly.astype(np.float32))
+    width, height = rect[1]
+    return max(width, height)
+
+
+def filter_polygons(predicted_polygons, width):
+    """Отчекаю прямоугольники которые <CUTOFF_PER% от ширены картинки"""
+    CUTOFF_PER = 0.2
+    predicted_polygons_new = []
+    for poly in predicted_polygons:
+        if width * CUTOFF_PER < quadrilateral_length(poly):
+            predicted_polygons_new.append(poly)
+
+    return predicted_polygons_new
+
+def filter_croped_lines(rotated_boxes: np.ndarray, img_width: int):
+    """_summary_
+
+    Args:
+        rotated_boxes (np.ndarray): shape = (num_boxes, 4, 2)
+        img_width (int): 
+    """
+    rotated_boxes = np.asarray(rotated_boxes, dtype=np.float32)
+    if (rotated_boxes.shape[0]) == 0:
+        return rotated_boxes
+    
+    # take minimal x_coord from box
+    x_coords = np.min(rotated_boxes[..., 0], axis=1)
+    is_left_cluster = (x_coords - 0.) < (img_width - x_coords)
+    rotated_boxes = rotated_boxes[is_left_cluster]
+
+    # take maximum x_coord from box
+    x_coords = np.max(rotated_boxes[..., 0], axis=1)
+    is_left_cluster = (x_coords - 0.) < (img_width - x_coords)
+    rotated_boxes = rotated_boxes[~is_left_cluster]
+
+    return list(rotated_boxes)
+
 
 def evaluate_image(
     row: Dict[str, Any],
@@ -436,14 +479,17 @@ def evaluate_image(
     start_time = time.perf_counter()
     predicted_polygons, scores = predict_dbnet_polygons(image, model, cfg, device)
     runtime_sec = time.perf_counter() - start_time
-    metrics = match_polygons(predicted_polygons, row["gt_polygons"])
+    #predicted_polygons_new = filter_polygons(predicted_polygons, image.shape[1])
+    predicted_polygons_new = filter_croped_lines(predicted_polygons, image.shape[1])
+    #print(len(predicted_polygons_new), len(predicted_polygons), flush=True)
+    metrics = match_polygons(predicted_polygons_new, row["gt_polygons"])
     return {
         "relative_path": row["relative_path"],
         "image_path": str(row["image_path"]),
         "metrics": metrics,
         "runtime_sec": float(runtime_sec),
         "scores": [float(score) for score in scores],
-        "predicted_polygons": predicted_polygons,
+        "predicted_polygons": predicted_polygons_new,
     }
 
 
